@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Digital Garden (prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f5f5; --ink:#2b2b2b; --line:#4a4a4a; --tile:#ffffff; --modal:#f9f9f9;
+    --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --ui:'Figtree',var(--sans);
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){--bg:#1b1b1b; --ink:#ececec; --line:#a5a5a5; --tile:#ececec; --modal:#242424;}
+  }
+  :root[data-theme="dark"]{--bg:#1b1b1b; --ink:#ececec; --line:#a5a5a5; --tile:#ececec; --modal:#242424;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--mono);overflow:hidden}
+
+  .btn{font:400 14px/21px var(--mono);padding:4px 16px;border:1px solid var(--ink);border-radius:4px;background:transparent;color:var(--ink);cursor:pointer}
+  .btn:hover{background:color-mix(in srgb,var(--ink) 8%,transparent)}
+  .btn.on,.btn[aria-selected="true"],.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+  .btn:focus-visible,.rail button:focus-visible,.tile:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+  #stage{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+  .tree-line{fill:none;stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
+  .dot{fill:var(--ink)}
+  .label{font:400 14px var(--mono);fill:var(--ink);text-anchor:middle}
+  .ascii{font:400 24px var(--mono);fill:var(--ink);white-space:pre}
+  .caption{font:400 11px var(--sans);fill:var(--ink);text-anchor:middle}
+  .empty{font:400 14px var(--mono);fill:var(--ink);text-anchor:middle}
+  .tile rect{fill:var(--tile);stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
+  .tile .mono{font:500 14px var(--mono);fill:#333}
+  .tile{outline:none}
+  .mode-prune,.mode-prune .tile.live{cursor:var(--cur-prune,pointer)}
+  .mode-water,.mode-water .tile.live{cursor:var(--cur-can,default)}
+  #stage.pan,#stage.pan .tile.live{cursor:grab}
+  #stage.pan.dragging{cursor:grabbing}
+  .tile.live:hover rect,.tile.live:focus-visible rect{stroke-width:2.5}
+  .tile image{pointer-events:none}
+  .tile.ghost{opacity:.55}
+
+  .pour{position:fixed;width:0;height:0;pointer-events:none;z-index:5;font:400 18px/1 var(--mono);color:var(--ink)}
+  .pour .d{position:absolute;left:var(--x);top:0;opacity:0;animation:fall .4s linear 2 both}
+  .pour .splash{position:absolute;left:-4px;top:78px;white-space:pre;opacity:0;animation:splash .9s ease-out .6s both}
+  @keyframes fall{0%{opacity:0;transform:translate(0,0)}15%{opacity:1}85%{opacity:1}100%{opacity:0;transform:translate(var(--dx),74px)}}
+  @keyframes splash{0%{opacity:0;letter-spacing:-2px}30%{opacity:1}100%{opacity:0;letter-spacing:8px}}
+  @media (prefers-reduced-motion: reduce){.pour .d{animation:none;opacity:1;transform:translate(var(--dx),calc(var(--i) * 22px))}.pour .splash{animation:none;opacity:1}}
+  .pop{transform-box:fill-box;transform-origin:center}
+  .tile.enter .pop{animation:pop .4s ease-out}
+  .tile.leaving .pop{animation:out .22s ease-in forwards}
+  .flower.enter{animation:grow .7s ease-out}
+  @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
+  @keyframes out{to{transform:scale(.5);opacity:0}}
+  @keyframes grow{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){.tile.enter .pop,.tile.leaving .pop,.flower.enter{animation:none}}
+
+  .top{position:fixed;left:32px;right:32px;top:calc(35px + env(safe-area-inset-top,0px));display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:12px;pointer-events:none}
+  .top>*{pointer-events:auto}
+  .tabs{display:flex;gap:14px}
+  .stroll{justify-self:end}
+  .np{display:inline-flex;align-items:center;justify-content:center;gap:12px;width:200px;border:1px solid var(--ink);border-radius:4px;padding:4px 16px;font:400 16px/21px var(--mono);background:color-mix(in srgb,var(--bg) 75%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .np svg{width:22px;height:14px;stroke:var(--ink);stroke-width:1.6;fill:none}
+
+  .rail{position:fixed;left:32px;bottom:calc(32px + env(safe-area-inset-bottom,0px));width:42px;border:1px solid var(--line);border-radius:4px;display:flex;flex-direction:column;background:var(--bg)}
+  .rail button{width:40px;height:36px;border:0;background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center;padding:0}
+  .rail button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+  .rail hr{margin:0;border:0;border-top:1px solid var(--line)}
+  .rail svg,.theme svg{width:22px;height:22px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .theme{position:fixed;right:32px;bottom:calc(32px + env(safe-area-inset-bottom,0px));display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--bg)}
+  .theme button{width:36px;height:36px;border:0;background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center;padding:0}
+  .theme button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+  .theme button:focus-visible{outline:2px solid var(--ink);outline-offset:-4px}
+
+  .modes{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(31px + env(safe-area-inset-bottom,0px));display:flex;gap:13px}
+  .tray{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(82px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 32px);font:400 13px var(--mono)}
+  .tray button{border:0;background:transparent;padding:0;cursor:pointer;display:grid;justify-items:center;gap:4px;color:var(--ink);font:400 11px var(--sans)}
+  .tray button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+  .tray svg{width:40px;height:40px;display:block}
+  .tray svg rect{fill:var(--tile);stroke:var(--line)}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(126px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);font:400 13px/1.4 var(--mono);padding:6px 14px;border-radius:4px;max-width:calc(100vw - 32px);text-align:center}
+  [hidden]{display:none !important}
+
+  dialog{width:300px;max-width:calc(100vw - 32px);min-height:280px;padding:24px;border:1px solid var(--line);border-radius:4px;background:color-mix(in srgb,var(--bg) 75%,transparent);color:var(--ink);font:400 16px/normal var(--ui);box-sizing:border-box;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  dialog[open]{display:flex;flex-direction:column;align-items:center}
+  dialog::backdrop{background:transparent}
+  .dlg-head{display:flex;justify-content:space-between;align-items:center;height:20px;width:100%;margin:0}
+  .icon-btn{width:20px;height:20px;border:0;background:transparent;padding:0;color:var(--ink);cursor:pointer}
+  .icon-btn svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .icon-btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  dialog h2{margin:12px 0 0;font:400 16px/normal var(--ui);text-align:center;width:100%}
+  .who{display:grid;justify-items:center;gap:8px;margin:20px 0;font:400 12px/normal var(--ui);width:100%}
+  .who img,.who svg{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:#fff;object-fit:cover;display:block}
+  .who svg{border-radius:4px}
+  .facts{margin:0;display:grid;gap:12px;width:100%}
+  .facts div{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .facts dt,.facts dd{margin:0}
+  .linkish{border:0;background:none;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer}
+  .actions{display:flex;gap:12px;justify-content:center;margin-top:20px}
+  .actions .btn{font-family:var(--ui);font-size:16px;padding:5px 18px;min-width:96px}
+  .flower-dlg{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px}
+  .flower-dlg h2{margin:6px 0 20px}
+  .flower-dlg .actions{margin-top:2px}
+
+  @media (max-width:640px){
+    .top{left:12px;right:12px;gap:6px}
+    .btn,.np{font-size:12px;padding:4px 10px}
+    .tabs{gap:8px}
+    .np span{display:none}
+    .rail{left:12px}.theme{right:12px}
+  }
+</style>
+</head>
+<body>
+<svg id="stage" viewBox="0 0 1440 1024" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Your garden"></svg>
+
+<header class="top">
+  <div class="tabs" role="tablist" aria-label="Garden views">
+    <button class="btn" role="tab" id="tab-garden" aria-selected="true">My Garden</button>
+    <button class="btn" role="tab" id="tab-compost" aria-selected="false">Compost</button>
+  </div>
+  <div class="np" title="Now playing">
+    <svg viewBox="0 0 24 14" aria-hidden="true"><path d="M2 6v8M7 0v14M12 4v10M17 7v7M22 2v12"/></svg>
+    <span>Mice on Venus</span>
+  </div>
+  <button class="btn stroll" id="stroll">Go for a Stroll</button>
+</header>
+
+<div class="rail" id="rail" role="toolbar" aria-label="Zoom and pan">
+  <button id="zout" aria-label="Zoom out"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M8 11h6"/></svg></button>
+  <button id="zin" aria-label="Zoom in"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M8 11h6M11 8v6"/></svg></button>
+  <hr>
+  <button id="hand" aria-label="Drag to pan" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M8 12V5.5a1.5 1.5 0 013 0V11m0-1V4.5a1.5 1.5 0 013 0V11m0-4.5a1.5 1.5 0 013 0V14a6 6 0 01-6 6h-1a6 6 0 01-5-2.7L4 14a1.6 1.6 0 012.6-1.8L8 14"/></svg></button>
+</div>
+
+<div class="theme" role="group" aria-label="Theme">
+  <button id="light" aria-label="Light theme" aria-pressed="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+  <button id="dark" aria-label="Dark theme" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z"/></svg></button>
+</div>
+
+<div class="tray" id="tray" hidden></div>
+<div class="modes" id="modes" role="group" aria-label="Garden tools">
+  <button class="btn on" data-mode="prune" aria-pressed="true">Prune</button>
+  <button class="btn" data-mode="water" aria-pressed="false">Water</button>
+  <button class="btn" data-mode="plant" aria-pressed="false">Plant</button>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<dialog id="dlg-prune" aria-labelledby="prune-title">
+  <div class="dlg-head">
+    <button class="icon-btn" id="prune-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+    <button class="icon-btn" id="prune-expand" aria-label="Expand"><svg viewBox="0 0 24 24"><path d="M9 3H3v6M3 3l7 7M15 21h6v-6M21 21l-7-7"/></svg></button>
+  </div>
+  <h2 id="prune-title">Would you like to disconnect...</h2>
+  <div class="who" id="prune-who"></div>
+  <dl class="facts" id="prune-facts"></dl>
+  <div class="actions">
+    <button class="btn" id="prune-keep">Keep</button>
+    <button class="btn on" id="prune-go">Disconnect</button>
+  </div>
+</dialog>
+
+<dialog id="dlg-flower" class="flower-dlg" aria-labelledby="flower-title">
+  <h2 id="flower-title">A new flower has grown!</h2>
+  <div class="actions">
+    <button class="btn" id="flower-plant">Plant</button>
+    <button class="btn" id="flower-pot">Pot</button>
+  </div>
+</dialog>
+
+<script>
+/* ---------- Sample garden ---------- */
+const NS = 'http://www.w3.org/2000/svg';
+const ICO = name => `assets/icons/${name}.png`;
+const APPS0 = [
+  {id:'goodnotes', name:'Goodnotes', tree:'collect', kind:'Handwriting', gb:3.1, since:'August 2019', img:ICO('goodnotes'), slot:'TOP0'},
+  {id:'linear', name:'Linear', tree:'collect', kind:'Tasks', gb:0.2, since:'March 2023', img:ICO('linear'), slot:'TOP1'},
+  {id:'omnifocus', name:'OmniFocus', tree:'collect', kind:'Tasks', gb:0.4, since:'May 2018', img:ICO('omnifocus'), slot:'TOP2'},
+  {id:'notability', name:'Notability', tree:'collect', kind:'Handwriting', gb:2.7, since:'September 2018', img:ICO('notability'), slot:'UR0'},
+  {id:'applenotes', name:'Apple Notes', tree:'collect', kind:'Notetaking', gb:1.2, since:'January 2016', img:ICO('applenotes'), slot:'UR1'},
+  {id:'concepts', name:'Concepts', tree:'collect', kind:'Sketching', gb:0.8, since:'June 2021', img:ICO('concepts'), slot:'UR2'},
+  {id:'asana', name:'Asana', tree:'collect', kind:'Tasks', gb:0.4, since:'February 2020', img:ICO('asana'), slot:'LR0'},
+  {id:'confluence', name:'Confluence', tree:'collect', kind:'Documentation', gb:0.6, since:'July 2023', img:ICO('confluence'), slot:'LR1'},
+  {id:'notion', name:'Notion', tree:'collect', kind:'Notetaking', gb:2.4, since:'September 2015', img:ICO('notion'), slot:'LR2'},
+  {id:'otter', name:'Otter', tree:'collect', kind:'Transcription', gb:5.2, since:'November 2021', img:ICO('otter'), slot:'LL0'},
+  {id:'loop', name:'Loop', tree:'collect', kind:'Notetaking', gb:0.3, since:'November 2023', img:ICO('loop'), slot:'LL1'},
+  {id:'evernote', name:'Evernote', tree:'collect', kind:'Notetaking', gb:4.6, since:'May 2014', img:ICO('evernote'), slot:'LL2'},
+  {id:'craft', name:'Craft', tree:'collect', kind:'Documentation', gb:0.7, since:'January 2022', img:ICO('craft'), slot:'UL0'},
+  {id:'arc', name:'Arc', tree:'collect', kind:'Browser', gb:1.1, since:'April 2023', img:ICO('arc'), slot:'UL1'},
+  {id:'dayone', name:'Day One', tree:'collect', kind:'Journal', gb:2.0, since:'October 2017', img:ICO('dayone'), slot:'UL2'},
+  {id:'figma', name:'Figma', tree:'create', kind:'Design', gb:1.4, since:'January 2020', img:ICO('figma'), slot:'T'},
+  {id:'illustrator', name:'Illustrator', tree:'create', kind:'Design', gb:6.8, since:'September 2018', img:ICO('illustrator'), slot:'L0'},
+  {id:'indesign', name:'InDesign', tree:'create', kind:'Layout', gb:5.9, since:'January 2021', img:ICO('indesign'), slot:'R0'},
+  {id:'obsidian', name:'Obsidian', tree:'create', kind:'Notetaking', gb:0.8, since:'March 2021', img:ICO('obsidian'), slot:'L1'},
+  {id:'vscode', name:'VS Code', tree:'create', kind:'Coding', gb:1.6, since:'August 2020', img:ICO('vscode'), slot:'R1'},
+  {id:'claude', name:'Claude', tree:'create', kind:'Assistant', gb:0.5, since:'April 2024', img:ICO('claude'), slot:'L2'},
+  {id:'affinity', name:'Affinity', tree:'create', kind:'Design', gb:3.3, since:'March 2022', img:ICO('affinity'), slot:'R2'},
+  {id:'icloud', name:'iCloud', tree:'create', kind:'Storage', gb:12.4, since:'September 2016', img:ICO('icloud'), slot:'L3'},
+  {id:'canva', name:'Canva', tree:'create', kind:'Design', gb:2.1, since:'February 2019', img:ICO('canva'), slot:'R3'},
+  {id:'bear', name:'Bear', tree:'collect', kind:'Notetaking', gb:0.2, since:'today', mono:'Be', slot:null},
+  {id:'procreate', name:'Procreate', tree:'create', kind:'Sketching', gb:0.4, since:'today', mono:'Pr', slot:null},
+];
+
+const TREES = {
+  collect:{label:'Collecting Thoughts', name:'Collecting Thoughts'},
+  create:{label:'Creating Things', name:'Creating Things'},
+};
+
+/* ---------- Geometry (1440 x 1024 stage, from Figma Wireframe 15) ---------- */
+function polar(cx, cy, dist, deg){
+  const r = deg * Math.PI / 180;
+  return {x: cx + dist * Math.sin(r), y: cy - dist * Math.cos(r)};
+}
+function collectGeom(){
+  const hub = {x:502.32, y:373.97};
+  const RAY = 105.325, STEM = 67.714, SIDE = 56.428;
+  const rayDegs = [0, 72, 144, 216, 288];
+  const names = ['TOP','UR','LR','LL','UL'];
+  const nodes = {};
+  const slots = [];
+  rayDegs.forEach((deg, i) => {
+    const id = names[i];
+    const n = polar(hub.x, hub.y, RAY, deg);
+    nodes[id] = {x:n.x, y:n.y, deg};
+    [[STEM, deg, 0],[SIDE, deg - 60, 1],[SIDE, deg + 60, 2]].forEach(([d, a, j]) => {
+      const p = polar(n.x, n.y, d, a);
+      slots.push({id:id + j, node:id, x:p.x, y:p.y, rot:a});
+    });
+  });
+  return {hub, nodes, slots, baseY: hub.y + 326.975, labelY: 740.14};
+}
+const FX = 950.95, STEP = 69.549, F_JOIN = 468.13, F_BASE = 867.37;
+function createGeom(){
+  const slots = [{id:'T', node:'T', x:FX, y:369.77, rot:0, ax:FX, ay:F_JOIN}];
+  for (let i = 0; i < 4; i++){
+    const ty = 397.96 + STEP * i;
+    slots.push({id:'L'+i, node:'B'+i, x:FX - STEP, y:ty, rot:-45, ax:FX, ay:ty + STEP});
+    slots.push({id:'R'+i, node:'B'+i, x:FX + STEP, y:ty, rot:45, ax:FX, ay:ty + STEP});
+  }
+  return {slots, labelY: 891.77};
+}
+const GEOM = {collect:collectGeom(), create:createGeom()};
+
+const AMBIENT = [
+  [628,880,['||']],[866,671,['||']],[77,373,['||']],[1176,373,['||']],[1390,155,['||']],
+  [310,155,['\\|/']],[1346,671,['\\|/']],[96,880,['\\|/']],[310,671,['\\|/']],[1132,880,['\\|/']],
+  [1230,448,['(#)',' | ','~|~']],[246,745,['vvv','( )',' | ','\\|/']],[805,120,['oo','o*o','oo',' | ',' | ']]
+];
+const FLOWERS = [['(#)',' | ','~|~'],['oo','o*o','oo',' | ',' | '],['\\|/','-@-',' | ',' | ']];
+const SPOTS = [[140,520],[1180,590],[1300,770],[740,600],[150,690],[1250,230],[80,230],[1090,190]];
+
+/* ---------- State ---------- */
+const state = {
+  apps: APPS0.map(a=>({...a})),
+  compost: [],        // {app, fate:'pending'|'planted'|'potted', flower}
+  flowers: [],        // {lines, spot, fresh}
+  mode:'prune', view:'garden', zoom:1, panX:0, panY:0, hand:false,
+  pending:null, fresh:new Set()
+};
+
+/* ---------- Helpers ---------- */
+const $ = s => document.querySelector(s);
+const stage = $('#stage');
+const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function glyph(app, clipId='tileClip'){
+  if (app.img){
+    return `<image href="${esc(app.img)}" x="0" y="0" width="40" height="40" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})"/>`;
+  }
+  return `<text class="mono" x="20" y="25" text-anchor="middle">${esc(app.mono||app.name.slice(0,2))}</text>`;
+}
+function tileSvg(app){
+  const id = 'clip-'+app.id;
+  return `<svg viewBox="0 0 40 40" aria-hidden="true"><defs><clipPath id="${id}"><rect x=".5" y=".5" width="39" height="39" rx="4"/></clipPath></defs><rect x=".5" y=".5" width="39" height="39" rx="4"/>${glyph(app,id)}</svg>`;
+}
+function ascii(lines,x,y,cls=''){
+  const t = lines.map((l,i)=>`<tspan x="${x}" y="${y+19+i*24}">${esc(l)}</tspan>`).join('');
+  return `<text class="ascii ${cls}" xml:space="preserve">${t}</text>`;
+}
+function line(x1,y1,x2,y2){ return `<path class="tree-line" d="M${x1} ${y1}L${x2} ${y2}"/>`; }
+function dot(x,y){ return `<circle class="dot" cx="${x}" cy="${y}" r="2.5"/>`; }
+function tile(app,x,y,{live=true,ghost=false,rot=0}={}){
+  const cls = ['tile', live?'live':'', ghost?'ghost':'', state.fresh.has(app.id)?'enter':''].join(' ');
+  const attrs = live ? `role="button" tabindex="0" data-app="${app.id}" aria-label="${esc(app.name)}, ${esc(app.kind)}"` : `aria-hidden="true"`;
+  return `<g class="${cls}" ${attrs} transform="translate(${x} ${y}) rotate(${rot}) translate(-20 -20)"><g class="pop"><rect x=".5" y=".5" width="39" height="39" rx="4"/>${glyph(app)}</g></g>`;
+}
+
+/* ---------- Render ---------- */
+function occupant(tree,slotId){ return state.apps.find(a=>a.tree===tree && a.slot===slotId); }
+
+function renderCollect(){
+  const {hub, nodes, slots, baseY, labelY} = GEOM.collect; let out = '';
+  const used = new Set(slots.filter(s=>occupant('collect',s.id)).map(s=>s.node));
+  out += line(hub.x, baseY, hub.x, hub.y) + dot(hub.x, baseY);
+  for (const k of ['TOP','UR','LR','LL','UL']) if (used.has(k)) out += line(hub.x, hub.y, nodes[k].x, nodes[k].y);
+  const tiles = [];
+  for (const s of slots){
+    const a = occupant('collect',s.id); if(!a) continue;
+    const n = nodes[s.node];
+    out += line(n.x, n.y, s.x, s.y);
+    tiles.push(tile(a, s.x, s.y, {rot:s.rot}));
+  }
+  out += tiles.join('');
+  out += `<text class="label" x="${hub.x}" y="${labelY}">${TREES.collect.label}</text>`;
+  return out;
+}
+function renderCreate(){
+  const {slots, labelY} = GEOM.create; let out = '';
+  out += line(FX, F_BASE, FX, F_JOIN) + dot(FX, F_BASE);
+  const tiles = [];
+  for (const s of slots){
+    const a = occupant('create',s.id); if(!a) continue;
+    out += line(s.ax, s.ay, s.x, s.y);
+    tiles.push(tile(a, s.x, s.y, {rot:s.rot||0}));
+  }
+  out += tiles.join('');
+  out += `<text class="label" x="${FX}" y="${labelY}">${TREES.create.label}</text>`;
+  return out;
+}
+function renderGarden(){
+  let out = '';
+  AMBIENT.forEach(([x,y,l])=>out += ascii(l,x,y));
+  state.flowers.forEach(f=>{ const [x,y]=SPOTS[f.spot]; out += `<g class="flower ${f.fresh?'enter':''}">${ascii(f.lines,x,y)}</g>`; });
+  out += renderCollect() + renderCreate();
+  return out;
+}
+function renderCompost(){
+  let out = '';
+  if (!state.compost.length){
+    return `<text class="empty" x="720" y="500">Nothing pruned yet.</text><text class="empty" x="720" y="524">Prune an app and a flower will grow here.</text>`;
+  }
+  state.compost.forEach((c,i)=>{
+    const col = i % 11, row = Math.floor(i/11);
+    const x = 62 + col*120, y = 795 - row*250;
+    if (c.fate==='potted') out += `<g class="flower ${c.fresh?'enter':''}">${ascii(c.flower,x-14,y-142)}</g>`;
+    else out += ascii(['\\|/'],x-21,y-84);
+    out += tile(c.app,x,y,{live:false,ghost:true});
+    out += `<text class="caption" x="${x}" y="${y+38}">${esc(c.app.name)}</text>`;
+    if (c.fate==='planted') out += `<text class="caption" x="${x}" y="${y+53}">in your garden</text>`;
+  });
+  return out;
+}
+function transform(){ return `translate(${720+state.panX} ${512+state.panY}) scale(${state.zoom}) translate(-720 -512)`; }
+function render(){
+  stage.setAttribute('class', `mode-${state.mode} ${state.hand?'pan':''}`);
+  stage.innerHTML = `<defs><clipPath id="tileClip"><rect x=".5" y=".5" width="39" height="39" rx="4"/></clipPath></defs><g id="world" transform="${transform()}">${state.view==='garden'?renderGarden():renderCompost()}</g>`;
+  const garden = state.view==='garden';
+  $('#modes').hidden = !garden; $('#rail').hidden = !garden;
+  $('#tray').hidden = !(garden && state.mode==='plant');
+  $('#tab-garden').setAttribute('aria-selected', garden); $('#tab-compost').setAttribute('aria-selected', !garden);
+  document.querySelectorAll('[data-mode]').forEach(b=>{const on=b.dataset.mode===state.mode;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
+  $('#hand').setAttribute('aria-pressed', state.hand);
+  if (garden && state.mode==='plant') renderTray();
+  state.fresh.clear(); state.flowers.forEach(f=>f.fresh=false); state.compost.forEach(c=>c.fresh=false);
+}
+function renderTray(){
+  const seeds = state.apps.filter(a=>a.slot===null);
+  const tray = $('#tray');
+  if (!seeds.length){ tray.innerHTML = 'Every app you use is already in the garden.'; return; }
+  tray.innerHTML = 'Pick an app to plant' + seeds.map(a=>`<button data-seed="${a.id}" aria-label="Plant ${esc(a.name)} in ${esc(TREES[a.tree].label)}">${tileSvg(a)}<span>${esc(a.name)}</span></button>`).join('');
+}
+
+/* ---------- Toast ---------- */
+let toastTimer;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.hidden=true,2600); }
+
+/* ---------- Prune flow ---------- */
+const dlgPrune = $('#dlg-prune'), dlgFlower = $('#dlg-flower');
+function openPrune(app){
+  state.pending = app;
+  $('#prune-who').innerHTML = (app.img
+    ? `<img src="${esc(app.img)}" alt="" width="40" height="40">`
+    : tileSvg(app)) + `<span>${esc(app.name)}</span>`;
+  $('#prune-facts').innerHTML =
+    `<div><dt>${app.gb.toFixed(1)} GB data</dt><dd><button class="linkish" id="export">Export</button></dd></div>` +
+    `<div><dt>Category:</dt><dd>${esc(app.kind)}</dd></div>` +
+    `<div><dt>Downloaded:</dt><dd>${esc(app.since)}</dd></div>`;
+  $('#export').onclick = () => toast('Export isn’t connected in this prototype.');
+  dlgPrune.showModal();
+}
+function closePrune(){ dlgPrune.close(); }
+$('#prune-x').onclick = closePrune;
+$('#prune-expand').onclick = () => toast('Full details aren’t connected in this prototype.');
+$('#prune-keep').onclick = closePrune;
+dlgPrune.addEventListener('close', ()=>{ /* keep pending only if flow continues */ });
+$('#prune-go').onclick = () => {
+  const app = state.pending; if(!app) return;
+  closePrune();
+  const el = stage.querySelector(`[data-app="${app.id}"]`);
+  if (el) el.classList.add('leaving');
+  const delay = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 230;
+  setTimeout(()=>{
+    app.slot = 'gone';
+    state.compost.push({app, fate:'pending'});
+    render();
+    dlgFlower.showModal();
+  }, delay);
+};
+function finishFlower(fate){
+  dlgFlower.close();
+  const c = state.compost[state.compost.length-1];
+  if (!c) return;
+  const lines = FLOWERS[(state.compost.length-1) % FLOWERS.length];
+  if (fate==='planted'){
+    const spot = state.flowers.length % SPOTS.length;
+    state.flowers = state.flowers.filter(f=>f.spot!==spot);
+    state.flowers.push({lines, spot, fresh:true});
+    c.fate = 'planted';
+  } else { c.fate = 'potted'; c.flower = lines; c.fresh = true; }
+  state.pending = null;
+  render();
+  if (fate==='potted') toast('Potted. You’ll find it in Compost.');
+}
+$('#flower-plant').onclick = () => finishFlower('planted');
+$('#flower-pot').onclick = () => finishFlower('potted');
+dlgFlower.addEventListener('cancel', e => e.preventDefault()); // a flower has grown; pick where it goes
+
+/* ---------- Planting ---------- */
+function plant(id){
+  const app = state.apps.find(a=>a.id===id); if(!app) return;
+  const slots = GEOM[app.tree].slots;
+  const free = slots.find(s=>!occupant(app.tree,s.id));
+  if (!free){ toast(`The ${TREES[app.tree].label} tree is full. Prune something first.`); return; }
+  app.slot = free.id; state.fresh.add(app.id); render();
+}
+
+
+/* ---------- Watering can (custom icon, drawn to match Lucide: 24px grid, 2px-family round strokes) ---------- */
+const CAN_ICON = '<rect x="4" y="9" width="11" height="11" rx="2"/><path d="M6 9V7.5a2.5 2.5 0 0 1 5 0V9"/><path d="M15 16l5-6"/><path d="M18.5 8.7l3 2.6"/>';
+const SCISSORS_ICON = '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/>';
+function cursorUrl(inner, hx, hy, fallback, {size=32, vb='0 0 24 24'}={}){
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="${vb}" fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="#f5f5f5" stroke-width="4">${inner}</g><g stroke="#2b2b2b" stroke-width="1.6">${inner}</g></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${hx} ${hy}, ${fallback}`;
+}
+const root = document.documentElement;
+root.style.setProperty('--cur-prune', cursorUrl(SCISSORS_ICON, 16, 16, 'pointer'));
+/* The can cursor is pre-rendered at a few tilt angles around the rose (the spout tip, which is also the hotspot),
+   so on click the real cursor tips forward and back. */
+const CAN_FRAMES = [0,22,44,64].map(deg =>
+  cursorUrl(`<g transform="rotate(${deg} 20 10)">${CAN_ICON}</g>`, 46, 24, 'default', {size:54, vb:'-14 -8 40 40'}));
+const setCan = i => root.style.setProperty('--cur-can', CAN_FRAMES[i]);
+setCan(0);
+
+let canTimers = [];
+function pour(x, y){
+  canTimers.forEach(clearTimeout); canTimers = [];
+  document.querySelectorAll('.pour').forEach(n=>n.remove());
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const at = (ms, fn) => canTimers.push(setTimeout(fn, ms));
+  (reduce ? [[0,3],[700,0]] : [[0,0],[60,1],[120,2],[180,3],[1300,2],[1360,1],[1420,0]])
+    .forEach(([ms,i]) => at(ms, () => setCan(i)));
+  const chars = ["'", ':', '.'];
+  let html = '';
+  for (let c=0; c<3; c++) for (let r=0; r<3; r++){
+    html += `<span class="d" style="--x:${c*11}px;--dx:${8+c*6}px;--i:${r};animation-delay:${(.2 + r*.14 + c*.05).toFixed(2)}s">${chars[(c+r)%3]}</span>`;
+  }
+  html += '<span class="splash">~ ~ ~</span>';
+  const el = document.createElement('div');
+  el.className = 'pour'; el.setAttribute('aria-hidden','true');
+  el.style.left = x+'px'; el.style.top = y+'px'; el.innerHTML = html;
+  document.body.appendChild(el);
+  at(reduce ? 700 : 1700, () => el.remove());
+}
+
+/* ---------- Interaction ---------- */
+function activate(el){
+  const app = state.apps.find(a=>a.id===el.dataset.app); if(!app) return;
+  if (state.mode==='prune') openPrune(app);
+}
+stage.addEventListener('click', e => {
+  if (state.hand) return;
+  if (state.mode==='water'){ pour(e.clientX, e.clientY); return; }
+  const el = e.target.closest('[data-app]'); if (el) activate(el);
+});
+stage.addEventListener('keydown', e => {
+  if (e.key!=='Enter' && e.key!==' ') return;
+  const el = e.target.closest('[data-app]'); if (!el) return;
+  e.preventDefault();
+  if (state.mode==='water'){ const r=el.getBoundingClientRect(); pour(r.left+r.width/2, r.top+r.height/2); }
+  else activate(el);
+});
+$('#tray').addEventListener('click', e => { const b=e.target.closest('[data-seed]'); if(b) plant(b.dataset.seed); });
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{ state.mode=b.dataset.mode; render(); }));
+$('#tab-garden').onclick = () => { state.view='garden'; render(); };
+$('#tab-compost').onclick = () => { state.view='compost'; render(); };
+$('#stroll').onclick = () => toast('Strolling through other gardens comes next.');
+
+/* zoom + pan */
+function setZoom(z){ state.zoom = Math.min(2.4, Math.max(.6, z)); const w=$('#world'); if(w) w.setAttribute('transform', transform()); }
+$('#zin').onclick = () => setZoom(state.zoom*1.2);
+$('#zout').onclick = () => setZoom(state.zoom/1.2);
+$('#hand').onclick = () => { state.hand = !state.hand; render(); };
+let drag=null;
+stage.addEventListener('pointerdown', e => { if(!state.hand) return; drag={x:e.clientX,y:e.clientY,px:state.panX,py:state.panY}; stage.classList.add('dragging'); stage.setPointerCapture(e.pointerId); });
+stage.addEventListener('pointermove', e => {
+  if(!drag) return;
+  const r = stage.getBoundingClientRect(), f = Math.min(r.width/1440, r.height/1024);
+  state.panX = drag.px + (e.clientX-drag.x)/f; state.panY = drag.py + (e.clientY-drag.y)/f;
+  $('#world').setAttribute('transform', transform());
+});
+const endDrag = () => { drag=null; stage.classList.remove('dragging'); };
+stage.addEventListener('pointerup', endDrag); stage.addEventListener('pointercancel', endDrag);
+
+/* theme */
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme', t);
+  $('#light').setAttribute('aria-pressed', t==='light'); $('#dark').setAttribute('aria-pressed', t==='dark');
+}
+$('#light').onclick = () => setTheme('light');
+$('#dark').onclick = () => setTheme('dark');
+setTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+render();
+</script>
+</body>
+</html>
