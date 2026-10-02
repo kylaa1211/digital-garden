@@ -33,16 +33,25 @@
   #stage{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
   .tree-line{fill:none;stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
   .dot{fill:var(--ink)}
+  .compost-tile{fill:var(--ink)}
   .label{font:400 14px var(--mono);fill:var(--ink);text-anchor:middle}
   .ascii{font:400 24px var(--mono);fill:var(--ink);white-space:pre}
   .caption{font:400 11px var(--sans);fill:var(--ink);text-anchor:middle}
   .empty{font:400 14px var(--mono);fill:var(--ink);text-anchor:middle}
+  .compost-ascii{text-anchor:middle}
+  .flower-ascii{text-anchor:middle}
+  .stroll-node{fill:var(--bg);stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
+  .stroll-hub{fill:var(--ink);stroke:var(--ink)}
+  .stroll-label{font:400 14px var(--sans);fill:var(--bg);text-anchor:middle}
+  .stroll-plus{font:400 24px var(--mono);fill:var(--ink);text-anchor:middle}
   .tile rect{fill:var(--tile);stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
   .tile .mono{font:500 14px var(--mono);fill:#333}
   .tile{outline:none}
   .mode-prune,.mode-prune .tile.live{cursor:var(--cur-prune,pointer)}
+  .view-compost.mode-prune,.view-compost.mode-prune .tile.live{cursor:var(--cur-shovel,default)}
   .mode-water,.mode-water .tile.live{cursor:var(--cur-can,default)}
   #stage.pan,#stage.pan .tile.live{cursor:grab}
+  #stage.view-stroll{cursor:grab}
   #stage.pan.dragging{cursor:grabbing}
   .tile.live:hover rect,.tile.live:focus-visible rect{stroke-width:2.5}
   .tile image{pointer-events:none}
@@ -70,7 +79,7 @@
   .np{display:inline-flex;align-items:center;justify-content:center;gap:12px;width:200px;border:1px solid var(--ink);border-radius:4px;padding:4px 16px;font:400 16px/21px var(--mono);background:color-mix(in srgb,var(--bg) 75%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
   .np svg{width:22px;height:14px;stroke:var(--ink);stroke-width:1.6;fill:none}
 
-  .rail{position:fixed;left:32px;bottom:calc(32px + env(safe-area-inset-bottom,0px));width:42px;border:1px solid var(--line);border-radius:4px;display:flex;flex-direction:column;background:var(--bg)}
+  .rail{position:fixed;left:32px;bottom:calc(32px + env(safe-area-inset-bottom,0px));width:42px;border:1px solid var(--line);border-radius:4px;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
   .rail button{width:40px;height:36px;border:0;background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center;padding:0}
   .rail button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
   .rail hr{margin:0;border:0;border-top:1px solid var(--line)}
@@ -87,6 +96,18 @@
   .tray svg{width:40px;height:40px;display:block}
   .tray svg rect{fill:var(--tile);stroke:var(--line)}
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(126px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);font:400 13px/1.4 var(--mono);padding:6px 14px;border-radius:4px;max-width:calc(100vw - 32px);text-align:center}
+  :root[data-theme="light"] button:not(.linkish){background:rgba(245,245,245,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  :root[data-theme="dark"] button:not(.linkish){background:color-mix(in srgb,var(--bg) 75%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  :root[data-theme="light"] .btn.on,
+  :root[data-theme="light"] .btn[aria-selected="true"],
+  :root[data-theme="light"] .btn[aria-pressed="true"],
+  :root[data-theme="light"] .rail button[aria-pressed="true"],
+  :root[data-theme="light"] .theme button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+  :root[data-theme="dark"] .btn.on,
+  :root[data-theme="dark"] .btn[aria-selected="true"],
+  :root[data-theme="dark"] .btn[aria-pressed="true"],
+  :root[data-theme="dark"] .rail button[aria-pressed="true"],
+  :root[data-theme="dark"] .theme button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
   [hidden]{display:none !important}
 
   dialog{width:300px;max-width:calc(100vw - 32px);min-height:280px;padding:24px;border:1px solid var(--line);border-radius:4px;background:color-mix(in srgb,var(--bg) 75%,transparent);color:var(--ink);font:400 16px/normal var(--ui);box-sizing:border-box;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
@@ -109,6 +130,11 @@
   .flower-dlg{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px}
   .flower-dlg h2{margin:6px 0 20px}
   .flower-dlg .actions{margin-top:2px}
+  .compost-prompt{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);margin:0;width:300px;height:160px;min-height:160px;padding:24px;border:1px solid var(--line);border-radius:0;background:color-mix(in srgb,var(--bg) 75%,transparent);color:var(--ink);font:400 16px/normal var(--ui);box-sizing:border-box;z-index:4;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .compost-prompt[open]{display:flex;flex-direction:column;align-items:center}
+  .compost-prompt .dlg-head{position:absolute;top:18px;left:24px;right:24px;width:auto;justify-content:flex-end}
+  .compost-prompt h2{margin:22px 0 20px;font:400 16px/normal var(--ui);text-align:center}
+  .compost-prompt .actions{margin-top:0}
 
   @media (max-width:640px){
     .top{left:12px;right:12px;gap:6px}
@@ -168,42 +194,45 @@
   </div>
 </dialog>
 
-<dialog id="dlg-flower" class="flower-dlg" aria-labelledby="flower-title">
-  <h2 id="flower-title">A new flower has grown!</h2>
+<dialog id="compost-prompt" class="compost-prompt" aria-labelledby="compost-prompt-title">
+  <div class="dlg-head">
+    <button class="icon-btn" id="compost-close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+  </div>
+  <h2 id="compost-prompt-title">A new flower has grown!</h2>
   <div class="actions">
-    <button class="btn" id="flower-plant">Plant</button>
-    <button class="btn" id="flower-pot">Pot</button>
+    <button class="btn on" id="compost-plant">Plant</button>
+    <button class="btn" id="compost-pot">Pot</button>
   </div>
 </dialog>
 
 <script>
 /* ---------- Sample garden ---------- */
 const NS = 'http://www.w3.org/2000/svg';
-const ICO = name => `assets/icons/${name}.png`;
+const ICO = name => `icons/${name}.png`;
 const APPS0 = [
-  {id:'goodnotes', name:'Goodnotes', tree:'collect', kind:'Handwriting', gb:3.1, since:'August 2019', img:ICO('goodnotes'), slot:'TOP0'},
-  {id:'linear', name:'Linear', tree:'collect', kind:'Tasks', gb:0.2, since:'March 2023', img:ICO('linear'), slot:'TOP1'},
-  {id:'omnifocus', name:'OmniFocus', tree:'collect', kind:'Tasks', gb:0.4, since:'May 2018', img:ICO('omnifocus'), slot:'TOP2'},
+  {id:'goodnotes', name:'Goodnotes', tree:'collect', kind:'Handwriting', gb:3.1, since:'August 2019', img:ICO('notes'), slot:'TOP0'},
+  {id:'linear', name:'Linear', tree:'create', kind:'Tasks', gb:0.2, since:'March 2023', img:ICO('cursor'), slot:'L1'},
+  {id:'omnifocus', name:'OmniFocus', tree:'collect', kind:'Tasks', gb:0.4, since:'May 2018', img:ICO('ottarai'), slot:'TOP2'},
   {id:'notability', name:'Notability', tree:'collect', kind:'Handwriting', gb:2.7, since:'September 2018', img:ICO('notability'), slot:'UR0'},
-  {id:'applenotes', name:'Apple Notes', tree:'collect', kind:'Notetaking', gb:1.2, since:'January 2016', img:ICO('applenotes'), slot:'UR1'},
-  {id:'concepts', name:'Concepts', tree:'collect', kind:'Sketching', gb:0.8, since:'June 2021', img:ICO('concepts'), slot:'UR2'},
-  {id:'asana', name:'Asana', tree:'collect', kind:'Tasks', gb:0.4, since:'February 2020', img:ICO('asana'), slot:'LR0'},
+  {id:'applenotes', name:'Apple Notes', tree:'collect', kind:'Notetaking', gb:1.2, since:'January 2016', img:ICO('goodnotes'), slot:'UR1'},
+  {id:'concepts', name:'Concepts', tree:'create', kind:'Sketching', gb:0.8, since:'June 2021', img:ICO('codex'), slot:'L3'},
+  {id:'asana', name:'Asana', tree:'collect', kind:'Tasks', gb:0.4, since:'February 2020', img:ICO('asana'), slot:'LR2'},
   {id:'confluence', name:'Confluence', tree:'collect', kind:'Documentation', gb:0.6, since:'July 2023', img:ICO('confluence'), slot:'LR1'},
-  {id:'notion', name:'Notion', tree:'collect', kind:'Notetaking', gb:2.4, since:'September 2015', img:ICO('notion'), slot:'LR2'},
-  {id:'otter', name:'Otter', tree:'collect', kind:'Transcription', gb:5.2, since:'November 2021', img:ICO('otter'), slot:'LL0'},
-  {id:'loop', name:'Loop', tree:'collect', kind:'Notetaking', gb:0.3, since:'November 2023', img:ICO('loop'), slot:'LL1'},
+  {id:'notion', name:'Notion', tree:'collect', kind:'Notetaking', gb:2.4, since:'September 2015', img:ICO('notion'), slot:'LR0'},
+  {id:'otter', name:'Otter', tree:'collect', kind:'Transcription', gb:5.2, since:'November 2021', img:ICO('keep'), slot:'LL0'},
+  {id:'loop', name:'Loop', tree:'collect', kind:'Notetaking', gb:0.3, since:'November 2023', img:ICO('onenote'), slot:'LL1'},
   {id:'evernote', name:'Evernote', tree:'collect', kind:'Notetaking', gb:4.6, since:'May 2014', img:ICO('evernote'), slot:'LL2'},
-  {id:'craft', name:'Craft', tree:'collect', kind:'Documentation', gb:0.7, since:'January 2022', img:ICO('craft'), slot:'UL0'},
-  {id:'arc', name:'Arc', tree:'collect', kind:'Browser', gb:1.1, since:'April 2023', img:ICO('arc'), slot:'UL1'},
-  {id:'dayone', name:'Day One', tree:'collect', kind:'Journal', gb:2.0, since:'October 2017', img:ICO('dayone'), slot:'UL2'},
+  {id:'craft', name:'Craft', tree:'collect', kind:'Documentation', gb:0.7, since:'January 2022', img:ICO('milanote'), slot:'UL0'},
+  {id:'arc', name:'Arc', tree:'collect', kind:'Browser', gb:1.1, since:'April 2023', img:ICO('wisprflow'), slot:'TOP1'},
+  {id:'dayone', name:'Day One', tree:'collect', kind:'Journal', gb:2.0, since:'October 2017', img:ICO('logseq'), slot:'UL1'},
   {id:'figma', name:'Figma', tree:'create', kind:'Design', gb:1.4, since:'January 2020', img:ICO('figma'), slot:'T'},
   {id:'illustrator', name:'Illustrator', tree:'create', kind:'Design', gb:6.8, since:'September 2018', img:ICO('illustrator'), slot:'L0'},
   {id:'indesign', name:'InDesign', tree:'create', kind:'Layout', gb:5.9, since:'January 2021', img:ICO('indesign'), slot:'R0'},
-  {id:'obsidian', name:'Obsidian', tree:'create', kind:'Notetaking', gb:0.8, since:'March 2021', img:ICO('obsidian'), slot:'L1'},
-  {id:'vscode', name:'VS Code', tree:'create', kind:'Coding', gb:1.6, since:'August 2020', img:ICO('vscode'), slot:'R1'},
+  {id:'obsidian', name:'Obsidian', tree:'collect', kind:'Notetaking', gb:0.8, since:'March 2021', img:ICO('obsidian'), slot:'UL2'},
+  {id:'vscode', name:'VS Code', tree:'create', kind:'Coding', gb:1.6, since:'August 2020', img:ICO('paper'), slot:'R1'},
   {id:'claude', name:'Claude', tree:'create', kind:'Assistant', gb:0.5, since:'April 2024', img:ICO('claude'), slot:'L2'},
   {id:'affinity', name:'Affinity', tree:'create', kind:'Design', gb:3.3, since:'March 2022', img:ICO('affinity'), slot:'R2'},
-  {id:'icloud', name:'iCloud', tree:'create', kind:'Storage', gb:12.4, since:'September 2016', img:ICO('icloud'), slot:'L3'},
+  {id:'icloud', name:'iCloud', tree:'collect', kind:'Storage', gb:12.4, since:'September 2016', img:ICO('granola'), slot:'UR2'},
   {id:'canva', name:'Canva', tree:'create', kind:'Design', gb:2.1, since:'February 2019', img:ICO('canva'), slot:'R3'},
   {id:'bear', name:'Bear', tree:'collect', kind:'Notetaking', gb:0.2, since:'today', mono:'Be', slot:null},
   {id:'procreate', name:'Procreate', tree:'create', kind:'Sketching', gb:0.4, since:'today', mono:'Pr', slot:null},
@@ -256,6 +285,11 @@ const AMBIENT = [
 ];
 const FLOWERS = [['(#)',' | ','~|~'],['oo','o*o','oo',' | ',' | '],['\\|/','-@-',' | ',' | ']];
 const SPOTS = [[140,520],[1180,590],[1300,770],[740,600],[150,690],[1250,230],[80,230],[1090,190]];
+const COMPOST_GROUPS = [
+  {center:180, top:805.3, tiles:[60,180,300], mark:['{+}','|','~|~']},
+  {center:720, top:805.3, tiles:[480,600,720,840,960], mark:['vvv','(  )','|','\\|/']},
+  {center:1260, top:805.3, tiles:[1140,1260,1380], mark:['[=]','|','~|~']},
+];
 
 /* ---------- State ---------- */
 const state = {
@@ -270,6 +304,11 @@ const state = {
 const $ = s => document.querySelector(s);
 const stage = $('#stage');
 const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ICON_NAMES = {notes:'Notes',ottarai:'Otter.ai',otter:'Otter',onenote:'OneNote',wisprflow:'Wispr Flow',indesign:'InDesign'};
+function appLabel(app){
+  const file = app.img ? app.img.split('/').pop().replace(/\.png$/,'') : '';
+  return ICON_NAMES[file] || (file ? file[0].toUpperCase()+file.slice(1) : app.name);
+}
 function glyph(app, clipId='tileClip'){
   if (app.img){
     return `<image href="${esc(app.img)}" x="0" y="0" width="40" height="40" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})"/>`;
@@ -280,16 +319,24 @@ function tileSvg(app){
   const id = 'clip-'+app.id;
   return `<svg viewBox="0 0 40 40" aria-hidden="true"><defs><clipPath id="${id}"><rect x=".5" y=".5" width="39" height="39" rx="4"/></clipPath></defs><rect x=".5" y=".5" width="39" height="39" rx="4"/>${glyph(app,id)}</svg>`;
 }
-function ascii(lines,x,y,cls=''){
-  const t = lines.map((l,i)=>`<tspan x="${x}" y="${y+19+i*24}">${esc(l)}</tspan>`).join('');
+function ascii(lines,x,y,cls='',step=24){
+  const t = lines.map((l,i)=>`<tspan x="${x}" y="${y+19+i*step}">${esc(l)}</tspan>`).join('');
   return `<text class="ascii ${cls}" xml:space="preserve">${t}</text>`;
 }
 function line(x1,y1,x2,y2){ return `<path class="tree-line" d="M${x1} ${y1}L${x2} ${y2}"/>`; }
 function dot(x,y){ return `<circle class="dot" cx="${x}" cy="${y}" r="2.5"/>`; }
-function tile(app,x,y,{live=true,ghost=false,rot=0}={}){
+function compostBranch(center, top, x){
+  if (x===center) return line(center, top-48, center, top+48);
+  const direction = Math.sign(x-center), radius = Math.min(48, Math.abs(x-center)/2);
+  const turnStart = top-radius, horizontalStart = center + direction*radius;
+  const horizontalEnd = x - direction*radius, turnEnd = top+radius;
+  const path = `M${center} ${top-48}V${turnStart}Q${center} ${top} ${horizontalStart} ${top}H${horizontalEnd}Q${x} ${top} ${x} ${turnEnd}V${top+48}`;
+  return `<path class="tree-line" d="${path}"/>`;
+}
+function tile(app,x,y,{live=true,ghost=false,rot=0,scale=1}={}){
   const cls = ['tile', live?'live':'', ghost?'ghost':'', state.fresh.has(app.id)?'enter':''].join(' ');
-  const attrs = live ? `role="button" tabindex="0" data-app="${app.id}" aria-label="${esc(app.name)}, ${esc(app.kind)}"` : `aria-hidden="true"`;
-  return `<g class="${cls}" ${attrs} transform="translate(${x} ${y}) rotate(${rot}) translate(-20 -20)"><g class="pop"><rect x=".5" y=".5" width="39" height="39" rx="4"/>${glyph(app)}</g></g>`;
+  const attrs = live ? `role="button" tabindex="0" data-app="${app.id}" aria-label="${esc(appLabel(app))}, ${esc(app.kind)}"` : `aria-hidden="true"`;
+  return `<g class="${cls}" ${attrs} transform="translate(${x} ${y}) rotate(${rot}) scale(${scale}) translate(-20 -20)"><g class="pop"><rect x=".5" y=".5" width="39" height="39" rx="4"/>${glyph(app)}</g></g>`;
 }
 
 /* ---------- Render ---------- */
@@ -326,35 +373,60 @@ function renderCreate(){
 }
 function renderGarden(){
   let out = '';
-  AMBIENT.forEach(([x,y,l])=>out += ascii(l,x,y));
+  AMBIENT.forEach(([x,y,l])=>out += ascii(l,x,y,l[1]==='o*o'?'flower-ascii':''));
   state.flowers.forEach(f=>{ const [x,y]=SPOTS[f.spot]; out += `<g class="flower ${f.fresh?'enter':''}">${ascii(f.lines,x,y)}</g>`; });
   out += renderCollect() + renderCreate();
   return out;
 }
 function renderCompost(){
-  let out = '';
-  if (!state.compost.length){
-    return `<text class="empty" x="720" y="500">Nothing pruned yet.</text><text class="empty" x="720" y="524">Prune an app and a flower will grow here.</text>`;
-  }
-  state.compost.forEach((c,i)=>{
-    const col = i % 11, row = Math.floor(i/11);
-    const x = 62 + col*120, y = 795 - row*250;
-    if (c.fate==='potted') out += `<g class="flower ${c.fresh?'enter':''}">${ascii(c.flower,x-14,y-142)}</g>`;
-    else out += ascii(['\\|/'],x-21,y-84);
-    out += tile(c.app,x,y,{live:false,ghost:true});
-    out += `<text class="caption" x="${x}" y="${y+38}">${esc(c.app.name)}</text>`;
-    if (c.fate==='planted') out += `<text class="caption" x="${x}" y="${y+53}">in your garden</text>`;
+  let out = ascii(['\\ | /','— ( ) —','/ | \\'],470,128,'compost-ascii',36);
+  out += ascii(['  ︵','︵(  )','(      )','(        )','︶︶︶︶︶'],152,227,'compost-ascii');
+  out += ascii(['  ︵','︵(  )','(      )','(        )','︶︶︶︶︶'],1032,395,'compost-ascii');
+  out += ascii([' ︵︵','︵(    )','(        )','(            )','(              )','︶︶︶︶︶'],360,371,'compost-ascii');
+  out += ascii([' ︵︵','︵(    )','(        )','(            )','(              )','︶︶︶︶︶'],1233,203,'compost-ascii');
+  COMPOST_GROUPS.forEach(group=>{
+    const markTop = group.top - 62 - (group.mark.length-1)*24;
+    out += ascii(group.mark,group.center,markTop,'compost-ascii');
+    group.tiles.forEach(x=>{
+      out += compostBranch(group.center, group.top, x);
+      out += dot(x, group.top+48);
+      out += `<rect class="compost-tile" x="${x-26}" y="${group.top+50.34}" width="52" height="52" rx="3"/>`;
+    });
   });
+  return out;
+}
+function renderStroll(){
+  const ring = (count,radius,offset=-Math.PI/2) => Array.from({length:count},(_,i)=>{
+    const angle = offset + i * Math.PI * 2 / count;
+    return [720 + Math.cos(angle)*radius, 512 + Math.sin(angle)*radius];
+  });
+  const rings = [ring(10,160)];
+  for (let radius=340, index=1; radius<=12000; radius+=260, index++){
+    const count = Math.max(12, Math.round(radius * Math.PI * 2 / 180));
+    const rotation = -Math.PI/2 + (index%2 ? 1 : -1)*Math.PI/count;
+    rings.push(ring(count,radius,rotation));
+  }
+  const orbit = rings[0];
+  let out = '';
+  rings.slice(1).flat().forEach(([x,y])=>{ out += `<circle class="stroll-node" cx="${x}" cy="${y}" r="30"/>`; });
+  orbit.forEach(([x,y])=>{ out += line(720,512,x,y); out += `<circle class="stroll-node" cx="${x}" cy="${y}" r="30"/>`; });
+  out += `<circle class="stroll-hub" cx="720" cy="512" r="40"/>`;
+  out += `<text class="stroll-label" x="720" y="505"><tspan x="720" dy="0">My</tspan><tspan x="720" dy="17">Garden</tspan></text>`;
+  out += `<text class="stroll-plus" x="720" y="360">+</text>`;
   return out;
 }
 function transform(){ return `translate(${720+state.panX} ${512+state.panY}) scale(${state.zoom}) translate(-720 -512)`; }
 function render(){
-  stage.setAttribute('class', `mode-${state.mode} ${state.hand?'pan':''}`);
-  stage.innerHTML = `<defs><clipPath id="tileClip"><rect x=".5" y=".5" width="39" height="39" rx="4"/></clipPath></defs><g id="world" transform="${transform()}">${state.view==='garden'?renderGarden():renderCompost()}</g>`;
+  stage.setAttribute('class', `view-${state.view} mode-${state.mode} ${state.hand?'pan':''}`);
+  const world = state.view==='garden' ? renderGarden() : state.view==='compost' ? renderCompost() : renderStroll();
+  stage.innerHTML = `<defs><clipPath id="tileClip"><rect x=".5" y=".5" width="39" height="39" rx="4"/></clipPath></defs><g id="world" transform="${transform()}">${world}</g>`;
   const garden = state.view==='garden';
-  $('#modes').hidden = !garden; $('#rail').hidden = !garden;
+  const navigable = garden || state.view==='stroll';
+  $('#modes').hidden = !garden; $('#rail').hidden = !navigable;
   $('#tray').hidden = !(garden && state.mode==='plant');
-  $('#tab-garden').setAttribute('aria-selected', garden); $('#tab-compost').setAttribute('aria-selected', !garden);
+  $('#compost-prompt').open = state.view==='compost';
+  $('#tab-garden').setAttribute('aria-selected', state.view==='garden'); $('#tab-compost').setAttribute('aria-selected', state.view==='compost');
+  $('#stroll').classList.toggle('on', state.view==='stroll'); $('#stroll').setAttribute('aria-pressed', state.view==='stroll');
   document.querySelectorAll('[data-mode]').forEach(b=>{const on=b.dataset.mode===state.mode;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
   $('#hand').setAttribute('aria-pressed', state.hand);
   if (garden && state.mode==='plant') renderTray();
@@ -372,12 +444,12 @@ let toastTimer;
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.hidden=true,2600); }
 
 /* ---------- Prune flow ---------- */
-const dlgPrune = $('#dlg-prune'), dlgFlower = $('#dlg-flower');
+const dlgPrune = $('#dlg-prune');
 function openPrune(app){
   state.pending = app;
   $('#prune-who').innerHTML = (app.img
     ? `<img src="${esc(app.img)}" alt="" width="40" height="40">`
-    : tileSvg(app)) + `<span>${esc(app.name)}</span>`;
+    : tileSvg(app)) + `<span>${esc(appLabel(app))}</span>`;
   $('#prune-facts').innerHTML =
     `<div><dt>${app.gb.toFixed(1)} GB data</dt><dd><button class="linkish" id="export">Export</button></dd></div>` +
     `<div><dt>Category:</dt><dd>${esc(app.kind)}</dd></div>` +
@@ -400,27 +472,8 @@ $('#prune-go').onclick = () => {
     app.slot = 'gone';
     state.compost.push({app, fate:'pending'});
     render();
-    dlgFlower.showModal();
   }, delay);
 };
-function finishFlower(fate){
-  dlgFlower.close();
-  const c = state.compost[state.compost.length-1];
-  if (!c) return;
-  const lines = FLOWERS[(state.compost.length-1) % FLOWERS.length];
-  if (fate==='planted'){
-    const spot = state.flowers.length % SPOTS.length;
-    state.flowers = state.flowers.filter(f=>f.spot!==spot);
-    state.flowers.push({lines, spot, fresh:true});
-    c.fate = 'planted';
-  } else { c.fate = 'potted'; c.flower = lines; c.fresh = true; }
-  state.pending = null;
-  render();
-  if (fate==='potted') toast('Potted. You’ll find it in Compost.');
-}
-$('#flower-plant').onclick = () => finishFlower('planted');
-$('#flower-pot').onclick = () => finishFlower('potted');
-dlgFlower.addEventListener('cancel', e => e.preventDefault()); // a flower has grown; pick where it goes
 
 /* ---------- Planting ---------- */
 function plant(id){
@@ -435,12 +488,14 @@ function plant(id){
 /* ---------- Watering can (custom icon, drawn to match Lucide: 24px grid, 2px-family round strokes) ---------- */
 const CAN_ICON = '<rect x="4" y="9" width="11" height="11" rx="2"/><path d="M6 9V7.5a2.5 2.5 0 0 1 5 0V9"/><path d="M15 16l5-6"/><path d="M18.5 8.7l3 2.6"/>';
 const SCISSORS_ICON = '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/>';
+const SHOVEL_ICON = '<path d="M21.56 4.56a1.5 1.5 0 0 1 0 2.122l-.47.47a3 3 0 0 1-4.212-.03 3 3 0 0 1 0-4.243l.44-.44a1.5 1.5 0 0 1 2.121 0z"/><path d="M3 22a1 1 0 0 1-1-1v-3.586a1 1 0 0 1 .293-.707l3.355-3.355a1.205 1.205 0 0 1 1.704 0l3.296 3.296a1.205 1.205 0 0 1 0 1.704l-3.355 3.355a1 1 0 0 1-.707.293z"/><path d="m9 15 7.879-7.878"/>';
 function cursorUrl(inner, hx, hy, fallback, {size=32, vb='0 0 24 24'}={}){
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="${vb}" fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="#f5f5f5" stroke-width="4">${inner}</g><g stroke="#2b2b2b" stroke-width="1.6">${inner}</g></svg>`;
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${hx} ${hy}, ${fallback}`;
 }
 const root = document.documentElement;
 root.style.setProperty('--cur-prune', cursorUrl(SCISSORS_ICON, 16, 16, 'pointer'));
+root.style.setProperty('--cur-shovel', cursorUrl(SHOVEL_ICON, 9, 15, 'default'));
 /* The can cursor is pre-rendered at a few tilt angles around the rose (the spout tip, which is also the hotspot),
    so on click the real cursor tips forward and back. */
 const CAN_FRAMES = [0,22,44,64].map(deg =>
@@ -490,7 +545,10 @@ $('#tray').addEventListener('click', e => { const b=e.target.closest('[data-seed
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{ state.mode=b.dataset.mode; render(); }));
 $('#tab-garden').onclick = () => { state.view='garden'; render(); };
 $('#tab-compost').onclick = () => { state.view='compost'; render(); };
-$('#stroll').onclick = () => toast('Strolling through other gardens comes next.');
+$('#stroll').onclick = () => { state.view='stroll'; render(); };
+$('#compost-close').onclick = () => $('#compost-prompt').close();
+$('#compost-plant').onclick = () => toast('Planting isn’t connected in this prototype.');
+$('#compost-pot').onclick = () => toast('Potting isn’t connected in this prototype.');
 
 /* zoom + pan */
 function setZoom(z){ state.zoom = Math.min(2.4, Math.max(.6, z)); const w=$('#world'); if(w) w.setAttribute('transform', transform()); }
@@ -498,7 +556,7 @@ $('#zin').onclick = () => setZoom(state.zoom*1.2);
 $('#zout').onclick = () => setZoom(state.zoom/1.2);
 $('#hand').onclick = () => { state.hand = !state.hand; render(); };
 let drag=null;
-stage.addEventListener('pointerdown', e => { if(!state.hand) return; drag={x:e.clientX,y:e.clientY,px:state.panX,py:state.panY}; stage.classList.add('dragging'); stage.setPointerCapture(e.pointerId); });
+stage.addEventListener('pointerdown', e => { if(!state.hand && state.view!=='stroll') return; drag={x:e.clientX,y:e.clientY,px:state.panX,py:state.panY}; stage.classList.add('dragging'); stage.setPointerCapture(e.pointerId); });
 stage.addEventListener('pointermove', e => {
   if(!drag) return;
   const r = stage.getBoundingClientRect(), f = Math.min(r.width/1440, r.height/1024);
