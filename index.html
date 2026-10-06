@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Digital Garden (prototype)</title>
+<script>
+/* First open of a session always starts on the opening page. "Enter" on that page sets the flag; "Exit" clears it. */
+(function(){ try { if (!sessionStorage.getItem('dg:entered')){ document.documentElement.style.display = 'none'; location.replace('onboarding.html'); } } catch (e) {} })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
@@ -136,6 +140,38 @@
   .compost-prompt h2{margin:22px 0 20px;font:400 16px/normal var(--ui);text-align:center}
   .compost-prompt .actions{margin-top:0}
 
+  /* Wind: plants lean from their base, but the glyphs stay glyphs */
+  .sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway var(--t,8s) ease-in-out var(--d,0s) infinite alternate}
+  @keyframes sway{from{transform:skewX(calc(var(--a,3deg) * var(--wind,1) * -1))}to{transform:skewX(calc(var(--a,3deg) * var(--wind,1)))}}
+  .tree-sway{transform-box:view-box;transform-origin:var(--ox,0px) var(--oy,0px);animation:treesway var(--t,9s) ease-in-out var(--d,0s) infinite alternate}
+  @keyframes treesway{from{transform:rotate(calc(var(--ta,.7deg) * var(--wind,1) * -1))}to{transform:rotate(calc(var(--ta,.7deg) * var(--wind,1)))}}
+  @media (prefers-reduced-motion: reduce){.sway,.tree-sway{animation:none}}
+  /* Clippings that fly off when the scissors snip */
+  .snip{position:fixed;width:0;height:0;pointer-events:none;z-index:5;font:400 14px/1 var(--mono);color:var(--ink)}
+  .snip i{position:absolute;left:0;top:0;font-style:normal;opacity:0;animation:clip .7s ease-out both;animation-delay:var(--dl)}
+  @keyframes clip{0%{opacity:0;transform:translate(0,0)}15%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy))}}
+
+  /* My Garden menu */
+  .gwrap{position:relative}
+  #tab-garden{display:inline-flex;align-items:center;gap:8px}
+  #tab-garden .chev{display:none;width:14px;height:14px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+  #tab-garden[aria-selected="true"] .chev{display:block}
+  #tab-garden[aria-expanded="true"] .chev{transform:rotate(180deg)}
+  .gmenu{position:absolute;left:0;top:calc(100% + 8px);width:268px;max-width:calc(100vw - 24px);box-sizing:border-box;padding:16px 16px 8px;border:1px solid var(--line);border-radius:4px;background:color-mix(in srgb,var(--bg) 75%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--ink);z-index:6;font:400 13px/1.4 var(--mono)}
+  .gmenu h3{margin:0 0 12px;font:500 14px/21px var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .gfacts{margin:0 0 12px;display:grid;gap:8px}
+  .gfacts div{display:flex;justify-content:space-between;gap:12px}
+  .gfacts dt,.gfacts dd{margin:0}
+  .gfacts dt{opacity:.7}
+  .gfacts dd{text-align:right}
+  .gmenu hr{border:0;border-top:1px solid var(--line);margin:0 0 8px}
+  :root[data-theme] .gmenu button.gitem{display:block;width:100%;box-sizing:border-box;text-align:left;border:0;border-radius:4px;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;color:var(--ink);font:400 14px/21px var(--mono);padding:5px 8px;margin:0 0 4px;cursor:pointer}
+  :root[data-theme] .gmenu button.gitem:hover,:root[data-theme] .gmenu button.gitem:focus-visible{background:color-mix(in srgb,var(--ink) 10%,transparent);outline:none}
+  #dlg-rename{min-height:210px}
+  .rename-input{width:100%;box-sizing:border-box;margin:20px 0 0;font:400 14px/21px var(--mono);color:var(--ink);background:transparent;border:1px solid var(--ink);border-radius:4px;padding:5px 10px}
+  .rename-input:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  #dlg-rename .actions{margin-top:auto;padding-top:20px}
+
   @media (max-width:640px){
     .top{left:12px;right:12px;gap:6px}
     .btn,.np{font-size:12px;padding:4px 10px}
@@ -150,7 +186,18 @@
 
 <header class="top">
   <div class="tabs" role="tablist" aria-label="Garden views">
-    <button class="btn" role="tab" id="tab-garden" aria-selected="true">My Garden</button>
+    <div class="gwrap">
+      <button class="btn" role="tab" id="tab-garden" aria-selected="true" aria-haspopup="menu" aria-expanded="false" aria-controls="gmenu"><span id="gname">My Garden</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+      <div class="gmenu" id="gmenu" hidden>
+        <h3 id="gmenu-title">My Garden</h3>
+        <dl class="gfacts" id="gfacts"></dl>
+        <hr>
+        <div role="menu" aria-label="Garden actions">
+          <button class="gitem" role="menuitem" id="g-rename">Rename garden</button>
+          <button class="gitem" role="menuitem" id="g-exit">Exit</button>
+        </div>
+      </div>
+    </div>
     <button class="btn" role="tab" id="tab-compost" aria-selected="false">Compost</button>
   </div>
   <div class="np" title="Now playing">
@@ -191,6 +238,18 @@
   <div class="actions">
     <button class="btn" id="prune-keep">Keep</button>
     <button class="btn on" id="prune-go">Disconnect</button>
+  </div>
+</dialog>
+
+<dialog id="dlg-rename" aria-labelledby="rename-title">
+  <div class="dlg-head">
+    <button class="icon-btn" id="rename-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+  </div>
+  <h2 id="rename-title">Rename your garden</h2>
+  <input class="rename-input" id="rename-input" type="text" maxlength="24" autocomplete="off" spellcheck="false" aria-label="Garden name">
+  <div class="actions">
+    <button class="btn" id="rename-cancel">Cancel</button>
+    <button class="btn on" id="rename-save">Save</button>
   </div>
 </dialog>
 
@@ -355,6 +414,7 @@ function renderCollect(){
     tiles.push(tile(a, s.x, s.y, {rot:s.rot}));
   }
   out += tiles.join('');
+  out = `<g class="tree-sway" style="--ox:${hub.x}px;--oy:${baseY}px;--t:9.5s;--d:-3s;--ta:.7deg">${out}</g>`;
   out += `<text class="label" x="${hub.x}" y="${labelY}">${TREES.collect.label}</text>`;
   return out;
 }
@@ -368,13 +428,74 @@ function renderCreate(){
     tiles.push(tile(a, s.x, s.y, {rot:s.rot||0}));
   }
   out += tiles.join('');
+  out = `<g class="tree-sway" style="--ox:${FX}px;--oy:${F_BASE}px;--t:8s;--d:-5.5s;--ta:.6deg">${out}</g>`;
   out += `<text class="label" x="${FX}" y="${labelY}">${TREES.create.label}</text>`;
   return out;
 }
-function renderGarden(){
+/* Deterministic randomness, so every grass tile and every plant keeps its own look and timing */
+function hash(i, j, k){
+  let h = (Math.imul(i+1013, 374761393) + Math.imul(j+7919, 668265263) + Math.imul(k+1, 2246822519)) >>> 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0;
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+/* Tall plants (flowers, tufts with stems) lean from their base. Short grass sways by swapping glyphs instead (see windStep). */
+function sway(inner, seed){
+  return `<g class="sway" style="--t:${(6 + hash(seed,1,1)*4).toFixed(1)}s;--d:${(-hash(seed,2,2)*10).toFixed(1)}s;--a:${(2.4 + hash(seed,3,3)*1.8).toFixed(1)}deg">${inner}</g>`;
+}
+const GRASS_FRAMES = {b:['\\\\','||','//'], t:['\\\\/','\\|/','\\//']};      // lean left, upright, lean right
+function grassText(kind, x, y){
+  return `<text class="ascii grass" data-k="${kind}" data-x="${Math.round(x)}" data-f="1" xml:space="preserve"><tspan x="${Math.round(x)}" y="${Math.round(y)+19}">${GRASS_FRAMES[kind][1]}</tspan></text>`;
+}
+const TILE_W = 1440, TILE_H = 1024, GRASS_BASE = AMBIENT.filter(([,,l])=>l.length===1);
+function grassTile(i, j){            // the garden's own tufts, repeated with a little jitter, plus a few extra
   let out = '';
-  AMBIENT.forEach(([x,y,l])=>out += ascii(l,x,y,l[1]==='o*o'?'flower-ascii':''));
-  state.flowers.forEach(f=>{ const [x,y]=SPOTS[f.spot]; out += `<g class="flower ${f.fresh?'enter':''}">${ascii(f.lines,x,y)}</g>`; });
+  GRASS_BASE.forEach(([x,y,l],k)=>{
+    const flip = hash(i,j,k*3+2) < .3, base = l[0]==='||' ? 'b' : 't';
+    out += grassText(flip ? (base==='b'?'t':'b') : base, i*TILE_W + x + (hash(i,j,k*3)-.5)*90, j*TILE_H + y + (hash(i,j,k*3+1)-.5)*70);
+  });
+  for (let k=0; k<8; k++) out += grassText(hash(i,j,100+k*3) < .5 ? 'b' : 't', i*TILE_W + 40 + hash(i,j,101+k*3)*(TILE_W-120), j*TILE_H + 40 + hash(i,j,102+k*3)*(TILE_H-120));
+  return out;
+}
+const grassTiles = new Set();
+function visibleWorld(){              // the part of the world currently on screen, in world coordinates
+  const r = stage.getBoundingClientRect(), w = r.width || window.innerWidth, h = r.height || window.innerHeight;
+  const f = Math.min(w/1440, h/1024), W = w/f, H = h/f, z = state.zoom;
+  return {x0:720 + (-W/2 - state.panX)/z, x1:720 + (W/2 - state.panX)/z, y0:512 + (-H/2 - state.panY)/z, y1:512 + (H/2 - state.panY)/z};
+}
+function ensureGrass(){               // adds grass tiles wherever you can see, and drops the ones you've left far behind
+  const host = $('#grass'); if (!host || state.view!=='garden') return;
+  const v = visibleWorld(), m = 200;
+  const i0 = Math.floor((v.x0-m)/TILE_W), i1 = Math.floor((v.x1+m)/TILE_W), j0 = Math.floor((v.y0-m)/TILE_H), j1 = Math.floor((v.y1+m)/TILE_H);
+  const need = new Set();
+  for (let j=j0; j<=j1; j++) for (let i=i0; i<=i1; i++) if (i || j) need.add(i+','+j);   // tile 0,0 is the garden itself
+  need.forEach(key=>{ if (grassTiles.has(key)) return; const [i,j] = key.split(',').map(Number); grassTiles.add(key); host.insertAdjacentHTML('beforeend', `<g data-t="${key}">${grassTile(i,j)}</g>`); });
+  [...grassTiles].forEach(key=>{
+    const [i,j] = key.split(',').map(Number);
+    if (!need.has(key) && (i < i0-1 || i > i1+1 || j < j0-1 || j > j1+1)){ const g = host.querySelector(`[data-t="${key}"]`); if (g) g.remove(); grassTiles.delete(key); }
+  });
+  windStep();
+}
+let grassQueued = false;
+const queueGrass = () => { if (grassQueued) return; grassQueued = true; requestAnimationFrame(() => { grassQueued = false; ensureGrass(); }); };
+window.addEventListener('resize', queueGrass);
+/* A gust rolls across the field: each blade leans left, stands, or leans right depending on where the wave is. */
+function windStep(t = performance.now()/1000){
+  if (state.view!=='garden' || document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  stage.querySelectorAll('.grass').forEach(el=>{
+    const lean = Math.sin(6.2832*(t/9 - (+el.dataset.x)/1100)) * (.6 + .4*WEATHER.factor);   // even a calm day still sways a little
+    const f = lean < -.5 ? 0 : lean > .5 ? 2 : 1;
+    if (el.dataset.f !== String(f)){ el.dataset.f = f; el.firstChild.textContent = GRASS_FRAMES[el.dataset.k][f]; }
+  });
+}
+setInterval(() => windStep(), 450);
+
+function renderGarden(){
+  let out = '<g id="grass" aria-hidden="true"></g>';
+  AMBIENT.forEach(([x,y,l],i)=>{
+    if (l.length===1) out += grassText(l[0]==='||' ? 'b' : 't', x, y);
+    else out += sway(ascii(l,x,y,l[1]==='o*o'?'flower-ascii':''), i);
+  });
+  state.flowers.forEach((f,i)=>{ const [x,y]=SPOTS[f.spot]; out += `<g class="flower ${f.fresh?'enter':''}">${sway(ascii(f.lines,x,y), 40+i)}</g>`; });
   out += renderCollect() + renderCreate();
   return out;
 }
@@ -417,10 +538,12 @@ function renderStroll(){
 }
 function transform(){ return `translate(${720+state.panX} ${512+state.panY}) scale(${state.zoom}) translate(-720 -512)`; }
 function render(){
+  grassTiles.clear();
   stage.setAttribute('class', `view-${state.view} mode-${state.mode} ${state.hand?'pan':''}`);
   const world = state.view==='garden' ? renderGarden() : state.view==='compost' ? renderCompost() : renderStroll();
   stage.innerHTML = `<defs><clipPath id="tileClip"><rect x=".5" y=".5" width="39" height="39" rx="4"/></clipPath></defs><g id="world" transform="${transform()}">${world}</g>`;
   const garden = state.view==='garden';
+  if (garden) ensureGrass();
   const navigable = garden || state.view==='stroll';
   $('#modes').hidden = !garden; $('#rail').hidden = !navigable;
   $('#tray').hidden = !(garden && state.mode==='plant');
@@ -430,6 +553,7 @@ function render(){
   document.querySelectorAll('[data-mode]').forEach(b=>{const on=b.dataset.mode===state.mode;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
   $('#hand').setAttribute('aria-pressed', state.hand);
   if (garden && state.mode==='plant') renderTray();
+  if (typeof gmenu !== 'undefined' && !gmenu.hidden){ if (garden) fillMenu(); else closeMenu(false); }
   state.fresh.clear(); state.flowers.forEach(f=>f.fresh=false); state.compost.forEach(c=>c.fresh=false);
 }
 function renderTray(){
@@ -489,19 +613,29 @@ function plant(id){
 const CAN_ICON = '<rect x="4" y="9" width="11" height="11" rx="2"/><path d="M6 9V7.5a2.5 2.5 0 0 1 5 0V9"/><path d="M15 16l5-6"/><path d="M18.5 8.7l3 2.6"/>';
 const SCISSORS_ICON = '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/>';
 const SHOVEL_ICON = '<path d="M21.56 4.56a1.5 1.5 0 0 1 0 2.122l-.47.47a3 3 0 0 1-4.212-.03 3 3 0 0 1 0-4.243l.44-.44a1.5 1.5 0 0 1 2.121 0z"/><path d="M3 22a1 1 0 0 1-1-1v-3.586a1 1 0 0 1 .293-.707l3.355-3.355a1.205 1.205 0 0 1 1.704 0l3.296 3.296a1.205 1.205 0 0 1 0 1.704l-3.355 3.355a1 1 0 0 1-.707.293z"/><path d="m9 15 7.879-7.878"/>';
-function cursorUrl(inner, hx, hy, fallback, {size=32, vb='0 0 24 24'}={}){
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="${vb}" fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="#f5f5f5" stroke-width="4">${inner}</g><g stroke="#2b2b2b" stroke-width="1.6">${inner}</g></svg>`;
+const THEME_COLORS = {light:{bg:'#f5f5f5', ink:'#2b2b2b'}, dark:{bg:'#1b1b1b', ink:'#ececec'}};
+function cursorUrl(inner, hx, hy, fallback, {size=32, vb='0 0 24 24', theme='light'}={}){
+  const c = THEME_COLORS[theme];     // the outline matches the page background and the icon is the ink colour, so both invert with the theme
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="${vb}" fill="none" stroke-linecap="round" stroke-linejoin="round"><g stroke="${c.bg}" stroke-width="4">${inner}</g><g stroke="${c.ink}" stroke-width="1.6">${inner}</g></svg>`;
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}") ${hx} ${hy}, ${fallback}`;
 }
 const root = document.documentElement;
-root.style.setProperty('--cur-prune', cursorUrl(SCISSORS_ICON, 16, 16, 'pointer'));
-root.style.setProperty('--cur-shovel', cursorUrl(SHOVEL_ICON, 9, 15, 'default'));
 /* The can cursor is pre-rendered at a few tilt angles around the rose (the spout tip, which is also the hotspot),
    so on click the real cursor tips forward and back. */
-const CAN_FRAMES = [0,22,44,64].map(deg =>
-  cursorUrl(`<g transform="rotate(${deg} 20 10)">${CAN_ICON}</g>`, 46, 24, 'default', {size:54, vb:'-14 -8 40 40'}));
-const setCan = i => root.style.setProperty('--cur-can', CAN_FRAMES[i]);
-setCan(0);
+let CAN_FRAMES = [], canFrame = 0, SCISSOR_FRAMES = [], scissorFrame = 0;
+const setCan = i => { canFrame = i; root.style.setProperty('--cur-can', CAN_FRAMES[i]); };
+const setScissors = i => { scissorFrame = i; root.style.setProperty('--cur-prune', SCISSOR_FRAMES[i]); };
+/* Scissors, split into two blades that rotate about the pivot (12,12) so the cursor can snip shut and open again */
+const scissorsInner = t =>
+  `<g transform="rotate(${t} 12 12)"><path d="M20 4 8.1 15.9"/><circle cx="6" cy="18" r="3"/></g>` +
+  `<g transform="rotate(${-t} 12 12)"><path d="M14.5 14.5 20 20M8.1 8.1 12 12"/><circle cx="6" cy="6" r="3"/></g>`;
+function buildCursors(theme){
+  SCISSOR_FRAMES = [0,13,25,34].map(t => cursorUrl(scissorsInner(t), 18, 18, 'pointer', {size:36, vb:'-2 -2 28 28', theme}));
+  root.style.setProperty('--cur-shovel', cursorUrl(SHOVEL_ICON, 9, 15, 'default', {theme}));
+  CAN_FRAMES = [0,22,44,64].map(deg =>
+    cursorUrl(`<g transform="rotate(${deg} 20 10)">${CAN_ICON}</g>`, 46, 24, 'default', {size:54, vb:'-14 -8 40 40', theme}));
+  setScissors(scissorFrame); setCan(canFrame);
+}
 
 let canTimers = [];
 function pour(x, y){
@@ -524,6 +658,24 @@ function pour(x, y){
   at(reduce ? 700 : 1700, () => el.remove());
 }
 
+let snipTimers = [];
+const SNIP_SEQ = [[0,1],[45,2],[90,3],[150,2],[200,1],[250,0],[330,1],[375,2],[420,3],[480,2],[530,1],[580,0]];   // two quick snips
+function snip(x, y){
+  snipTimers.forEach(clearTimeout); snipTimers = [];
+  document.querySelectorAll('.snip').forEach(n=>n.remove());
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const at = (ms, fn) => snipTimers.push(setTimeout(fn, ms));
+  (reduce ? [[0,3],[160,0]] : SNIP_SEQ).forEach(([ms,i]) => at(ms, () => setScissors(i)));
+  if (reduce) return;
+  const bits = ["'", ',', '.', '~', "'", ','];
+  const el = document.createElement('div');
+  el.className = 'snip'; el.setAttribute('aria-hidden','true');
+  el.style.left = (x+10)+'px'; el.style.top = (y-4)+'px';
+  el.innerHTML = bits.map((c,i)=>`<i style="--dx:${(i%2 ? 1 : -1)*(10+i*5)}px;--dy:${20+i*7}px;--dl:${(.05+i*.07).toFixed(2)}s">${c}</i>`).join('');
+  document.body.appendChild(el);
+  at(1300, () => el.remove());
+}
+
 /* ---------- Interaction ---------- */
 function activate(el){
   const app = state.apps.find(a=>a.id===el.dataset.app); if(!app) return;
@@ -538,42 +690,109 @@ stage.addEventListener('keydown', e => {
   if (e.key!=='Enter' && e.key!==' ') return;
   const el = e.target.closest('[data-app]'); if (!el) return;
   e.preventDefault();
-  if (state.mode==='water'){ const r=el.getBoundingClientRect(); pour(r.left+r.width/2, r.top+r.height/2); }
-  else activate(el);
+  const r = el.getBoundingClientRect();
+  if (state.mode==='water') pour(r.left+r.width/2, r.top+r.height/2);
+  else { if (state.mode==='prune' && state.view==='garden') snip(r.left+r.width/2, r.top+r.height/2); activate(el); }
 });
 $('#tray').addEventListener('click', e => { const b=e.target.closest('[data-seed]'); if(b) plant(b.dataset.seed); });
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{ state.mode=b.dataset.mode; render(); }));
-$('#tab-garden').onclick = () => { state.view='garden'; render(); };
-$('#tab-compost').onclick = () => { state.view='compost'; render(); };
-$('#stroll').onclick = () => { state.view='stroll'; render(); };
+$('#tab-garden').onclick = () => {
+  if (state.view !== 'garden'){ state.view = 'garden'; render(); return; }
+  gmenu.hidden ? openMenu() : closeMenu(false);
+};
+$('#tab-compost').onclick = () => { closeMenu(false); state.view='compost'; render(); };
+$('#stroll').onclick = () => { closeMenu(false); state.view='stroll'; render(); };
 $('#compost-close').onclick = () => $('#compost-prompt').close();
 $('#compost-plant').onclick = () => toast('Planting isn’t connected in this prototype.');
 $('#compost-pot').onclick = () => toast('Potting isn’t connected in this prototype.');
 
 /* zoom + pan */
-function setZoom(z){ state.zoom = Math.min(2.4, Math.max(.6, z)); const w=$('#world'); if(w) w.setAttribute('transform', transform()); }
+function setZoom(z){ state.zoom = Math.min(2.4, Math.max(.6, z)); const w=$('#world'); if(w) w.setAttribute('transform', transform()); ensureGrass(); }
 $('#zin').onclick = () => setZoom(state.zoom*1.2);
 $('#zout').onclick = () => setZoom(state.zoom/1.2);
 $('#hand').onclick = () => { state.hand = !state.hand; render(); };
 let drag=null;
-stage.addEventListener('pointerdown', e => { if(!state.hand && state.view!=='stroll') return; drag={x:e.clientX,y:e.clientY,px:state.panX,py:state.panY}; stage.classList.add('dragging'); stage.setPointerCapture(e.pointerId); });
+stage.addEventListener('pointerdown', e => {
+  if (state.view==='garden' && state.mode==='prune' && !state.hand) snip(e.clientX, e.clientY);
+  if(!state.hand && state.view!=='stroll') return; drag={x:e.clientX,y:e.clientY,px:state.panX,py:state.panY}; stage.classList.add('dragging'); stage.setPointerCapture(e.pointerId); });
 stage.addEventListener('pointermove', e => {
   if(!drag) return;
   const r = stage.getBoundingClientRect(), f = Math.min(r.width/1440, r.height/1024);
   state.panX = drag.px + (e.clientX-drag.x)/f; state.panY = drag.py + (e.clientY-drag.y)/f;
   $('#world').setAttribute('transform', transform());
+  queueGrass();
 });
 const endDrag = () => { drag=null; stage.classList.remove('dragging'); };
 stage.addEventListener('pointerup', endDrag); stage.addEventListener('pointercancel', endDrag);
 
 /* theme */
-function setTheme(t){
+const THEME_KEY = 'digitalGarden.theme';
+function setTheme(t, remember){
   document.documentElement.setAttribute('data-theme', t);
   $('#light').setAttribute('aria-pressed', t==='light'); $('#dark').setAttribute('aria-pressed', t==='dark');
+  buildCursors(t);
+  if (remember){ try { localStorage.setItem(THEME_KEY, t); } catch (e) {} }
 }
-$('#light').onclick = () => setTheme('light');
-$('#dark').onclick = () => setTheme('dark');
-setTheme(matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+$('#light').onclick = () => setTheme('light', true);
+$('#dark').onclick = () => setTheme('dark', true);
+let savedTheme = null; try { savedTheme = localStorage.getItem(THEME_KEY); } catch (e) {}
+setTheme(savedTheme==='light' || savedTheme==='dark' ? savedTheme : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+
+/* ---------- Garden menu: info, rename, exit ---------- */
+/* Placeholder weather for the prototype (swap for a live feed later). It changes by day, and its wind strength drives how much the plants sway. */
+const WEATHER_SETS = [
+  {sky:'Sunny',         temp:68, wind:'Light breeze',  mph:6,  factor:.8},
+  {sky:'Partly cloudy', temp:61, wind:'Breezy',        mph:14, factor:1.25},
+  {sky:'Overcast',      temp:55, wind:'Calm',          mph:3,  factor:.45},
+  {sky:'Clear skies',   temp:59, wind:'Gentle breeze', mph:9,  factor:1}
+];
+const WEATHER = WEATHER_SETS[Math.floor(Date.now()/86400000) % WEATHER_SETS.length];
+root.style.setProperty('--wind', WEATHER.factor);
+const META_KEY = 'digitalGarden.meta';
+function loadMeta(){
+  try { const m = JSON.parse(localStorage.getItem(META_KEY)); if (m && m.created) return {name:m.name || 'My Garden', created:m.created}; } catch (e) {}
+  const m = {name:'My Garden', created:new Date().toISOString()};
+  try { localStorage.setItem(META_KEY, JSON.stringify(m)); } catch (e) {}
+  return m;
+}
+const meta = loadMeta();
+const saveMeta = () => { try { localStorage.setItem(META_KEY, JSON.stringify(meta)); } catch (e) {} };
+const gmenu = $('#gmenu'), gbtn = $('#tab-garden');
+function gardenStats(){
+  const inGarden = state.apps.filter(a=>a.slot!=='gone'), gone = state.apps.filter(a=>a.slot==='gone');
+  const sum = list => list.reduce((n,a)=>n+(a.gb||0), 0);
+  return {planted:inGarden.filter(a=>a.slot).length, total:inGarden.length, gb:sum(inGarden), compost:gone.length, compostGb:sum(gone)};
+}
+function fillMenu(){
+  const st = gardenStats(), d = new Date(meta.created);
+  const created = isNaN(d) ? '' : d.toLocaleDateString(undefined, {year:'numeric', month:'short', day:'numeric'});
+  $('#gmenu-title').textContent = meta.name;
+  $('#gfacts').innerHTML =
+    `<div><dt>Created</dt><dd>${esc(created)}</dd></div>` +
+    `<div><dt>Data</dt><dd>${st.gb.toFixed(1)} GB</dd></div>` +
+    `<div><dt>Apps planted</dt><dd>${st.planted} of ${st.total}</dd></div>` +
+    `<div><dt>Compost</dt><dd>${st.compost} ${st.compost===1?'app':'apps'} · ${st.compostGb.toFixed(1)} GB</dd></div>` +
+    `<div><dt>Weather</dt><dd>${esc(WEATHER.sky)}, ${WEATHER.temp}°F</dd></div>` +
+    `<div><dt>Wind</dt><dd>${esc(WEATHER.wind)} · ${WEATHER.mph} mph</dd></div>`;
+}
+function applyName(){ $('#gname').textContent = meta.name; document.title = `${meta.name} · Digital Garden (prototype)`; }
+function openMenu(){ fillMenu(); gmenu.hidden = false; gbtn.setAttribute('aria-expanded', 'true'); }
+function closeMenu(refocus){ if (gmenu.hidden) return; gmenu.hidden = true; gbtn.setAttribute('aria-expanded', 'false'); if (refocus) gbtn.focus(); }
+applyName();
+document.addEventListener('pointerdown', e => { if (!gmenu.hidden && !e.target.closest('.gwrap')) closeMenu(false); });
+document.addEventListener('keydown', e => { if (e.key==='Escape' && !gmenu.hidden) closeMenu(true); });
+const dlgRename = $('#dlg-rename'), renameInput = $('#rename-input');
+$('#g-rename').onclick = () => { closeMenu(false); renameInput.value = meta.name; dlgRename.showModal(); renameInput.focus(); renameInput.select(); };
+function saveRename(){
+  const v = renameInput.value.trim();
+  if (!v){ renameInput.focus(); return; }
+  meta.name = v.slice(0, 24); saveMeta(); applyName(); dlgRename.close(); toast(`Garden renamed to ${meta.name}.`);
+}
+$('#rename-save').onclick = saveRename;
+renameInput.addEventListener('keydown', e => { if (e.key==='Enter'){ e.preventDefault(); saveRename(); } });
+$('#rename-cancel').onclick = () => dlgRename.close();
+$('#rename-x').onclick = () => dlgRename.close();
+$('#g-exit').onclick = () => { try { sessionStorage.removeItem('dg:entered'); } catch (e) {} location.href = 'onboarding.html'; };
 
 render();
 </script>
