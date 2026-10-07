@@ -23,7 +23,12 @@
   button{font:inherit;color:inherit}
   .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   main{position:relative;z-index:1}
-  :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  /* One highlight everywhere: the element's own 1px border becomes 2px (an inner 1px stroke), with no offset ring */
+  :focus-visible{outline:1px solid var(--ink);outline-offset:-1px}
+  .ulink:focus-visible,.chk:focus-visible,.rm:focus-visible,.nm:focus-visible{outline:none;text-decoration:underline 2px;text-underline-offset:3px}
+  .ib:focus-visible,.dot:focus-visible{outline:none}
+  .ib:focus-visible svg{stroke-width:2.6}
+  .dot:focus-visible circle{stroke-width:2.5}
 
   /* ---------- Home: two buttons, a flower cursor, and a hover grid ---------- */
   .home{min-height:100vh;display:grid;place-content:center;box-sizing:border-box;padding:48px 24px}
@@ -42,7 +47,6 @@
   .field{font:400 16px/20px var(--sans);color:var(--ink);background:var(--bg);border:1px solid var(--ink);border-radius:4px;padding:4px 16px;box-sizing:border-box;min-width:0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
   .field::placeholder{color:var(--muted)}
   .field.sug{color:var(--muted)}
-  .field:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   .ulink{font:400 16px/20px var(--mono);background:none;border:0;padding:0;color:var(--ink);text-decoration:underline 1px;text-decoration-skip-ink:none;text-underline-position:from-font;cursor:pointer}
   .chk{font:400 16px/20px var(--mono);background:none;border:0;padding:0;color:var(--ink);cursor:pointer;white-space:pre;text-align:left}
 
@@ -81,13 +85,17 @@
   .seg{display:flex;gap:13px}
   .seg .btn{flex:1 1 0;min-width:0}
   .types{display:flex;gap:24px;flex-wrap:wrap}
-  .dz{flex:1 1 0;min-height:96px;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;border:1px solid var(--ink);border-radius:4px;background:var(--bg);text-align:center;font:400 16px/150% var(--sans);color:var(--faint);cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .dz{flex:1 1 0;min-height:96px;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;border:1px solid var(--ink);border-radius:4px;background:var(--bg);text-align:center;font:400 16px/150% var(--sans);color:var(--muted);cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
   .dz.has{color:var(--ink)}
-  .dz.over{background:color-mix(in srgb,var(--ink) 8%,var(--bg))}
+  .dz.over{background:color-mix(in srgb,var(--ink) 8%,var(--bg));outline:1px solid var(--ink);outline-offset:-1px}
   .ta{flex:1 1 0;min-height:96px;display:flex;padding:24px;box-sizing:border-box;border:1px solid var(--ink);border-radius:4px;background:var(--bg)}
-  .ta:focus-within{outline:2px solid var(--ink);outline-offset:2px}
+  .ta:focus-within{outline:1px solid var(--ink);outline-offset:-1px}
   .ta textarea{flex:1;min-width:0;border:0;padding:0;margin:0;background:transparent;resize:none;outline:none;font:400 16px/150% var(--sans);color:var(--ink)}
-  .ta textarea::placeholder{color:var(--faint)}
+  .ta textarea::placeholder{color:var(--muted)}
+  .draw{position:relative;flex:1 1 0;min-height:120px;border:1px solid var(--ink);background:var(--bg);cursor:crosshair;touch-action:none;overflow:hidden;user-select:none;-webkit-user-select:none}
+  .draw svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .draw .hint{position:absolute;inset:0;display:grid;place-items:center;font:400 16px/150% var(--sans);color:var(--muted);pointer-events:none}
+  .pglyph{fill:var(--ink);text-anchor:middle;dominant-baseline:central;font-family:var(--mono),'Noto Sans Symbols 2','Apple Symbols','Segoe UI Symbol',sans-serif}
   .fill{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:24px}
   .center{flex:1 1 0;display:flex;align-items:center;justify-content:center;text-align:center;font:400 16px/20px var(--mono)}
   .center span{display:inline-block;min-width:10ch;text-align:left}
@@ -103,7 +111,8 @@
   .catgrid::-webkit-scrollbar-thumb{background:var(--ink);border:1px solid var(--ink);border-radius:24px}
   @supports not selector(::-webkit-scrollbar){.catgrid{scrollbar-width:thin;scrollbar-color:var(--ink) transparent}}
   .cat{display:flex;flex-direction:column;gap:4px;min-width:0;align-self:start}
-  .cat.over{outline:1px dashed var(--ink);outline-offset:6px}
+  .cat.over{background:color-mix(in srgb,var(--ink) 6%,transparent);border-radius:4px}
+  .cat.over .cat-name{outline:1px solid var(--ink);outline-offset:-1px}
   .cathead{position:relative;display:flex}
   .cathead .field{flex:1}
   .cathead .rm{position:absolute;right:12px;top:4px}
@@ -135,7 +144,6 @@
 <main id="main"></main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <input type="file" id="devfile" hidden>
-<input type="file" id="songfile" accept="audio/*" hidden>
 
 <script>
 /* =====================================================================
@@ -349,9 +357,9 @@ const SAMPLE = ['Google Drive','Dropbox','Photos','OneDrive','VSCO','Safari','Go
    State
    ===================================================================== */
 const state = {
-  step:'home',                     // home | plot | devices | sorting | categories | planting
-  expanded:false,
-  plot:'', focus:{audit:true, screen:true}, custom:'', time:null, visibility:null, song:null,
+  step:'home',                     // home | plot | draw | devices | sorting | categories | planting
+  expanded:false, draw:null, pattern:null,     // the drawn plot outline, and its pattern (star | plus | circle)
+  plot:'', focus:{audit:false, screen:false}, custom:'', time:null, visibility:null, song:null,
   mode:'file', types:{txt:false, csv:false, json:false}, fileName:'', fileApps:[], fileNote:'', list:'',
   cats:null, sig:'', adding:null, moving:null, drag:null, focusMe:null, sample:false
 };
@@ -449,11 +457,11 @@ const SCENE = [
   [['{+} | ~|~'], 'left:calc(50% - 547.27px);top:calc(50% + 276px);transform:translate(-50%,-50%)'],
   [['vvv (  )','| \\|/'], 'left:calc(50% - 4.89px);top:calc(50% + 264px);transform:translate(-50%,-50%)'],
   [['[=] | ~|~'], 'left:calc(50% + 528.49px);top:calc(50% + 276px);transform:translate(-50%,-50%)'],
-  [['||\\'], 'left:1020.85px;top:796px;line-height:30px'],
-  [['\\||'], 'left:50%;top:956px;transform:translateX(-50%);line-height:30px'],
-  [['||\\'], 'left:31.67px;top:950px;line-height:30px'],
-  [['\\|/'], 'left:362.17px;top:802px;line-height:30px'],
-  [['\\|/'], 'left:1343.6px;top:956px;line-height:30px'],
+  [['||'], 'left:1020.85px;top:796px;line-height:30px', 'b'],
+  [['||'], 'left:50%;top:956px;transform:translateX(-50%);line-height:30px', 'b'],
+  [['||'], 'left:31.67px;top:950px;line-height:30px', 'b'],
+  [['\\|/'], 'left:362.17px;top:802px;line-height:30px', 't'],
+  [['\\|/'], 'left:1343.6px;top:956px;line-height:30px', 't'],
   [CLOUD_S, 'left:30.83px;top:49px'],
   [CLOUD_S, 'left:954.67px;top:268px'],
   [SUN, 'left:50%;top:65px;transform:translateX(-50%);line-height:150%'],
@@ -462,8 +470,37 @@ const SCENE = [
   [['oo','o * o','oo','| |'], 'left:1013.05px;top:873px'],
   [['^','< @ >','⌄','| |'], 'left:355.17px;top:876px']
 ];
-$('#scene').innerHTML = `<div class="stage">${SCENE.map(([l,css])=>`<pre style="${css}">${esc(l.join('\n'))}</pre>`).join('')}</div>`;
-function fitScene(){ $('#scene').style.setProperty('--s', Math.min(window.innerWidth/1440, window.innerHeight/1024).toFixed(4)); }
+/* Grass is the only thing that moves. Every blade leans the same way at the same moment, exactly like the garden. */
+const GRASS_FRAMES = {b:['\\\\','||','//'], t:['\\\\/','\\|/','\\//']};      // lean left, upright, lean right
+const WIND = [.8, 1.25, .45, 1][Math.floor(Date.now()/86400000) % 4];       // same daily wind as the garden
+function hash(i, j, k){
+  let h = (Math.imul(i+1013, 374761393) + Math.imul(j+7919, 668265263) + Math.imul(k+1, 2246822519)) >>> 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0;
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+}
+const grassPre = (kind, css, cls='') => `<pre class="grass ${cls}" data-k="${kind}" data-f="1" style="${css}">${GRASS_FRAMES[kind][1]}</pre>`;
+const SCENE_HTML = SCENE.map(([l,css,kind]) => kind ? grassPre(kind, css) : `<pre style="${css}">${esc(l.join('\n'))}</pre>`).join('');
+const TUFTS = [[628,880,'b'],[866,671,'b'],[77,373,'b'],[1176,373,'b'],[1390,155,'b'],[310,155,'t'],[1346,671,'t'],[96,880,'t'],[310,671,'t'],[1132,880,'t']];
+function fitScene(){
+  const vw = window.innerWidth, vh = window.innerHeight, sc = Math.min(vw/1440, vh/1024), W = vw/sc, H = vh/sc;
+  $('#scene').style.setProperty('--s', sc.toFixed(4));
+  /* the artwork is one 1440 x 1024 frame; repeat grass around it so the garden reaches every edge of the screen */
+  const i0 = Math.floor((1440-W)/2/1440), i1 = Math.floor((1440+W)/2/1440), j0 = Math.floor((1024-H)/2/1024), j1 = Math.floor((1024+H)/2/1024);
+  let extra = '';
+  for (let j=j0; j<=j1; j++) for (let i=i0; i<=i1; i++){
+    if (!i && !j) continue;
+    TUFTS.forEach(([x,y,k],n) => { extra += grassPre(k, `left:${(i*1440 + x + (hash(i,j,n*3)-.5)*90).toFixed(0)}px;top:${(j*1024 + y + (hash(i,j,n*3+1)-.5)*70).toFixed(0)}px;line-height:30px`, 'extra'); });
+    for (let n=0; n<8; n++) extra += grassPre(hash(i,j,100+n*3) < .5 ? 'b' : 't', `left:${(i*1440 + 40 + hash(i,j,101+n*3)*1320).toFixed(0)}px;top:${(j*1024 + 40 + hash(i,j,102+n*3)*904).toFixed(0)}px;line-height:30px`, 'extra');
+  }
+  $('#scene').innerHTML = `<div class="stage">${SCENE_HTML}${extra}</div>`;
+  windStep(true);
+}
+function windStep(force, t = performance.now()/1000){
+  const scene = $('#scene'); if (scene.hidden || document.hidden || reduced()) return;
+  const lean = Math.sin(6.2832 * t / 9) * (.6 + .4*WIND), f = lean < -.5 ? 0 : lean > .5 ? 2 : 1;
+  scene.querySelectorAll('.grass').forEach(el => { if (el.dataset.f !== String(f)){ el.dataset.f = f; el.textContent = GRASS_FRAMES[el.dataset.k][f]; } });
+}
+setInterval(() => windStep(), 450);
 window.addEventListener('resize', fitScene); fitScene();
 
 /* =====================================================================
@@ -477,10 +514,10 @@ const ICON_MOON = `<svg viewBox="0 0 20 20" aria-hidden="true"><path transform="
 /* =====================================================================
    Screens
    ===================================================================== */
-const STEP_NO = {plot:1, devices:2, sorting:2, categories:3, planting:3};
+const STEP_NO = {plot:1, draw:2, devices:3, sorting:3, categories:4, planting:4};
 function dotsHtml(step){
   const cur = STEP_NO[step];
-  return [1,2,3].map(n=>`<button class="dot${n===cur?' on':''}" data-dot="${n}" aria-label="Step ${n} of 3${n===cur?' (current)':''}" ${n>=cur?'disabled':''}><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="7.5"/></svg></button>`).join('');
+  return [1,2,3,4].map(n=>`<button class="dot${n===cur?' on':''}" data-dot="${n}" aria-label="Step ${n} of 4${n===cur?' (current)':''}" ${n>=cur?'disabled':''}><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="7.5"/></svg></button>`).join('');
 }
 function modal(step, body, {fit=false, fixed=false, sb=false}={}){
   const full = state.expanded;
@@ -534,10 +571,74 @@ function plotHtml(){
         <button class="btn" data-vis="public" ${pressed(state.visibility==='public')}>Public</button>
         <button class="btn" data-vis="private" ${pressed(state.visibility==='private')}>Private</button>
       </div></div>
-    <div class="row2"><span class="q">Add a song:</span>
-      <button class="ulink" data-act="song" id="songbtn">${state.song ? esc(state.song) : 'Upload'}</button></div>
+    <div class="row2"><label class="q" for="song">Add your own music:</label>
+      <input class="field" id="song" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste link here" value="${esc(state.song || '')}"></div>
   `, {fixed:true, sb:true});
 }
+/* ---- Draw your plot of land ---- */
+const PAT = {star:{w:60,h:62,g:'*',size:24}, plus:{w:44,h:44,g:'\u22B9',size:15}, circle:{w:70,h:38,g:'o',size:12}};
+const PLABEL = {star:'*', plus:'\u22B9', circle:'\u00B0'};
+function patternDefs(){
+  return Object.keys(PAT).map(k => { const p = PAT[k], st = `font-size:${p.size}px`;
+    return `<pattern id="pat-${k}" width="${p.w}" height="${p.h}" patternUnits="userSpaceOnUse"><rect width="${p.w}" height="${p.h}" style="fill:var(--bg)"/>` +
+      `<text class="pglyph" style="${st}" x="${p.w/4}" y="${p.h/4}">${p.g}</text><text class="pglyph" style="${st}" x="${p.w*3/4}" y="${p.h*3/4}">${p.g}</text></pattern>`; }).join('');
+}
+function smoothClosed(pts){
+  const n = pts.length, f = v => v.toFixed(1);
+  let d = `M${f(pts[0][0])} ${f(pts[0][1])}`;
+  for (let i=0; i<n; i++){
+    const a = pts[(i-1+n)%n], b = pts[i], c = pts[(i+1)%n], e = pts[(i+2)%n];
+    d += `C${f(b[0]+(c[0]-a[0])/6)} ${f(b[1]+(c[1]-a[1])/6)} ${f(c[0]-(e[0]-b[0])/6)} ${f(c[1]-(e[1]-b[1])/6)} ${f(c[0])} ${f(c[1])}`;
+  }
+  return d + 'Z';
+}
+function drawHtml(){
+  const opts = Object.keys(PAT).map(k => `<button class="chk" role="checkbox" aria-checked="${state.pattern===k}" data-pattern="${k}">${checkTxt(state.pattern===k)} ${PLABEL[k]}</button>`).join('');
+  return modal('draw', `
+    <div class="q">Draw your plot of land.</div>
+    <div class="draw" id="draw" role="application" aria-label="Drawing area. Click and drag to draw the outline of your plot."><svg id="drawsvg" aria-hidden="true"></svg><div class="hint" id="drawhint">Click and drag to draw</div></div>
+    <div class="row2"><span class="q">Choose your pattern:</span><div class="types">${opts}</div></div>
+  `, {fit:true});
+}
+function paintDraw(live){
+  const box = $('#draw'), svg = $('#drawsvg'); if (!box || !svg) return;
+  const W = box.clientWidth, H = box.clientHeight; let inner = '';
+  if (live && live.length > 1) inner = `<path d="M${live.map(p => p[0].toFixed(1)+' '+p[1].toFixed(1)).join('L')}" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+  else if (state.draw) inner = `<path d="${smoothClosed(state.draw.pts.map(([x,y]) => [x*W, y*H]))}" fill="${state.pattern ? `url(#pat-${state.pattern})` : 'none'}" stroke="var(--ink)" stroke-width="1.5"/>`;
+  svg.innerHTML = `<defs>${patternDefs()}</defs>` + inner;
+  $('#drawhint').hidden = !!(live || state.draw);       // the hint is gray and goes away as soon as you start drawing
+}
+function finishShape(pts, W, H){
+  const xs = pts.map(p=>p[0]), ys = pts.map(p=>p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), size = Math.max(x1-x0, y1-y0);
+  if (pts.length < 6 || size < 40){ state.draw = null; paintDraw(); toast('Draw a bigger shape to mark your plot.'); return; }
+  const len = [0]; for (let i=1; i<pts.length; i++) len.push(len[i-1] + Math.hypot(pts[i][0]-pts[i-1][0], pts[i][1]-pts[i-1][1]));
+  const total = len[len.length-1], N = Math.min(40, Math.max(12, Math.round(total/24))), res = [];
+  for (let k=0, j=0; k<N; k++){           // spread the points evenly along the stroke, then smooth the closed loop through them
+    const t = total*k/N; while (len[j+1] < t) j++;
+    const f = (t - len[j]) / ((len[j+1]-len[j]) || 1);
+    res.push([pts[j][0] + (pts[j+1][0]-pts[j][0])*f, pts[j][1] + (pts[j+1][1]-pts[j][1])*f]);
+  }
+  const cx = (x0+x1)/2, cy = (y0+y1)/2, c01 = v => Math.min(1, Math.max(0, v));
+  state.draw = {pts:res.map(([x,y]) => [c01(x/W), c01(y/H)]), norm:res.map(([x,y]) => [+((x-cx)/size).toFixed(4), +((y-cy)/size).toFixed(4)])};
+  paintDraw();
+}
+let stroke = null;
+document.addEventListener('pointerdown', e => {
+  const box = e.target.closest && e.target.closest('#draw'); if (!box) return;
+  e.preventDefault(); box.setPointerCapture(e.pointerId);
+  const r = box.getBoundingClientRect(); stroke = {id:e.pointerId, r, pts:[[e.clientX-r.left, e.clientY-r.top]]};
+  state.draw = null; paintDraw(stroke.pts);
+});
+document.addEventListener('pointermove', e => {
+  if (!stroke || e.pointerId !== stroke.id) return;
+  const p = [Math.min(stroke.r.width, Math.max(0, e.clientX-stroke.r.left)), Math.min(stroke.r.height, Math.max(0, e.clientY-stroke.r.top))], q = stroke.pts[stroke.pts.length-1];
+  if (Math.hypot(p[0]-q[0], p[1]-q[1]) > 5){ stroke.pts.push(p); paintDraw(stroke.pts); }
+});
+const endStroke = e => { if (!stroke || e.pointerId !== stroke.id) return; const {pts, r} = stroke; stroke = null; finishShape(pts, r.width, r.height); };
+document.addEventListener('pointerup', endStroke); document.addEventListener('pointercancel', endStroke);
+window.addEventListener('resize', () => { if (state.step==='draw') paintDraw(); });
+
 function devicesHtml(){
   const file = state.mode==='file', t = state.types;
   const head = `<div class="grp"><div class="q">What’s on your devices?</div>
@@ -548,11 +649,12 @@ function devicesHtml(){
   const fileBody = `
       <div class="row2" style="flex-wrap:wrap"><span class="q">Choose your file type:</span>
         <div class="types">${['txt','csv','json'].map(k=>`<button class="chk" role="checkbox" aria-checked="${t[k]}" data-type="${k}">${checkTxt(t[k])} .${k}</button>`).join('')}</div></div>
-      <div class="dz${state.fileName?' has':''}" id="dz" tabindex="0" role="button" aria-label="Drop your file here, or press Enter to choose one">${esc(state.fileNote || 'Drop your file here')}</div>
+      <div class="dz${state.fileName?' has':''}" id="dz" data-act="pick" tabindex="0" role="button" aria-label="Drop your file here, or press Enter to choose one">${esc(state.fileNote || 'Drop your file here')}</div>
       <button class="btn on" data-act="pick" style="align-self:stretch">Upload</button>`;
   const listBody = `
       <div class="fill"><label class="q" for="list">One app per line, or separated by commas</label>
-        <div class="ta"><textarea id="list" placeholder="Notion&#10;Figma&#10;Spotify" spellcheck="false">${esc(state.list)}</textarea></div></div>`;
+        <div class="ta"><textarea id="list" placeholder="Notion&#10;Figma&#10;Spotify" spellcheck="false">${esc(state.list)}</textarea></div></div>
+      <button class="btn on" data-act="upload" style="align-self:stretch">Upload</button>`;
   return modal('devices', head + (file ? fileBody : listBody), {fixed:true});
 }
 function statusHtml(step, word){
@@ -589,9 +691,10 @@ function render(){
   const s = state.step, home = s==='home';
   const grid = $('#catgrid'), keep = grid ? grid.scrollTop : 0;
   $('#scene').hidden = home;
-  $('#main').innerHTML = home ? homeHtml() : s==='plot' ? plotHtml() : s==='devices' ? devicesHtml()
+  $('#main').innerHTML = home ? homeHtml() : s==='plot' ? plotHtml() : s==='draw' ? drawHtml() : s==='devices' ? devicesHtml()
     : s==='sorting' ? statusHtml('sorting','Sorting') : s==='planting' ? statusHtml('planting','Planting') : catsHtml();
   if (home) field.resize(); else field.stop();
+  if (s==='draw') paintDraw();
   const g = $('#catgrid'); if (g) g.scrollTop = keep;
   const me = document.querySelector('[data-focus-me]'); if (me){ me.focus(); if (me.select && me.tagName==='INPUT') me.select(); }
   state.focusMe = null;
@@ -610,7 +713,7 @@ function sortNow(){
   if (!names.length){ use = SAMPLE; state.sample = true; toast('No apps added, so we used a sample set for this demo.'); } else state.sample = false;
   const sig = JSON.stringify(use);
   if (sig !== state.sig || !state.cats){ state.cats = suggestCats(use); state.sig = sig; }
-  state.expanded = true; go('categories');
+  state.expanded = false; go('categories');
 }
 function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(()=>t.hidden = true, 3200); }
 function refreshDrop(){
@@ -627,7 +730,8 @@ function finish(){
   const name = (state.plot.trim() || 'My Garden').slice(0, 24);
   const focus = [state.focus.audit && 'System audit', state.focus.screen && 'Reduce screentime', state.custom.trim()].filter(Boolean);
   try {
-    localStorage.setItem('digitalGarden.setup', JSON.stringify({version:2, savedAt:created, plot:name, focus, timeOfDay:time, visibility, song:state.song,
+    localStorage.setItem('digitalGarden.setup', JSON.stringify({version:3, savedAt:created, plot:name, focus, timeOfDay:time, visibility, song:state.song,
+      plotShape:{pts:state.draw ? state.draw.norm : null, pattern:state.pattern || 'star'},
       categories:state.cats.map(c=>({name:c.name, apps:c.apps.map(a=>a.name)}))}));
     localStorage.setItem('digitalGarden.meta', JSON.stringify({name, created}));
     if (time==='system') localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, time==='day' ? 'light' : 'dark');
@@ -640,7 +744,7 @@ function enterGarden(){ try { sessionStorage.setItem('dg:entered', '1'); } catch
    Events
    ===================================================================== */
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-act],[data-focus],[data-time],[data-vis],[data-mode],[data-type],[data-dot],[data-move],[data-rm],[data-rmcat],[data-add],[data-newcat]');
+  const t = e.target.closest('[data-act],[data-focus],[data-time],[data-vis],[data-mode],[data-type],[data-pattern],[data-dot],[data-move],[data-rm],[data-rmcat],[data-add],[data-newcat]');
   if (!t) return;
   const d = t.dataset;
   if (d.focus){ state.focus[d.focus] = !state.focus[d.focus]; t.setAttribute('aria-checked', state.focus[d.focus]); t.textContent = `${checkTxt(state.focus[d.focus])} ${d.focus==='audit'?'System audit':'Reduce screentime'}`; return; }
@@ -648,7 +752,12 @@ document.addEventListener('click', e => {
   if (d.vis){ state.visibility = d.vis; t.parentElement.querySelectorAll('.btn').forEach(b=>b.setAttribute('aria-pressed', b===t)); return; }
   if (d.mode){ state.mode = d.mode; render(); return; }
   if (d.type){ state.types[d.type] = !state.types[d.type]; t.setAttribute('aria-checked', state.types[d.type]); t.textContent = `${checkTxt(state.types[d.type])} .${d.type}`; return; }
-  if (d.dot){ const n = +d.dot; go(n===1 ? 'plot' : 'devices'); if (n===2) state.expanded = false; return; }
+  if (d.pattern){
+    state.pattern = state.pattern===d.pattern ? null : d.pattern;
+    t.parentElement.querySelectorAll('.chk').forEach(b => { const on = state.pattern===b.dataset.pattern; b.setAttribute('aria-checked', on); b.textContent = `${checkTxt(on)} ${PLABEL[b.dataset.pattern]}`; });
+    paintDraw(); return;
+  }
+  if (d.dot){ const n = +d.dot; go(n===1 ? 'plot' : n===2 ? 'draw' : 'devices'); state.expanded = false; return; }
   if (d.move){ state.moving = d.move; state.focusMe = null; render(); return; }
   if (d.rm){ const f = findApp(d.rm); if (f){ f.c.apps.splice(f.i,1); toast(`Removed ${f.a.name}.`); render(); } return; }
   if (d.rmcat){ state.cats = state.cats.filter(c=>c.id!==d.rmcat); render(); return; }
@@ -658,16 +767,24 @@ document.addEventListener('click', e => {
     case 'start': go('plot'); break;
     case 'close': state.expanded = false; go('home'); break;
     case 'expand': state.expanded = !state.expanded; render(); break;
-    case 'back': if (state.step==='plot') go('home'); else if (state.step==='categories'){ state.expanded = false; go('devices'); } else if (state.step==='planting') go('categories'); else go('devices'); if (state.step==='devices') state.expanded = state.expanded && false; render(); break;
+    case 'back': {
+      const prev = {plot:'home', draw:'plot', devices:'draw', sorting:'devices', categories:'devices', planting:'categories'}[state.step] || 'home';
+      if (prev==='devices') state.expanded = false;
+      go(prev); break;
+    }
     case 'next':
-      if (state.step==='plot') go('plot') && 0 || go('devices');
+      if (state.step==='plot') go('draw');
+      else if (state.step==='draw') go('devices');
       else if (state.step==='devices'){ go('sorting'); timer.t = setTimeout(sortNow, reduced() ? 200 : 1700); }
       else if (state.step==='sorting'){ sortNow(); }
       else if (state.step==='categories'){ go('planting'); timer.t = setTimeout(finish, reduced() ? 200 : 1500); }
       else if (state.step==='planting') finish();
       break;
     case 'pick': { const picked = Object.keys(state.types).filter(k=>state.types[k]); $('#devfile').accept = picked.length ? picked.map(k=>'.'+k).join(',') : '.txt,.csv,.tsv,.json'; $('#devfile').click(); break; }
-    case 'song': $('#songfile').click(); break;
+    case 'upload': {                       // the List modal's Upload button
+      if (!state.list.trim()){ toast('Add at least one app first.'); break; }
+      go('sorting'); timer.t = setTimeout(sortNow, reduced() ? 200 : 1700); break;
+    }
   }
 });
 function applyTime(){
@@ -679,10 +796,16 @@ document.addEventListener('input', e => {
   if (t.id==='plot') state.plot = t.value;
   else if (t.id==='custom') state.custom = t.value;
   else if (t.id==='list') state.list = t.value;
+  else if (t.id==='song') state.song = t.value.trim() || null;
+  else if (t.dataset && t.dataset.rename) t.classList.remove('sug');
+});
+document.addEventListener('focusin', e => {
+  const t = e.target;
+  if (t.dataset && t.dataset.rename && t.classList.contains('sug')){ t.select(); t.addEventListener('mouseup', ev => ev.preventDefault(), {once:true}); }
 });
 document.addEventListener('change', e => {
   const t = e.target;
-  if (t.dataset && t.dataset.rename){ const c = findCat(t.dataset.rename); const v = t.value.trim().slice(0,32); if (c){ if (v){ c.name = v; c.edited = true; t.classList.remove('sug'); } else t.value = c.name; } }
+  if (t.dataset && t.dataset.rename){ const c = findCat(t.dataset.rename); const v = t.value.trim().slice(0,32); if (c){ if (v){ c.name = v; c.edited = true; t.classList.remove('sug'); } else { t.value = c.name; t.classList.toggle('sug', !c.edited); } } }
   if (t.dataset && t.dataset.mv){ moveApp(t.dataset.mv, t.value); state.moving = null; render(); }
 });
 document.addEventListener('focusout', e => {
@@ -701,13 +824,6 @@ document.addEventListener('keydown', e => {
   else if (t.id==='plot' && e.key==='Enter'){ e.preventDefault(); $('[data-act=next]').click(); }
 });
 $('#devfile').addEventListener('change', e => { const f = e.target.files[0]; if (f) readDevFile(f); e.target.value = ''; });
-$('#songfile').addEventListener('change', e => {
-  const f = e.target.files[0]; e.target.value = '';
-  if (!f) return;
-  if (!/^audio\//.test(f.type) && !/\.(mp3|m4a|wav|aac|ogg|flac)$/i.test(f.name)){ toast('Please choose an audio file.'); return; }
-  state.song = f.name; const b = $('#songbtn'); if (b) b.textContent = f.name;
-});
-
 /* dropping a file on the drop zone, and dragging apps between categories */
 document.addEventListener('dragover', e => {
   const types = [...((e.dataTransfer && e.dataTransfer.types) || [])];

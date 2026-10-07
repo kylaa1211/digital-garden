@@ -44,19 +44,24 @@
   .empty{font:400 14px var(--mono);fill:var(--ink);text-anchor:middle}
   .compost-ascii{text-anchor:middle}
   .flower-ascii{text-anchor:middle}
-  .stroll-node{fill:var(--bg);stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
-  .stroll-hub{fill:var(--ink);stroke:var(--ink)}
-  .stroll-label{font:400 14px var(--sans);fill:var(--bg);text-anchor:middle}
-  .stroll-plus{font:400 24px var(--mono);fill:var(--ink);text-anchor:middle}
   .tile rect{fill:var(--tile);stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
   .tile .mono{font:500 14px var(--mono);fill:#333}
   .tile{outline:none}
   .mode-prune,.mode-prune .tile.live{cursor:var(--cur-prune,pointer)}
-  .view-compost.mode-prune,.view-compost.mode-prune .tile.live{cursor:var(--cur-shovel,default)}
   .mode-water,.mode-water .tile.live{cursor:var(--cur-can,default)}
-  #stage.pan,#stage.pan .tile.live{cursor:grab}
+  .mode-plant,.mode-plant .tile.live{cursor:var(--cur-shovel,default)}
+  #stage.view-compost,#stage.view-compost .tile.live{cursor:var(--cur-shovel,default)}
   #stage.view-stroll{cursor:grab}
-  #stage.pan.dragging{cursor:grabbing}
+  #stage.pan,#stage.pan .tile.live{cursor:grab}
+  #stage.view-stroll.dragging,#stage.pan.dragging,#stage.pan.dragging .tile.live{cursor:grabbing}
+  .plot{stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
+  .plot.mine{stroke:var(--ink);stroke-width:3}
+  #stage.view-stroll #plots .plot{cursor:pointer}
+  #stage.view-stroll.dragging #plots .plot{cursor:grabbing}
+  #stage.view-stroll #plots g:hover .plot{stroke:var(--ink);stroke-width:2}
+  .pglyph{fill:var(--ink);text-anchor:middle;dominant-baseline:central;font-family:var(--mono),'Noto Sans Symbols 2','Apple Symbols','Segoe UI Symbol',sans-serif}
+  .chip rect{fill:var(--ink)}
+  .chip text{font:400 14px var(--mono);fill:var(--bg);text-anchor:middle;dominant-baseline:central}
   .tile.live:hover rect,.tile.live:focus-visible rect{stroke-width:2.5}
   .tile image{pointer-events:none}
   .tile.ghost{opacity:.55}
@@ -83,8 +88,8 @@
   .np{display:inline-flex;align-items:center;justify-content:center;gap:12px;width:200px;border:1px solid var(--ink);border-radius:4px;padding:4px 16px;font:400 16px/21px var(--mono);background:color-mix(in srgb,var(--bg) 75%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
   .np svg{width:22px;height:14px;stroke:var(--ink);stroke-width:1.6;fill:none}
 
-  .rail{position:fixed;left:32px;bottom:calc(32px + env(safe-area-inset-bottom,0px));width:42px;border:1px solid var(--line);border-radius:4px;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
-  .rail button{width:40px;height:36px;border:0;background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center;padding:0}
+  .rail{position:fixed;left:32px;bottom:calc(32px + env(safe-area-inset-bottom,0px));width:42px;box-sizing:border-box;border:1px solid var(--line);border-radius:4px;display:flex;flex-direction:column;background:var(--bg);overflow:hidden}
+  .rail button{width:100%;height:36px;border:0;background:transparent;color:var(--ink);cursor:pointer;display:grid;place-items:center;padding:0}
   .rail button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
   .rail hr{margin:0;border:0;border-top:1px solid var(--line)}
   .rail svg,.theme svg{width:22px;height:22px;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
@@ -94,11 +99,12 @@
   .theme button:focus-visible{outline:2px solid var(--ink);outline-offset:-4px}
 
   .modes{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(31px + env(safe-area-inset-bottom,0px));display:flex;gap:13px}
-  .tray{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(82px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 32px);font:400 13px var(--mono)}
-  .tray button{border:0;background:transparent;padding:0;cursor:pointer;display:grid;justify-items:center;gap:4px;color:var(--ink);font:400 11px var(--sans)}
-  .tray button:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+  .tray{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(82px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;max-width:calc(100vw - 32px);overflow-x:auto;padding:8px;border:1px solid var(--ink);border-radius:4px;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font:400 13px var(--mono);z-index:5}
+  .tray .none{padding:4px 10px;opacity:.7;white-space:nowrap}
   .tray svg{width:40px;height:40px;display:block}
   .tray svg rect{fill:var(--tile);stroke:var(--line)}
+  .tray svg text{font:400 7px var(--mono);fill:#333;text-anchor:middle}
+  .cflower{font:400 10px var(--mono);fill:var(--bg);text-anchor:middle}
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(126px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);font:400 13px/1.4 var(--mono);padding:6px 14px;border-radius:4px;max-width:calc(100vw - 32px);text-align:center}
   :root[data-theme="light"] button:not(.linkish){background:rgba(245,245,245,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
   :root[data-theme="dark"] button:not(.linkish){background:color-mix(in srgb,var(--bg) 75%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
@@ -134,18 +140,8 @@
   .flower-dlg{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px}
   .flower-dlg h2{margin:6px 0 20px}
   .flower-dlg .actions{margin-top:2px}
-  .compost-prompt{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);margin:0;width:300px;height:160px;min-height:160px;padding:24px;border:1px solid var(--line);border-radius:0;background:color-mix(in srgb,var(--bg) 75%,transparent);color:var(--ink);font:400 16px/normal var(--ui);box-sizing:border-box;z-index:4;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-  .compost-prompt[open]{display:flex;flex-direction:column;align-items:center}
-  .compost-prompt .dlg-head{position:absolute;top:18px;left:24px;right:24px;width:auto;justify-content:flex-end}
-  .compost-prompt h2{margin:22px 0 20px;font:400 16px/normal var(--ui);text-align:center}
-  .compost-prompt .actions{margin-top:0}
 
-  /* Wind: plants lean from their base, but the glyphs stay glyphs */
-  .sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway var(--t,8s) ease-in-out var(--d,0s) infinite alternate}
-  @keyframes sway{from{transform:skewX(calc(var(--a,3deg) * var(--wind,1) * -1))}to{transform:skewX(calc(var(--a,3deg) * var(--wind,1)))}}
-  .tree-sway{transform-box:view-box;transform-origin:var(--ox,0px) var(--oy,0px);animation:treesway var(--t,9s) ease-in-out var(--d,0s) infinite alternate}
-  @keyframes treesway{from{transform:rotate(calc(var(--ta,.7deg) * var(--wind,1) * -1))}to{transform:rotate(calc(var(--ta,.7deg) * var(--wind,1)))}}
-  @media (prefers-reduced-motion: reduce){.sway,.tree-sway{animation:none}}
+  /* Wind: only the grass moves, and all of it moves together (see windStep) */
   /* Clippings that fly off when the scissors snip */
   .snip{position:fixed;width:0;height:0;pointer-events:none;z-index:5;font:400 14px/1 var(--mono);color:var(--ink)}
   .snip i{position:absolute;left:0;top:0;font-style:normal;opacity:0;animation:clip .7s ease-out both;animation-delay:var(--dl)}
@@ -154,10 +150,30 @@
   /* My Garden menu */
   .gwrap{position:relative}
   #tab-garden{display:inline-flex;align-items:center;gap:8px}
-  #tab-garden .chev{display:none;width:14px;height:14px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+  #tab-garden .chev{display:none;width:16px;height:16px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
   #tab-garden[aria-selected="true"] .chev{display:block}
-  #tab-garden[aria-expanded="true"] .chev{transform:rotate(180deg)}
-  .gmenu{position:absolute;left:0;top:calc(100% + 8px);width:268px;max-width:calc(100vw - 24px);box-sizing:border-box;padding:16px 16px 8px;border:1px solid var(--line);border-radius:4px;background:color-mix(in srgb,var(--bg) 75%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--ink);z-index:6;font:400 13px/1.4 var(--mono)}
+  #tab-garden[aria-expanded="true"] .chev rect{fill:color-mix(in srgb,currentColor 18%,transparent)}
+  .gmenu{position:fixed;left:32px;top:calc(35px + env(safe-area-inset-top,0px) + 50px);width:268px;max-width:calc(100vw - 64px);max-height:calc(100vh - 300px);overflow:auto;box-sizing:border-box;padding:16px 16px 8px;border:1px solid var(--line);border-radius:4px;background:color-mix(in srgb,var(--bg) 75%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--ink);z-index:6;font:400 13px/1.4 var(--mono);animation:gin .18s ease-out}
+  .gmenu[hidden]{display:none}
+  @keyframes gin{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion: reduce){.gmenu{animation:none}}
+  .ghead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px}
+  .ghead h3{margin:0 !important}
+  :root[data-theme] .gmenu button.gclose{width:24px;height:24px;flex:none;display:grid;place-items:center;padding:0;border:0;border-radius:4px;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;color:var(--ink);cursor:pointer}
+  :root[data-theme] .gmenu button.gclose:hover,:root[data-theme] .gmenu button.gclose:focus-visible{background:color-mix(in srgb,var(--ink) 10%,transparent);outline:none}
+  .gclose svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .gshape{display:block;width:100%;height:auto;margin:0 0 12px;border:1px solid var(--line);border-radius:4px}
+  .np{cursor:pointer;color:var(--ink)}
+  .np:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .np path{transform-box:fill-box;transform-origin:50% 100%}
+  .np.playing path{animation:eq 1s ease-in-out infinite alternate}
+  .np.playing path:nth-child(1){animation-duration:.8s;animation-delay:-.2s}
+  .np.playing path:nth-child(2){animation-duration:1.1s;animation-delay:-.7s}
+  .np.playing path:nth-child(3){animation-duration:.9s;animation-delay:-.4s}
+  .np.playing path:nth-child(4){animation-duration:1.25s;animation-delay:-.1s}
+  .np.playing path:nth-child(5){animation-duration:.95s;animation-delay:-.6s}
+  @keyframes eq{from{transform:scaleY(.2)}to{transform:scaleY(1)}}
+  @media (prefers-reduced-motion: reduce){.np.playing path{animation:none}}
   .gmenu h3{margin:0 0 12px;font:500 14px/21px var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .gfacts{margin:0 0 12px;display:grid;gap:8px}
   .gfacts div{display:flex;justify-content:space-between;gap:12px}
@@ -179,33 +195,44 @@
     .np span{display:none}
     .rail{left:12px}.theme{right:12px}
   }
+  :root[data-theme] .tray button{flex:none;display:block;width:auto;height:auto;padding:0;border:0;border-radius:4px;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;color:var(--ink);cursor:pointer}
+  :root[data-theme] .tray button:hover{background:color-mix(in srgb,var(--ink) 10%,transparent)}
+  :root[data-theme] .tray button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  .vtag{display:flex;align-items:center;gap:8px;cursor:default;pointer-events:none}
+  .vtag svg{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 </style>
 </head>
 <body>
 <svg id="stage" viewBox="0 0 1440 1024" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Your garden"></svg>
 
 <header class="top">
-  <div class="tabs" role="tablist" aria-label="Garden views">
+  <div class="tabs" id="tabs" role="tablist" aria-label="Garden views">
     <div class="gwrap">
-      <button class="btn" role="tab" id="tab-garden" aria-selected="true" aria-haspopup="menu" aria-expanded="false" aria-controls="gmenu"><span id="gname">My Garden</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
-      <div class="gmenu" id="gmenu" hidden>
-        <h3 id="gmenu-title">My Garden</h3>
-        <dl class="gfacts" id="gfacts"></dl>
-        <hr>
-        <div role="menu" aria-label="Garden actions">
-          <button class="gitem" role="menuitem" id="g-rename">Rename garden</button>
-          <button class="gitem" role="menuitem" id="g-exit">Exit</button>
-        </div>
-      </div>
+      <button class="btn" role="tab" id="tab-garden" aria-selected="true" aria-expanded="false" aria-controls="gmenu"><span id="gname">My Garden</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg></button>
     </div>
     <button class="btn" role="tab" id="tab-compost" aria-selected="false">Compost</button>
   </div>
-  <div class="np" title="Now playing">
-    <svg viewBox="0 0 24 14" aria-hidden="true"><path d="M2 6v8M7 0v14M12 4v10M17 7v7M22 2v12"/></svg>
-    <span>Mice on Venus</span>
-  </div>
+  <div class="btn on vtag" id="vtag" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span>Visiting: <span id="vtag-name"></span></span></div>
+  <button class="np" id="np" aria-pressed="false" aria-label="Play Mice on Venus" title="Play or pause">
+    <svg viewBox="0 0 24 14" aria-hidden="true"><path d="M2 6v8"/><path d="M7 0v14"/><path d="M12 4v10"/><path d="M17 7v7"/><path d="M22 2v12"/></svg>
+    <span id="np-title">Mice on Venus</span>
+  </button>
   <button class="btn stroll" id="stroll">Go for a Stroll</button>
 </header>
+
+<aside class="gmenu" id="gmenu" hidden aria-label="Garden details">
+  <div class="ghead">
+    <h3 id="gmenu-title">My Garden</h3>
+    <button class="gclose" id="gpanel-close" aria-label="Collapse panel"><svg viewBox="0 0 24 24" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/></svg></button>
+  </div>
+  <svg class="gshape" id="gshape" viewBox="0 0 236 150" role="img" aria-label="The shape of your plot"></svg>
+  <dl class="gfacts" id="gfacts"></dl>
+  <hr>
+  <div role="group" aria-label="Garden actions">
+    <button class="gitem" id="g-rename">Rename garden</button>
+    <button class="gitem" id="g-exit">Exit</button>
+  </div>
+</aside>
 
 <div class="rail" id="rail" role="toolbar" aria-label="Zoom and pan">
   <button id="zout" aria-label="Zoom out"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M8 11h6"/></svg></button>
@@ -220,6 +247,10 @@
 </div>
 
 <div class="tray" id="tray" hidden></div>
+<div class="modes" id="cmodes" role="group" aria-label="Compost tools" hidden>
+  <button class="btn on" data-cmode="fertilize" aria-pressed="true">Fertilize</button>
+  <button class="btn" data-cmode="harvest" aria-pressed="false">Harvest</button>
+</div>
 <div class="modes" id="modes" role="group" aria-label="Garden tools">
   <button class="btn on" data-mode="prune" aria-pressed="true">Prune</button>
   <button class="btn" data-mode="water" aria-pressed="false">Water</button>
@@ -253,16 +284,6 @@
   </div>
 </dialog>
 
-<dialog id="compost-prompt" class="compost-prompt" aria-labelledby="compost-prompt-title">
-  <div class="dlg-head">
-    <button class="icon-btn" id="compost-close" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
-  </div>
-  <h2 id="compost-prompt-title">A new flower has grown!</h2>
-  <div class="actions">
-    <button class="btn on" id="compost-plant">Plant</button>
-    <button class="btn" id="compost-pot">Pot</button>
-  </div>
-</dialog>
 
 <script>
 /* ---------- Sample garden ---------- */
@@ -293,71 +314,209 @@ const APPS0 = [
   {id:'affinity', name:'Affinity', tree:'create', kind:'Design', gb:3.3, since:'March 2022', img:ICO('affinity'), slot:'R2'},
   {id:'icloud', name:'iCloud', tree:'collect', kind:'Storage', gb:12.4, since:'September 2016', img:ICO('granola'), slot:'UR2'},
   {id:'canva', name:'Canva', tree:'create', kind:'Design', gb:2.1, since:'February 2019', img:ICO('canva'), slot:'R3'},
-  {id:'bear', name:'Bear', tree:'collect', kind:'Notetaking', gb:0.2, since:'today', mono:'Be', slot:null},
-  {id:'procreate', name:'Procreate', tree:'create', kind:'Sketching', gb:0.4, since:'today', mono:'Pr', slot:null},
+  {id:'arena', name:'Are.na', tree:'collect', kind:'Collecting', gb:0.3, since:'today', img:ICO('arena'), mono:'Ar', slot:null},
+  {id:'cosmos', name:'Cosmos', tree:'collect', kind:'Collecting', gb:0.4, since:'today', img:ICO('cosmos'), mono:'Co', slot:null},
+  {id:'x', name:'X', tree:'create', kind:'Social', gb:0.5, since:'today', img:ICO('x'), mono:'X', slot:null},
 ];
 
-const TREES = {
-  collect:{label:'Collecting Thoughts', name:'Collecting Thoughts'},
-  create:{label:'Creating Things', name:'Creating Things'},
+/* ---------- What the onboarding flow saved (if anything) ---------- */
+const SETUP = (() => {
+  try {
+    const v = JSON.parse(localStorage.getItem('digitalGarden.setup'));
+    if (v && Array.isArray(v.categories) && v.categories.some(c => c && Array.isArray(c.apps) && c.apps.length)) return v;
+  } catch (e) {}
+  return null;
+})();
+const MY_PLOT = {
+  pts: SETUP && SETUP.plotShape && Array.isArray(SETUP.plotShape.pts) ? SETUP.plotShape.pts : null,       // outline drawn in onboarding, centred, longest side = 1
+  pattern: SETUP && SETUP.plotShape && ['star','plus','circle'].includes(SETUP.plotShape.pattern) ? SETUP.plotShape.pattern : 'star'
 };
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const normName = s => String(s).toLowerCase().replace(/\.(app|exe|dmg|apk)$/,'').replace(/[^a-z0-9]+/g,'');   // icons/<this>.png, e.g. icons/googlechrome.png
+/* Short or alternate names that should land on the icon files in /icons */
+const ICON_ALIAS = {chrome:'googlechrome', arc:'arcbrowser', photos:'applephotos', mail:'applemail', health:'applehealth', music:'applemusic',
+  messages:'imessage', translate:'googletranslate', bankofamerica:'bofa', twitter:'x', merlin:'merlinbirdid', merlinbird:'merlinbirdid',
+  opera:'operagx', sirius:'siriusxm', googlemail:'gmail', drive:'googledrive', fitnesspal:'myfitnesspal', inat:'inaturalist', kakao:'kakaotalk',
+  ticketmaster:'livenation', googlekeep:'keep', applenotes:'notes'};
+function iconAlts(n){            // every file name worth trying, best first
+  const k = normName(n), first = normName(String(n).trim().split(/\s+/)[0]);
+  const list = [ICON_ALIAS[k], k, k.replace(/^(apple|google|microsoft|adobe|ms|my)/, ''), k.replace(/(app|browser|music|mobile|messenger)$/, ''), ICON_ALIAS[first], first];
+  const generic = ['apple','google','microsoft','adobe','music','mobile','messenger','my','app','browser'];
+  return [...new Set(list.filter(x => x && x.length > 1 && !generic.includes(x)))].map(ICO);
+}
+const iconFor = n => iconAlts(n)[0];
+function iconNext(el){             // an icon file wasn't found: try the next name, and fall back to the monogram
+  const rest = (el.dataset.alt || '').split('|').filter(Boolean), next = rest.shift();
+  el.dataset.alt = rest.join('|');
+  if (next) el.setAttribute('href', next); else el.style.display = 'none';
+}
 
-/* ---------- Geometry (1440 x 1024 stage, from Figma Wireframe 15) ---------- */
+/* ---------- Tree designs ----------
+   Every category becomes one tree. The designs follow the Figma "tree" sheet: radial hubs, ladders, fans and combs,
+   plus rings for very large categories. Each one is built with its trunk base at 0,0 and grows upward. */
 function polar(cx, cy, dist, deg){
   const r = deg * Math.PI / 180;
   return {x: cx + dist * Math.sin(r), y: cy - dist * Math.cos(r)};
 }
-function collectGeom(){
-  const hub = {x:502.32, y:373.97};
-  const RAY = 105.325, STEM = 67.714, SIDE = 56.428;
-  const rayDegs = [0, 72, 144, 216, 288];
-  const names = ['TOP','UR','LR','LL','UL'];
-  const nodes = {};
-  const slots = [];
-  rayDegs.forEach((deg, i) => {
-    const id = names[i];
-    const n = polar(hub.x, hub.y, RAY, deg);
-    nodes[id] = {x:n.x, y:n.y, deg};
-    [[STEM, deg, 0],[SIDE, deg - 60, 1],[SIDE, deg + 60, 2]].forEach(([d, a, j]) => {
-      const p = polar(n.x, n.y, d, a);
-      slots.push({id:id + j, node:id, x:p.x, y:p.y, rot:a});
+function dRadial(per){          // a hub with five rays; each ray ends in 1, 2 or 3 apps
+  const C = {1:{H:250,RAY:100}, 2:{H:300,RAY:100,SIDE:50,SPLAY:38}, 3:{H:327,RAY:105.325,STEM:67.714,SIDE:56.428}}[per];
+  const hub = {x:0, y:-C.H}, names = ['TOP','UR','LR','LL','UL'], slots = [], segs = [{x1:0,y1:0,x2:0,y2:hub.y,when:null}];
+  [0,72,144,216,288].forEach((deg, i) => {
+    const id = names[i], n = polar(hub.x, hub.y, C.RAY, deg), ids = [];
+    const add = (d, a, j) => { const p = polar(n.x, n.y, d, a); slots.push({id:id+j, x:p.x, y:p.y, rot:a, fx:n.x, fy:n.y}); ids.push(id+j); };
+    if (per === 1){ slots.push({id:id+'0', x:n.x, y:n.y, rot:deg, fx:hub.x, fy:hub.y}); return; }
+    if (per === 2){ add(C.SIDE, deg - C.SPLAY, 0); add(C.SIDE, deg + C.SPLAY, 1); }
+    else { add(C.STEM, deg, 0); add(C.SIDE, deg - 60, 1); add(C.SIDE, deg + 60, 2); }
+    segs.push({x1:hub.x, y1:hub.y, x2:n.x, y2:n.y, when:ids});
+  });
+  return {slots, segs};
+}
+function dLadder(L, v){         // a trunk with a pair of diamonds at every level (and one on top for the symmetric one)
+  const c = v === 'twin' ? {step:62, dx:58, off:31, top:false, rise:46, base:170}
+          : v === 'lean' ? {step:60, dx:36, off:-30, top:false, rise:60, base:170}
+          :                {step:69.549, dx:69.549, off:0, top:true, rise:69.549, base:191.2};
+  const a0 = -(c.base + c.step * (L - 1)), slots = [], segs = [{x1:0,y1:0,x2:0,y2:Math.min(a0, a0 + c.off),when:null}];
+  if (c.top) slots.push({id:'T', x:0, y:a0 - 98.36, rot:0, fx:0, fy:a0});
+  for (let i = 0; i < L; i++){
+    const a = -(c.base + c.step * (L - 1 - i));
+    slots.push({id:'L'+i, x:-c.dx, y:a - c.rise,         rot:-45, fx:0, fy:a});
+    slots.push({id:'R'+i, x: c.dx, y:a + c.off - c.rise, rot: 45, fx:0, fy:a + c.off});
+  }
+  return {slots, segs};
+}
+function dArc(n, R, H, span){   // apps fan out along an arc above the trunk
+  const slots = [], segs = [{x1:0,y1:0,x2:0,y2:-H,when:null}];
+  for (let i = 0; i < n; i++){ const a = -span + 2*span*i/(n - 1), p = polar(0, -H, R, a); slots.push({id:'S'+i, x:p.x, y:p.y, rot:a, fx:0, fy:-H}); }
+  return {slots, segs};
+}
+function dComb(n){              // apps in one straight row, every one on its own stem
+  const H = 268, pitch = 44, slots = [], segs = [{x1:0,y1:0,x2:0,y2:-H,when:null}];
+  for (let i = 0; i < n; i++) slots.push({id:'S'+i, x:(i - (n-1)/2) * pitch, y:-(H + 189), rot:0, fx:0, fy:-H});
+  return {slots, segs};
+}
+function dRings(n){             // very large categories: concentric arcs of apps around the top of the trunk
+  const H = 200, slots = [], segs = [{x1:0,y1:0,x2:0,y2:-H,when:null}];
+  let r = 125;
+  while (slots.length < n){
+    const full = Math.max(3, Math.floor(Math.PI * r / 58) + 1), count = Math.min(full, n - slots.length), step = 170 / (full - 1);
+    for (let i = 0; i < count; i++){ const a = (i - (count - 1)/2) * step, p = polar(0, -H, r, a); slots.push({id:'S'+slots.length, x:p.x, y:p.y, rot:a, fx:0, fy:-H}); }
+    r += 62;
+  }
+  return {slots, segs};
+}
+function makeGeom(d){
+  const g = d.k === 'radial1' ? dRadial(1) : d.k === 'radial2' ? dRadial(2) : d.k === 'radial3' ? dRadial(3)
+    : d.k === 'ladder' ? dLadder(d.L, 'sym') : d.k === 'twin' ? dLadder(d.L, 'twin') : d.k === 'lean' ? dLadder(d.L, 'lean')
+    : d.k === 'arc7' ? dArc(7, 165, 240, 72) : d.k === 'arc9' ? dArc(9, 190, 270, 90) : d.k === 'comb10' ? dComb(10) : dRings(d.n);
+  let minY = 0, hw = 0;
+  g.slots.forEach(s => { minY = Math.min(minY, s.y - 30); hw = Math.max(hw, Math.abs(s.x) + 30); });
+  g.minY = minY; g.hw = hw;
+  return g;
+}
+/* The smallest design that holds every app; where two designs hold the same number, the category picks one so neighbours differ. */
+function pickDesign(n, seed){
+  const h = hash(seed, 5, 5);
+  if (n <= 5)  return {k:'radial1'};
+  if (n <= 7)  return {k:'arc7'};
+  if (n === 8) return {k: h < .5 ? 'twin' : 'lean', L:4};
+  if (n === 9) return h < .5 ? {k:'ladder', L:4} : {k:'arc9'};
+  if (n === 10) return {k: h < .5 ? 'comb10' : 'radial2'};
+  if (n <= 15) return h < .5 ? {k:'radial3'} : {k:'ladder', L:Math.ceil((n - 1) / 2)};
+  return {k:'rings', n};
+}
+
+/* ---------- Sample garden (used until onboarding has saved one) ---------- */
+function fromCategories(cats, pfx){
+  const trees = [], apps = []; let n = 0;
+  cats.filter(c => c && Array.isArray(c.apps) && c.apps.length).forEach((c, ci) => {
+    const id = pfx + 't' + ci, name = String(c.name || 'Garden');
+    trees.push({id, name, design:pickDesign(c.apps.length, ci + 1)});
+    c.apps.forEach(raw => {
+      n++; const nm = String(raw);
+      apps.push({id:pfx+'a'+n, name:nm, label:nm, tree:id, kind:name, gb:+(.1 + hash(n,7,3) * hash(n,7,3) * 9).toFixed(1),
+        since:MONTHS[Math.floor(hash(n,9,5) * 12)] + ' ' + (2015 + Math.floor(hash(n,11,2) * 11)), img:iconFor(nm), alts:iconAlts(nm).slice(1), mono:nm.slice(0,2), slot:null});
     });
   });
-  return {hub, nodes, slots, baseY: hub.y + 326.975, labelY: 740.14};
+  return {trees, apps};
 }
-const FX = 950.95, STEP = 69.549, F_JOIN = 468.13, F_BASE = 867.37;
-function createGeom(){
-  const slots = [{id:'T', node:'T', x:FX, y:369.77, rot:0, ax:FX, ay:F_JOIN}];
-  for (let i = 0; i < 4; i++){
-    const ty = 397.96 + STEP * i;
-    slots.push({id:'L'+i, node:'B'+i, x:FX - STEP, y:ty, rot:-45, ax:FX, ay:ty + STEP});
-    slots.push({id:'R'+i, node:'B'+i, x:FX + STEP, y:ty, rot:45, ax:FX, ay:ty + STEP});
-  }
-  return {slots, labelY: 891.77};
+function buildData(){
+  if (SETUP) return {...fromCategories(SETUP.categories, ''), assign:true};
+  return {
+    trees:[{id:'collect', name:'Collecting Thoughts', design:{k:'radial3'}}, {id:'create', name:'Creating Things', design:{k:'ladder', L:4}}],
+    apps:APPS0.map(a => ({...a})), assign:false
+  };
 }
-const GEOM = {collect:collectGeom(), create:createGeom()};
+function assemble(d){                    // draw each tree's geometry and (for generated gardens) seat every app in a slot
+  d.trees.forEach(t => { t.geom = makeGeom(t.design); });
+  if (d.assign) d.trees.forEach(t => d.apps.filter(a => a.tree === t.id).forEach((a, i) => { a.slot = t.geom.slots[i].id; }));
+  return d;
+}
+
+const CELL_W = 460, CELL_H = 660;      // each tree gets one cell of the garden, then drifts a little inside it
+function layoutTrees(trees, seed = 0){
+  const N = trees.length, cols = N <= 2 ? Math.max(N, 1) : N <= 6 ? 3 : 4, rows = Math.max(1, Math.ceil(N / cols));
+  const stagger = cols > 1, SH = CELL_H / 4;                       // alternate columns sit SH above / below the middle
+  const W = cols * CELL_W, H = rows * CELL_H + (stagger ? CELL_H / 2 : 0), top = 512 - H / 2 + (stagger ? SH : 0);
+  trees.forEach((t, i) => {
+    const r = Math.floor(i / cols), c = i - r * cols, inRow = r === rows - 1 ? N - r * cols : cols;     // the last row is centred
+    t.cx = 720 - inRow * CELL_W / 2 + c * CELL_W + CELL_W / 2 + (hash(i, seed, 11) - .5) * 50;
+    t.baseY = top + r * CELL_H + 585 + (stagger ? (c % 2 ? -SH : SH) : 0) + (hash(i, seed, 12) - .5) * 70;
+    t.scale = Math.min(1, 520 / -t.geom.minY, (CELL_W / 2 - 14) / t.geom.hw);                          // tall or wide trees shrink to stay in their cell
+  });
+  return {cols, rows, fit:Math.max(.3, Math.min(1, 1380 / W, 940 / H))};
+}
 
 const AMBIENT = [
   [628,880,['||']],[866,671,['||']],[77,373,['||']],[1176,373,['||']],[1390,155,['||']],
   [310,155,['\\|/']],[1346,671,['\\|/']],[96,880,['\\|/']],[310,671,['\\|/']],[1132,880,['\\|/']],
   [1230,448,['(#)',' | ','~|~']],[246,745,['vvv','( )',' | ','\\|/']],[805,120,['oo','o*o','oo',' | ',' | ']]
 ];
-const FLOWERS = [['(#)',' | ','~|~'],['oo','o*o','oo',' | ',' | '],['\\|/','-@-',' | ',' | ']];
+const FLOWERS = [['[=]',' | ','~|~'], ['(#)',' | ','~|~'], ['~~~','\\ /',' | ','\\|/'], [' ^ ','< @ >',' v ',' | ',' | ']];
 const SPOTS = [[140,520],[1180,590],[1300,770],[740,600],[150,690],[1250,230],[80,230],[1090,190]];
+
+/* Compost: the layout from the Figma compost frame. Three rows of branches; `top` is the horizontal run, `c` the stem. */
 const COMPOST_GROUPS = [
-  {center:180, top:805.3, tiles:[60,180,300], mark:['{+}','|','~|~']},
-  {center:720, top:805.3, tiles:[480,600,720,840,960], mark:['vvv','(  )','|','\\|/']},
-  {center:1260, top:805.3, tiles:[1140,1260,1380], mark:['[=]','|','~|~']},
+  {c:178,  top:285, tiles:[58,178,298],              mark:['{+}','|','~|~']},
+  {c:720,  top:285, tiles:[600,720,840],             mark:['(#)','|','~|~']},
+  {c:1262, top:285, tiles:[1142,1262,1382],          mark:['[=]','|','~|~']},
+  {c:298,  top:533, tiles:[58,178,298,418,538],      mark:['vvv','(  )','|','\\|/']},
+  {c:1142, top:533, tiles:[902,1022,1142,1262,1382], mark:['~~~','\\ /','|','\\|/']},
+  {c:178,  top:829, tiles:[58,178,298],              mark:['{+}','|','~|~']},
+  {c:720,  top:829, tiles:[600,720,840],             mark:['(#)','|','~|~']},
+  {c:1262, top:829, tiles:[1142,1262,1382],          mark:['[=]','|','~|~']},
 ];
 
 /* ---------- State ---------- */
+const DATA = assemble(buildData());
 const state = {
-  apps: APPS0.map(a=>({...a})),
-  compost: [],        // {app, fate:'pending'|'planted'|'potted', flower}
-  flowers: [],        // {lines, spot, fresh}
-  mode:'prune', view:'garden', zoom:1, panX:0, panY:0, hand:false,
-  pending:null, fresh:new Set()
+  apps: DATA.apps, trees: DATA.trees,
+  compost: [],        // what's in the compost: {app} or {flower}, in the order it went in
+  stock: FLOWERS.slice(),   // flowers ready to plant (each is its lines of ASCII); harvesting the compost adds more
+  cmode: 'fertilize', harvests: 0,
+  flowers: [],        // flowers planted in the garden: {lines, spot, fresh}
+  mode:'prune', lastMode:'prune', view:'garden', zoom:1, panX:0, panY:0, hand:false,
+  pending:null, fresh:new Set(), visit:null, own:null
 };
+const LAYOUT = layoutTrees(state.trees);
+state.zoom = LAYOUT.fit;
+let USER_SPOTS = SPOTS, AMBIENT_USE = AMBIENT;
+function setSpots(custom){
+  if (custom || SETUP){      // with several trees the garden has no fixed gaps, so flowers go beside each trunk instead
+    USER_SPOTS = state.trees.map(t => [t.cx - 165, t.baseY - 140]);
+    AMBIENT_USE = AMBIENT.filter(([,,l]) => l.length === 1).concat(state.trees.flatMap((t, i) =>
+      hash(i,3,3) < .7 ? [[t.cx + 105, t.baseY - 140, FLOWERS[Math.floor(hash(i,4,4) * FLOWERS.length)]]] : []));
+  } else { USER_SPOTS = SPOTS; AMBIENT_USE = AMBIENT; }
+}
+setSpots(false);
+/* Each view remembers where you left it */
+const viewPos = {};
+function setView(v){
+  if (v === state.view) return;
+  viewPos[state.view] = {zoom:state.zoom, panX:state.panX, panY:state.panY};
+  state.view = v;
+  Object.assign(state, viewPos[v] || {zoom: v === 'garden' ? LAYOUT.fit : 1, panX:0, panY:0});
+  render();
+}
 
 /* ---------- Helpers ---------- */
 const $ = s => document.querySelector(s);
@@ -365,14 +524,19 @@ const stage = $('#stage');
 const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ICON_NAMES = {notes:'Notes',ottarai:'Otter.ai',otter:'Otter',onenote:'OneNote',wisprflow:'Wispr Flow',indesign:'InDesign'};
 function appLabel(app){
+  if (app.label) return app.label;
   const file = app.img ? app.img.split('/').pop().replace(/\.png$/,'') : '';
   return ICON_NAMES[file] || (file ? file[0].toUpperCase()+file.slice(1) : app.name);
 }
 function glyph(app, clipId='tileClip'){
-  if (app.img){
-    return `<image href="${esc(app.img)}" x="0" y="0" width="40" height="40" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})"/>`;
-  }
-  return `<text class="mono" x="20" y="25" text-anchor="middle">${esc(app.mono||app.name.slice(0,2))}</text>`;
+  /* the monogram sits underneath and is hidden once icons/<name>.png loads, so a missing icon still reads as an app */
+  const mono = `<text class="mono" x="20" y="25" text-anchor="middle">${esc(app.mono||app.name.slice(0,2))}</text>`;
+  if (!app.img) return mono;
+  return mono + `<image href="${esc(app.img)}" x="0" y="0" width="40" height="40" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})" data-alt="${esc((app.alts||[]).join('|'))}" onload="this.previousElementSibling.style.display='none'" onerror="iconNext(this)"/>`;
+}
+function flowerSvg(lines){
+  const y0 = 22 - (lines.length - 1) * 3.8;
+  return `<svg viewBox="0 0 40 40" aria-hidden="true"><rect x=".5" y=".5" width="39" height="39" rx="4"/><text xml:space="preserve">${lines.map((l,i)=>`<tspan x="20" y="${(y0+i*7.6).toFixed(1)}">${esc(l)}</tspan>`).join('')}</text></svg>`;
 }
 function tileSvg(app){
   const id = 'clip-'+app.id;
@@ -384,12 +548,12 @@ function ascii(lines,x,y,cls='',step=24){
 }
 function line(x1,y1,x2,y2){ return `<path class="tree-line" d="M${x1} ${y1}L${x2} ${y2}"/>`; }
 function dot(x,y){ return `<circle class="dot" cx="${x}" cy="${y}" r="2.5"/>`; }
-function compostBranch(center, top, x){
-  if (x===center) return line(center, top-48, center, top+48);
-  const direction = Math.sign(x-center), radius = Math.min(48, Math.abs(x-center)/2);
+function compostBranch(center, top, x, R=24){
+  if (x===center) return line(center, top-R, center, top+R);
+  const direction = Math.sign(x-center), radius = Math.min(R, Math.abs(x-center)/2);
   const turnStart = top-radius, horizontalStart = center + direction*radius;
   const horizontalEnd = x - direction*radius, turnEnd = top+radius;
-  const path = `M${center} ${top-48}V${turnStart}Q${center} ${top} ${horizontalStart} ${top}H${horizontalEnd}Q${x} ${top} ${x} ${turnEnd}V${top+48}`;
+  const path = `M${center} ${top-R}V${turnStart}Q${center} ${top} ${horizontalStart} ${top}H${horizontalEnd}Q${x} ${top} ${x} ${turnEnd}V${top+R}`;
   return `<path class="tree-line" d="${path}"/>`;
 }
 function tile(app,x,y,{live=true,ghost=false,rot=0,scale=1}={}){
@@ -401,46 +565,24 @@ function tile(app,x,y,{live=true,ghost=false,rot=0,scale=1}={}){
 /* ---------- Render ---------- */
 function occupant(tree,slotId){ return state.apps.find(a=>a.tree===tree && a.slot===slotId); }
 
-function renderCollect(){
-  const {hub, nodes, slots, baseY, labelY} = GEOM.collect; let out = '';
-  const used = new Set(slots.filter(s=>occupant('collect',s.id)).map(s=>s.node));
-  out += line(hub.x, baseY, hub.x, hub.y) + dot(hub.x, baseY);
-  for (const k of ['TOP','UR','LR','LL','UL']) if (used.has(k)) out += line(hub.x, hub.y, nodes[k].x, nodes[k].y);
-  const tiles = [];
-  for (const s of slots){
-    const a = occupant('collect',s.id); if(!a) continue;
-    const n = nodes[s.node];
-    out += line(n.x, n.y, s.x, s.y);
-    tiles.push(tile(a, s.x, s.y, {rot:s.rot}));
-  }
-  out += tiles.join('');
-  out = `<g class="tree-sway" style="--ox:${hub.x}px;--oy:${baseY}px;--t:9.5s;--d:-3s;--ta:.7deg">${out}</g>`;
-  out += `<text class="label" x="${hub.x}" y="${labelY}">${TREES.collect.label}</text>`;
-  return out;
+function renderTree(t){
+  const g = t.geom, occ = new Set(), tiles = [];
+  g.slots.forEach(sl => { if (occupant(t.id, sl.id)) occ.add(sl.id); });
+  let out = '';
+  g.segs.forEach(sg => { if (!sg.when || sg.when.some(id => occ.has(id))) out += line(sg.x1, sg.y1, sg.x2, sg.y2); });
+  out += dot(0, 0);
+  g.slots.forEach(sl => {
+    const a = occupant(t.id, sl.id); if (!a) return;
+    out += line(sl.fx, sl.fy, sl.x, sl.y);
+    tiles.push(tile(a, sl.x, sl.y, {rot:sl.rot, live:!state.visit}));
+  });
+  return `<g transform="translate(${t.cx} ${t.baseY}) scale(${t.scale.toFixed(3)})">${out}${tiles.join('')}</g><text class="label" x="${t.cx}" y="${t.baseY + 36}">${esc(t.name)}</text>`;
 }
-function renderCreate(){
-  const {slots, labelY} = GEOM.create; let out = '';
-  out += line(FX, F_BASE, FX, F_JOIN) + dot(FX, F_BASE);
-  const tiles = [];
-  for (const s of slots){
-    const a = occupant('create',s.id); if(!a) continue;
-    out += line(s.ax, s.ay, s.x, s.y);
-    tiles.push(tile(a, s.x, s.y, {rot:s.rot||0}));
-  }
-  out += tiles.join('');
-  out = `<g class="tree-sway" style="--ox:${FX}px;--oy:${F_BASE}px;--t:8s;--d:-5.5s;--ta:.6deg">${out}</g>`;
-  out += `<text class="label" x="${FX}" y="${labelY}">${TREES.create.label}</text>`;
-  return out;
-}
-/* Deterministic randomness, so every grass tile and every plant keeps its own look and timing */
+/* Deterministic randomness, so every grass tile keeps its own look */
 function hash(i, j, k){
   let h = (Math.imul(i+1013, 374761393) + Math.imul(j+7919, 668265263) + Math.imul(k+1, 2246822519)) >>> 0;
   h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0;
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
-}
-/* Tall plants (flowers, tufts with stems) lean from their base. Short grass sways by swapping glyphs instead (see windStep). */
-function sway(inner, seed){
-  return `<g class="sway" style="--t:${(6 + hash(seed,1,1)*4).toFixed(1)}s;--d:${(-hash(seed,2,2)*10).toFixed(1)}s;--a:${(2.4 + hash(seed,3,3)*1.8).toFixed(1)}deg">${inner}</g>`;
 }
 const GRASS_FRAMES = {b:['\\\\','||','//'], t:['\\\\/','\\|/','\\//']};      // lean left, upright, lean right
 function grassText(kind, x, y){
@@ -451,12 +593,17 @@ function grassTile(i, j){            // the garden's own tufts, repeated with a 
   let out = '';
   GRASS_BASE.forEach(([x,y,l],k)=>{
     const flip = hash(i,j,k*3+2) < .3, base = l[0]==='||' ? 'b' : 't';
-    out += grassText(flip ? (base==='b'?'t':'b') : base, i*TILE_W + x + (hash(i,j,k*3)-.5)*90, j*TILE_H + y + (hash(i,j,k*3+1)-.5)*70);
+    const gx = i*TILE_W + x + (hash(i,j,k*3)-.5)*90, gy = j*TILE_H + y + (hash(i,j,k*3+1)-.5)*70;
+    if (!nearTree(gx, gy)) out += grassText(flip ? (base==='b'?'t':'b') : base, gx, gy);
   });
-  for (let k=0; k<8; k++) out += grassText(hash(i,j,100+k*3) < .5 ? 'b' : 't', i*TILE_W + 40 + hash(i,j,101+k*3)*(TILE_W-120), j*TILE_H + 40 + hash(i,j,102+k*3)*(TILE_H-120));
+  for (let k=0; k<8; k++){
+    const gx = i*TILE_W + 40 + hash(i,j,101+k*3)*(TILE_W-120), gy = j*TILE_H + 40 + hash(i,j,102+k*3)*(TILE_H-120);
+    if (!nearTree(gx, gy)) out += grassText(hash(i,j,100+k*3) < .5 ? 'b' : 't', gx, gy);
+  }
   return out;
 }
-const grassTiles = new Set();
+const grassTiles = new Set(), plotCells = new Set();
+const nearTree = (x, y) => state.trees.some(t => Math.abs(x - t.cx) < t.geom.hw * t.scale + 12 && y > t.baseY + t.geom.minY * t.scale - 12 && y < t.baseY + 48);
 function visibleWorld(){              // the part of the world currently on screen, in world coordinates
   const r = stage.getBoundingClientRect(), w = r.width || window.innerWidth, h = r.height || window.innerHeight;
   const f = Math.min(w/1440, h/1024), W = w/f, H = h/f, z = state.zoom;
@@ -475,15 +622,95 @@ function ensureGrass(){               // adds grass tiles wherever you can see, 
   });
   windStep();
 }
-let grassQueued = false;
-const queueGrass = () => { if (grassQueued) return; grassQueued = true; requestAnimationFrame(() => { grassQueued = false; ensureGrass(); }); };
-window.addEventListener('resize', queueGrass);
-/* A gust rolls across the field: each blade leans left, stands, or leans right depending on where the wave is. */
+
+/* ---------- Go for a stroll: every garden is a plot of land, drawn as a shape filled with a pattern ---------- */
+const PAT = {star:{w:60,h:62,g:'*',size:24}, plus:{w:44,h:44,g:'\u22B9',size:15}, circle:{w:70,h:38,g:'o',size:12}};
+const PAT_KEYS = Object.keys(PAT), STROLL_CW = 420, STROLL_CH = 360;
+function patternDefs(pfx = 'pat-', sc = 1){   // two glyphs per tile, the second half a tile across and down, so rows stagger
+  return PAT_KEYS.map(k => { const p = PAT[k], st = `font-size:${p.size}px`;
+    return `<pattern id="${pfx}${k}" width="${p.w}" height="${p.h}" patternUnits="userSpaceOnUse" patternTransform="scale(${sc})"><rect width="${p.w}" height="${p.h}" style="fill:var(--bg)"/>` +
+      `<text class="pglyph" style="${st}" x="${p.w/4}" y="${p.h/4}">${p.g}</text><text class="pglyph" style="${st}" x="${p.w*3/4}" y="${p.h*3/4}">${p.g}</text></pattern>`; }).join('');
+}
+function smoothClosed(pts){           // a closed Catmull-Rom curve through the points, as cubic Beziers
+  const n = pts.length, f = v => v.toFixed(1);
+  let d = `M${f(pts[0][0])} ${f(pts[0][1])}`;
+  for (let i=0; i<n; i++){
+    const a = pts[(i-1+n)%n], b = pts[i], c = pts[(i+1)%n], e = pts[(i+2)%n];
+    d += `C${f(b[0]+(c[0]-a[0])/6)} ${f(b[1]+(c[1]-a[1])/6)} ${f(c[0]-(e[0]-b[0])/6)} ${f(c[1]-(e[1]-b[1])/6)} ${f(c[0])} ${f(c[1])}`;
+  }
+  return d + 'Z';
+}
+function cloudPath(w, h, n, seed){     // a scalloped outline: round bumps between points on an ellipse
+  const pts = Array.from({length:n}, (_,k) => { const a = (k + (hash(seed,k,1)-.5)*.35) * 2*Math.PI/n - Math.PI/2; return [Math.cos(a)*w/2*.86, Math.sin(a)*h/2*.86]; });
+  let d = `M${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+  pts.forEach((p, k) => { const q = pts[(k+1)%n], r = Math.hypot(q[0]-p[0], q[1]-p[1]) * (.52 + hash(seed,k,2)*.16); d += `A${r.toFixed(1)} ${r.toFixed(1)} 0 0 1 ${q[0].toFixed(1)} ${q[1].toFixed(1)}`; });
+  return d + 'Z';
+}
+function blobPath(w, h, n, seed){      // a lumpy, smooth outline
+  return smoothClosed(Array.from({length:n}, (_,k) => { const a = (k + (hash(seed,k,3)-.5)*.5) * 2*Math.PI/n, rho = .58 + hash(seed,k,4)*.5; return [Math.cos(a)*w/2*rho, Math.sin(a)*h/2*rho]; }));
+}
+const OWNERS = ['Audrey','Mateo','Priya','Jonah','Noor','Kai','Ines','Theo','Wren','Sol','Dara','Remy','Leila','Oskar','Mina','Bea'];
+function plotInfo(i, j){               // who lives here: the plot's pattern and name never change for the same spot
+  return {pat:PAT_KEYS[Math.floor(hash(i,j,209)*3)], name:OWNERS[Math.floor(hash(i,j,250)*OWNERS.length)] + '’s Garden'};
+}
+const proposals = new Map(), settled = new Map();
+function plotProposal(i, j){
+  const key = i + ',' + j; if (proposals.has(key)) return proposals.get(key);
+  const r = k => hash(i, j, 200+k), t = r(3); let rx, ry, kind;
+  if (t < .13){ const tall = r(4) < .6; kind = 'pill'; rx = tall ? 60 + r(5)*25 : 120 + r(5)*50; ry = tall ? 100 + r(6)*80 : 55 + r(6)*25; }
+  else { kind = t < .45 ? 'cloud' : 'blob'; rx = 150 + r(1)*150; ry = 120 + r(2)*110; }
+  const p = {i, j, kind, rx, ry, x:720 + i*STROLL_CW + (r(7)-.5)*STROLL_CW*.7, y:512 + j*STROLL_CH + (r(8)-.5)*STROLL_CH*.7, pri:r(20), open:r(11) < .04};
+  proposals.set(key, p); return p;
+}
+const MY_OBSTACLE = {x:720, y:512, rx:165, ry:160};
+const apart = (a, s, b, gap) => Math.hypot((a.x-b.x) / (a.rx*s + b.rx + gap), (a.y-b.y) / (a.ry*s + b.ry + gap)) >= 1;
+function plotShapeFor(i, j){
+  const key = i + ',' + j; if (settled.has(key)) return settled.get(key);
+  const a = plotProposal(i, j); let out = null;
+  if (!a.open){
+    const rivals = [MY_OBSTACLE];
+    for (let dj=-2; dj<=2; dj++) for (let di=-2; di<=2; di++){ if (!di && !dj) continue; const b = plotProposal(i+di, j+dj); if (!b.open && b.pri > a.pri) rivals.push(b); }
+    let s = 1; while (s >= .5 && rivals.some(b => !apart(a, s, b, 14))) s -= .04;
+    if (s >= .5) out = {...a, w:a.rx*2*s, h:a.ry*2*s};
+  }
+  settled.set(key, out); return out;
+}
+function plotMarkup(i, j){
+  const sh = plotShapeFor(i, j); if (!sh) return `<g data-t="${i},${j}"></g>`;       // a spot with no plot
+  const pat = plotInfo(i, j).pat, seed = i*131 + j*17, fill = `fill="url(#pat-${pat})"`;
+  let shape;
+  if (sh.kind === 'pill'){ shape = `<rect class="plot" x="${(-sh.w/2).toFixed(1)}" y="${(-sh.h/2).toFixed(1)}" width="${sh.w.toFixed(1)}" height="${sh.h.toFixed(1)}" rx="${(Math.min(sh.w, sh.h)/2).toFixed(1)}" ${fill}/>`; }
+  else { const k = sh.kind === 'cloud' ? 1.03 : 1.2, d = sh.kind === 'cloud' ? cloudPath(sh.w*k, sh.h*k, 5 + Math.floor(hash(i,j,204)*4), seed) : blobPath(sh.w*k, sh.h*k, 8 + Math.floor(hash(i,j,204)*5), seed); shape = `<path class="plot" d="${d}" ${fill}/>`; }
+  return `<g data-t="${i},${j}" transform="translate(${sh.x.toFixed(1)} ${sh.y.toFixed(1)})">${shape}</g>`;
+}
+function myPlotMarkup(){               // the plot drawn in onboarding, with a bolder outline and a label
+  const S = 300, d = MY_PLOT.pts && MY_PLOT.pts.length >= 3 ? smoothClosed(MY_PLOT.pts.map(([x,y]) => [x*S, y*S])) : cloudPath(300, 260, 6, 7);
+  return `<g transform="translate(720 512)"><path class="plot mine" d="${d}" fill="url(#pat-${MY_PLOT.pattern})"/><g class="chip"><rect x="-43" y="-14" width="86" height="28" rx="4"/><text x="0" y="1">My plot</text></g></g>`;
+}
+function ensureStroll(){               // like the grass: plots appear wherever you scroll, and go when you leave them far behind
+  const host = $('#plots'); if (!host || state.view!=='stroll') return;
+  const v = visibleWorld(), m = 520;
+  const i0 = Math.ceil((v.x0-m-720)/STROLL_CW), i1 = Math.floor((v.x1+m-720)/STROLL_CW), j0 = Math.ceil((v.y0-m-512)/STROLL_CH), j1 = Math.floor((v.y1+m-512)/STROLL_CH);
+  const need = new Set();
+  for (let j=j0; j<=j1; j++) for (let i=i0; i<=i1; i++) if (i || j) need.add(i+','+j);   // 0,0 is your own plot
+  need.forEach(key => { if (plotCells.has(key)) return; const [i,j] = key.split(',').map(Number); plotCells.add(key); host.insertAdjacentHTML('beforeend', plotMarkup(i,j)); });
+  [...plotCells].forEach(key => {
+    if (need.has(key)) return;
+    const [i,j] = key.split(',').map(Number);
+    if (i < i0-1 || i > i1+1 || j < j0-1 || j > j1+1){ const g = host.querySelector(`[data-t="${key}"]`); if (g) g.remove(); plotCells.delete(key); }
+  });
+}
+const ensureWorld = () => { ensureGrass(); ensureStroll(); };
+let worldQueued = false;
+const queueWorld = () => { if (worldQueued) return; worldQueued = true; requestAnimationFrame(() => { worldQueued = false; ensureWorld(); }); };
+window.addEventListener('resize', queueWorld);
+/* One gust at a time rolls over the whole garden: every blade of grass leans left, stands, or leans right together.
+   Trees and flowers stay still. */
 function windStep(t = performance.now()/1000){
   if (state.view!=='garden' || document.hidden || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  stage.querySelectorAll('.grass').forEach(el=>{
-    const lean = Math.sin(6.2832*(t/9 - (+el.dataset.x)/1100)) * (.6 + .4*WEATHER.factor);   // even a calm day still sways a little
-    const f = lean < -.5 ? 0 : lean > .5 ? 2 : 1;
+  const lean = Math.sin(6.2832 * t / 9) * (.6 + .4*WEATHER.factor);   // even a calm day still sways a little
+  const f = lean < -.5 ? 0 : lean > .5 ? 2 : 1;
+  stage.querySelectorAll('.grass').forEach(el => {
     if (el.dataset.f !== String(f)){ el.dataset.f = f; el.firstChild.textContent = GRASS_FRAMES[el.dataset.k][f]; }
   });
 }
@@ -491,76 +718,129 @@ setInterval(() => windStep(), 450);
 
 function renderGarden(){
   let out = '<g id="grass" aria-hidden="true"></g>';
-  AMBIENT.forEach(([x,y,l],i)=>{
-    if (l.length===1) out += grassText(l[0]==='||' ? 'b' : 't', x, y);
-    else out += sway(ascii(l,x,y,l[1]==='o*o'?'flower-ascii':''), i);
+  AMBIENT_USE.forEach(([x,y,l],i)=>{
+    if (l.length===1){ if (!nearTree(x, y)) out += grassText(l[0]==='||' ? 'b' : 't', x, y); }
+    else out += ascii(l,x,y,l[1]==='o*o'?'flower-ascii':'');
   });
-  state.flowers.forEach((f,i)=>{ const [x,y]=SPOTS[f.spot]; out += `<g class="flower ${f.fresh?'enter':''}">${sway(ascii(f.lines,x,y), 40+i)}</g>`; });
-  out += renderCollect() + renderCreate();
+  state.flowers.forEach(f=>{ const [x,y]=USER_SPOTS[f.spot]; out += `<g class="flower ${f.fresh?'enter':''}">${ascii(f.lines,x,y)}</g>`; });
+  out += state.trees.map(renderTree).join('');
   return out;
 }
 function renderCompost(){
-  let out = ascii(['\\ | /','— ( ) —','/ | \\'],470,128,'compost-ascii',36);
-  out += ascii(['  ︵','︵(  )','(      )','(        )','︶︶︶︶︶'],152,227,'compost-ascii');
-  out += ascii(['  ︵','︵(  )','(      )','(        )','︶︶︶︶︶'],1032,395,'compost-ascii');
-  out += ascii([' ︵︵','︵(    )','(        )','(            )','(              )','︶︶︶︶︶'],360,371,'compost-ascii');
-  out += ascii([' ︵︵','︵(    )','(        )','(            )','(              )','︶︶︶︶︶'],1233,203,'compost-ascii');
-  COMPOST_GROUPS.forEach(group=>{
-    const markTop = group.top - 62 - (group.mark.length-1)*24;
-    out += ascii(group.mark,group.center,markTop,'compost-ascii');
-    group.tiles.forEach(x=>{
-      out += compostBranch(group.center, group.top, x);
-      out += dot(x, group.top+48);
-      out += `<rect class="compost-tile" x="${x-26}" y="${group.top+50.34}" width="52" height="52" rx="3"/>`;
+  let out = '', k = 0;
+  COMPOST_GROUPS.forEach(g=>{
+    out += ascii(g.mark, g.c, g.top - 48 - (g.mark.length-1)*24, 'compost-ascii');
+    g.tiles.forEach(x=>{
+      const e = state.compost[k++], ty = g.top + 26.34;
+      out += compostBranch(g.c, g.top, x) + dot(x, g.top+24);
+      if (e && e.app) out += tile(e.app, x, ty + 26, {live:false, scale:1.3});                  // a pruned app's icon sits where the black box was
+      else {
+        out += `<rect class="compost-tile" x="${x-26}" y="${ty}" width="52" height="52" rx="3"/>`;
+        if (e && e.flower) out += `<text class="cflower" xml:space="preserve">${e.flower.map((l,i)=>`<tspan x="${x}" y="${(ty + 26 - (e.flower.length-1)*5.5 + i*11 + 3).toFixed(1)}">${esc(l)}</tspan>`).join('')}</text>`;
+      }
     });
+    out += dot(g.c, g.top-24);
   });
   return out;
 }
-function renderStroll(){
-  const ring = (count,radius,offset=-Math.PI/2) => Array.from({length:count},(_,i)=>{
-    const angle = offset + i * Math.PI * 2 / count;
-    return [720 + Math.cos(angle)*radius, 512 + Math.sin(angle)*radius];
-  });
-  const rings = [ring(10,160)];
-  for (let radius=340, index=1; radius<=12000; radius+=260, index++){
-    const count = Math.max(12, Math.round(radius * Math.PI * 2 / 180));
-    const rotation = -Math.PI/2 + (index%2 ? 1 : -1)*Math.PI/count;
-    rings.push(ring(count,radius,rotation));
-  }
-  const orbit = rings[0];
-  let out = '';
-  rings.slice(1).flat().forEach(([x,y])=>{ out += `<circle class="stroll-node" cx="${x}" cy="${y}" r="30"/>`; });
-  orbit.forEach(([x,y])=>{ out += line(720,512,x,y); out += `<circle class="stroll-node" cx="${x}" cy="${y}" r="30"/>`; });
-  out += `<circle class="stroll-hub" cx="720" cy="512" r="40"/>`;
-  out += `<text class="stroll-label" x="720" y="505"><tspan x="720" dy="0">My</tspan><tspan x="720" dy="17">Garden</tspan></text>`;
-  out += `<text class="stroll-plus" x="720" y="360">+</text>`;
-  return out;
-}
+function renderStroll(){ return '<g id="plots" aria-hidden="true"></g>' + myPlotMarkup(); }
 function transform(){ return `translate(${720+state.panX} ${512+state.panY}) scale(${state.zoom}) translate(-720 -512)`; }
 function render(){
-  grassTiles.clear();
-  stage.setAttribute('class', `view-${state.view} mode-${state.mode} ${state.hand?'pan':''}`);
+  grassTiles.clear(); plotCells.clear();
+  stage.setAttribute('class', `view-${state.view} mode-${state.mode||'none'} ${state.hand?'pan':''}`);
   const world = state.view==='garden' ? renderGarden() : state.view==='compost' ? renderCompost() : renderStroll();
-  stage.innerHTML = `<defs><clipPath id="tileClip"><rect x=".5" y=".5" width="39" height="39" rx="4"/></clipPath></defs><g id="world" transform="${transform()}">${world}</g>`;
+  stage.innerHTML = `<defs><clipPath id="tileClip"><rect x=".5" y=".5" width="39" height="39" rx="4"/></clipPath>${patternDefs()}</defs><g id="world" transform="${transform()}">${world}</g>`;
   const garden = state.view==='garden';
-  if (garden) ensureGrass();
-  const navigable = garden || state.view==='stroll';
-  $('#modes').hidden = !garden; $('#rail').hidden = !navigable;
-  $('#tray').hidden = !(garden && state.mode==='plant');
-  $('#compost-prompt').open = state.view==='compost';
-  $('#tab-garden').setAttribute('aria-selected', state.view==='garden'); $('#tab-compost').setAttribute('aria-selected', state.view==='compost');
+  ensureWorld();
+  const visiting = !!state.visit;
+  const compost = state.view==='compost', trayOn = (garden && state.mode==='plant' && !visiting) || compost;
+  $('#modes').hidden = !garden || visiting; $('#cmodes').hidden = !compost; $('#rail').hidden = false;
+  $('#tray').hidden = !trayOn;
+  $('#tabs').hidden = visiting; $('#vtag').hidden = !visiting; if (visiting) $('#vtag-name').textContent = state.visit.name;
+  $('#stroll').textContent = visiting ? 'Back' : 'Go for a Stroll';
+  document.querySelectorAll('[data-cmode]').forEach(b=>{const on=b.dataset.cmode===state.cmode;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
+  $('#tab-garden').setAttribute('aria-selected', state.view==='garden' && !visiting); $('#tab-compost').setAttribute('aria-selected', state.view==='compost');
   $('#stroll').classList.toggle('on', state.view==='stroll'); $('#stroll').setAttribute('aria-pressed', state.view==='stroll');
   document.querySelectorAll('[data-mode]').forEach(b=>{const on=b.dataset.mode===state.mode;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
   $('#hand').setAttribute('aria-pressed', state.hand);
-  if (garden && state.mode==='plant') renderTray();
-  if (typeof gmenu !== 'undefined' && !gmenu.hidden){ if (garden) fillMenu(); else closeMenu(false); }
+  if (trayOn) renderTray();
+  if (typeof gmenu !== 'undefined' && !gmenu.hidden){ if (garden && !visiting) fillMenu(); else closeMenu(false); }
   state.fresh.clear(); state.flowers.forEach(f=>f.fresh=false); state.compost.forEach(c=>c.fresh=false);
 }
+const treeOf = id => state.trees.find(t => t.id === id);
+
+/* ---------- Visiting someone else's garden (generated; nothing here is a real person yet) ---------- */
+const CAT_POOL = [
+  {name:'Connecting with people', apps:['iMessage','WhatsApp','KakaoTalk','Instagram','Facebook','TikTok','LinkedIn','Discord','Reddit','Slack','Apple Mail','Gmail']},
+  {name:'Experiencing audio',     apps:['Spotify','Apple Music','NPR','SiriusXM','SeatGeek','StubHub','Live Nation']},
+  {name:'Managing finances',      apps:['BofA','SoFi','Venmo','Coinbase','Robinhood','Ramp','Kalshi']},
+  {name:'Surfing the web',        apps:['Safari','Google Chrome','Firefox','Arc Browser','Opera GX','DuckDuckGo','Perplexity']},
+  {name:'Archiving life',         apps:['Google Drive','Dropbox','OneDrive','Apple Photos','Google Photos','VSCO']},
+  {name:'Eating and getting around', apps:['DoorDash','Uber Eats','Uber','Lyft','OpenTable','Resy']},
+  {name:'Learning and noticing',  apps:['Anki','Duolingo','Quizlet','Google Translate','Cosmos','Are.na','Merlin Bird ID','iNaturalist','Kiwibit']},
+  {name:'Editing media',          apps:['CapCut','Facetune','Lightroom','Photoshop','Freeform']},
+  {name:'Looking after myself',   apps:['Apple Health','MyFitnessPal','Duolingo','Kiwibit']}
+];
+function randomGarden(i, j){
+  const seeded = (arr, k) => arr.map((a, n) => [hash(i, j, 400 + k*53 + n), a]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  const count = 3 + Math.floor(hash(i,j,301) * 5);
+  const cats = seeded(CAT_POOL, 1).slice(0, count).map((c, k) => ({name:c.name, apps:seeded(c.apps, k + 2).slice(0, Math.max(3, Math.min(c.apps.length, 3 + Math.floor(hash(i,j,310+k) * (c.apps.length - 2)))))}));
+  return {name:plotInfo(i, j).name, pattern:plotInfo(i, j).pat, cats, song:{title:SONG_POOL[Math.floor(hash(i,j,520) * SONG_POOL.length)], seed:2 + Math.floor(hash(i,j,521) * 60)}};
+}
+function enterVisit(i, j){
+  closeMenu(false);
+  const g = randomGarden(i, j), d = assemble({...fromCategories(g.cats, 'v'), assign:true});
+  viewPos.stroll = {zoom:state.zoom, panX:state.panX, panY:state.panY};
+  state.own = {trees:state.trees, apps:state.apps, flowers:state.flowers, hand:state.hand, mode:state.mode};
+  state.trees = d.trees; state.apps = d.apps; state.flowers = [];
+  state.visit = {name:g.name, i, j};
+  const L = layoutTrees(state.trees, i * 7 + j);
+  setSpots(true);
+  state.view = 'garden'; state.zoom = L.fit; state.panX = state.panY = 0; state.hand = true; state.mode = null;     // visitors only get the hand
+  render(); setSong(g.song);
+}
+function leaveVisit(to){
+  if (!state.visit) return;
+  const o = state.own;
+  state.trees = o.trees; state.apps = o.apps; state.flowers = o.flowers; state.hand = o.hand; state.mode = o.mode; state.visit = null; state.own = null;
+  setSpots(false);
+  state.view = to;
+  Object.assign(state, (to === 'stroll' ? viewPos.stroll : viewPos.garden) || {zoom: to === 'garden' ? LAYOUT.fit : 1, panX:0, panY:0});
+  render(); setSong(OWN_SONG);
+}
 function renderTray(){
-  const seeds = state.apps.filter(a=>a.slot===null);
-  const tray = $('#tray');
-  if (!seeds.length){ tray.innerHTML = 'Every app you use is already in the garden.'; return; }
-  tray.innerHTML = 'Pick an app to plant' + seeds.map(a=>`<button data-seed="${a.id}" aria-label="Plant ${esc(a.name)} in ${esc(TREES[a.tree].label)}">${tileSvg(a)}<span>${esc(a.name)}</span></button>`).join('');
+  const compost = state.view === 'compost', harvest = compost && state.cmode === 'harvest';
+  let items;
+  if (harvest){
+    items = state.compost.map((e, i) => e.app
+      ? `<button data-entry="${i}" title="Harvest ${esc(e.app.name)}" aria-label="Harvest a flower from ${esc(e.app.name)}">${tileSvg(e.app)}</button>`
+      : `<button data-entry="${i}" title="Take this flower back" aria-label="Take this flower back">${flowerSvg(e.flower)}</button>`);
+  } else {
+    const verb = compost ? 'Fertilize with' : 'Plant';
+    items = state.stock.map((f, i) => `<button data-flower="${i}" title="${verb} a flower" aria-label="${verb} a flower">${flowerSvg(f)}</button>`)
+      .concat(state.apps.filter(a => a.slot === null).map(a => `<button data-seed="${a.id}" title="${verb} ${esc(a.name)}" aria-label="${verb} ${esc(a.name)}">${tileSvg(a)}</button>`));
+  }
+  const none = harvest ? 'Nothing in the compost yet. Prune an app first.' : compost ? 'Nothing to fertilize with yet.' : 'Nothing to plant yet. Harvest flowers in Compost.';
+  $('#tray').innerHTML = items.length ? items.join('') : `<span class="none">${none}</span>`;
+}
+const COMPOST_CAP = COMPOST_GROUPS.reduce((n, g) => n + g.tiles.length, 0);
+function compostAction(b){
+  if (b.dataset.entry != null){                 // harvest: an app in the compost turns into a flower
+    const i = +b.dataset.entry, en = state.compost[i]; if (!en) return;
+    state.compost.splice(i, 1);
+    if (en.app){ state.stock.push(FLOWERS[state.harvests++ % FLOWERS.length]); toast(`Harvested a flower from ${en.app.name}.`); }
+    else { state.stock.push(en.flower); toast('Flower taken back.'); }
+    render(); return;
+  }
+  if (state.compost.length >= COMPOST_CAP){ toast('The compost is full. Harvest something first.'); return; }
+  if (b.dataset.seed){                          // fertilize: add a waiting app to the compost
+    const a = state.apps.find(x => x.id === b.dataset.seed); if (!a) return;
+    a.slot = 'gone'; state.compost.push({app:a});
+  } else {                                      // ...or a flower
+    const i = +b.dataset.flower, f = state.stock[i]; if (!f) return;
+    state.stock.splice(i, 1); state.compost.push({flower:f});
+  }
+  render();
 }
 
 /* ---------- Toast ---------- */
@@ -574,6 +854,7 @@ function openPrune(app){
   $('#prune-who').innerHTML = (app.img
     ? `<img src="${esc(app.img)}" alt="" width="40" height="40">`
     : tileSvg(app)) + `<span>${esc(appLabel(app))}</span>`;
+  const pim = $('#prune-who img'); if (pim){ const alts = [...(app.alts||[])]; pim.onerror = () => { const n = alts.shift(); if (n) pim.src = n; else pim.outerHTML = tileSvg(app); }; }
   $('#prune-facts').innerHTML =
     `<div><dt>${app.gb.toFixed(1)} GB data</dt><dd><button class="linkish" id="export">Export</button></dd></div>` +
     `<div><dt>Category:</dt><dd>${esc(app.kind)}</dd></div>` +
@@ -594,18 +875,32 @@ $('#prune-go').onclick = () => {
   const delay = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 230;
   setTimeout(()=>{
     app.slot = 'gone';
-    state.compost.push({app, fate:'pending'});
+    state.compost.push({app});
     render();
   }, delay);
 };
 
 /* ---------- Planting ---------- */
+function growTree(tree){           // a full tree grows into the next size up; apps keep their order
+  const old = tree.geom.slots.map(sl => sl.id);
+  const members = state.apps.filter(a => a.tree === tree.id && a.slot && a.slot !== 'gone').sort((a, b) => old.indexOf(a.slot) - old.indexOf(b.slot));
+  tree.design = pickDesign(members.length + 1, state.trees.indexOf(tree) + 1);
+  tree.geom = makeGeom(tree.design);
+  members.forEach((a, i) => { a.slot = tree.geom.slots[i].id; });
+  layoutTrees(state.trees);
+}
 function plant(id){
   const app = state.apps.find(a=>a.id===id); if(!app) return;
-  const slots = GEOM[app.tree].slots;
-  const free = slots.find(s=>!occupant(app.tree,s.id));
-  if (!free){ toast(`The ${TREES[app.tree].label} tree is full. Prune something first.`); return; }
+  const tree = treeOf(app.tree); let free = tree.geom.slots.find(s=>!occupant(app.tree,s.id)), grew = false;
+  if (!free){ growTree(tree); free = tree.geom.slots.find(s=>!occupant(app.tree,s.id)); grew = true; }
   app.slot = free.id; state.fresh.add(app.id); render();
+  if (grew) toast(`The ${tree.name} tree grew to make room.`);
+}
+function plantFlower(i){
+  const lines = state.stock[i]; if (!lines) return;
+  const used = new Set(state.flowers.map(f=>f.spot)), spot = USER_SPOTS.findIndex((_,k)=>!used.has(k));
+  if (spot < 0){ toast('The garden has no room for another flower.'); return; }
+  state.stock.splice(i, 1); state.flowers.push({lines, spot, fresh:true}); render();
 }
 
 
@@ -682,47 +977,62 @@ function activate(el){
   if (state.mode==='prune') openPrune(app);
 }
 stage.addEventListener('click', e => {
-  if (state.hand) return;
+  if (state.hand || state.visit) return;
   if (state.mode==='water'){ pour(e.clientX, e.clientY); return; }
   const el = e.target.closest('[data-app]'); if (el) activate(el);
 });
 stage.addEventListener('keydown', e => {
   if (e.key!=='Enter' && e.key!==' ') return;
-  const el = e.target.closest('[data-app]'); if (!el) return;
+  const el = e.target.closest('[data-app]'); if (!el || state.visit) return;
   e.preventDefault();
   const r = el.getBoundingClientRect();
   if (state.mode==='water') pour(r.left+r.width/2, r.top+r.height/2);
   else { if (state.mode==='prune' && state.view==='garden') snip(r.left+r.width/2, r.top+r.height/2); activate(el); }
 });
-$('#tray').addEventListener('click', e => { const b=e.target.closest('[data-seed]'); if(b) plant(b.dataset.seed); });
-document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{ state.mode=b.dataset.mode; render(); }));
+$('#tray').addEventListener('click', e => {
+  const b = e.target.closest('[data-seed],[data-flower],[data-entry]'); if (!b) return;
+  if (state.view === 'compost'){ compostAction(b); return; }
+  if (b.dataset.seed) plant(b.dataset.seed); else plantFlower(+b.dataset.flower);
+});
+document.querySelectorAll('[data-cmode]').forEach(b => b.addEventListener('click', () => { state.cmode = b.dataset.cmode; render(); }));
+/* The hand and the three garden tools are one group: choosing any of them un-chooses the others */
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{ state.mode = state.lastMode = b.dataset.mode; state.hand = false; render(); }));
 $('#tab-garden').onclick = () => {
-  if (state.view !== 'garden'){ state.view = 'garden'; render(); return; }
+  if (state.visit){ leaveVisit('garden'); return; }
+  if (state.view !== 'garden'){ setView('garden'); return; }
   gmenu.hidden ? openMenu() : closeMenu(false);
 };
-$('#tab-compost').onclick = () => { closeMenu(false); state.view='compost'; render(); };
-$('#stroll').onclick = () => { closeMenu(false); state.view='stroll'; render(); };
-$('#compost-close').onclick = () => $('#compost-prompt').close();
-$('#compost-plant').onclick = () => toast('Planting isn’t connected in this prototype.');
-$('#compost-pot').onclick = () => toast('Potting isn’t connected in this prototype.');
+$('#tab-compost').onclick = () => { closeMenu(false); if (state.visit) leaveVisit('garden'); setView('compost'); };
+$('#stroll').onclick = () => { closeMenu(false); if (state.visit){ leaveVisit('stroll'); return; } setView('stroll'); };
 
 /* zoom + pan */
-function setZoom(z){ state.zoom = Math.min(2.4, Math.max(.6, z)); const w=$('#world'); if(w) w.setAttribute('transform', transform()); ensureGrass(); }
+function setZoom(z){ state.zoom = Math.min(2.4, Math.max(.3, z)); const w=$('#world'); if(w) w.setAttribute('transform', transform()); ensureWorld(); }
 $('#zin').onclick = () => setZoom(state.zoom*1.2);
 $('#zout').onclick = () => setZoom(state.zoom/1.2);
-$('#hand').onclick = () => { state.hand = !state.hand; render(); };
-let drag=null;
+$('#hand').onclick = () => {
+  if (state.visit) return;
+  if (state.hand){ state.hand = false; state.mode = state.lastMode || 'prune'; }     // putting the hand down brings back the last tool
+  else { if (state.mode) state.lastMode = state.mode; state.hand = true; state.mode = null; }
+  render();
+};
+let drag=null, down=null;
 stage.addEventListener('pointerdown', e => {
-  if (state.view==='garden' && state.mode==='prune' && !state.hand) snip(e.clientX, e.clientY);
+  if (state.view==='garden' && state.mode==='prune' && !state.hand && !state.visit) snip(e.clientX, e.clientY);
+  down = {x:e.clientX, y:e.clientY, plot:state.view==='stroll' && e.target.closest ? e.target.closest('#plots > [data-t]') : null};
   if(!state.hand && state.view!=='stroll') return; drag={x:e.clientX,y:e.clientY,px:state.panX,py:state.panY}; stage.classList.add('dragging'); stage.setPointerCapture(e.pointerId); });
 stage.addEventListener('pointermove', e => {
   if(!drag) return;
   const r = stage.getBoundingClientRect(), f = Math.min(r.width/1440, r.height/1024);
   state.panX = drag.px + (e.clientX-drag.x)/f; state.panY = drag.py + (e.clientY-drag.y)/f;
   $('#world').setAttribute('transform', transform());
-  queueGrass();
+  queueWorld();
 });
-const endDrag = () => { drag=null; stage.classList.remove('dragging'); };
+const endDrag = e => {
+  const d0 = down; down = null; drag = null; stage.classList.remove('dragging');
+  if (e && e.type==='pointerup' && d0 && d0.plot && Math.hypot(e.clientX-d0.x, e.clientY-d0.y) < 6 && d0.plot.firstElementChild){   // a tap, not a drag
+    const [i, j] = d0.plot.dataset.t.split(',').map(Number); enterVisit(i, j);
+  }
+};
 stage.addEventListener('pointerup', endDrag); stage.addEventListener('pointercancel', endDrag);
 
 /* theme */
@@ -767,6 +1077,8 @@ function fillMenu(){
   const st = gardenStats(), d = new Date(meta.created);
   const created = isNaN(d) ? '' : d.toLocaleDateString(undefined, {year:'numeric', month:'short', day:'numeric'});
   $('#gmenu-title').textContent = meta.name;
+  const S = 120, path = MY_PLOT.pts && MY_PLOT.pts.length >= 3 ? smoothClosed(MY_PLOT.pts.map(([x,y]) => [x*S, y*S])) : cloudPath(130, 110, 6, 7);
+  $('#gshape').innerHTML = `<defs>${patternDefs('pp-', .5)}</defs><path d="${path}" transform="translate(118 75)" fill="url(#pp-${MY_PLOT.pattern})" stroke="var(--ink)" stroke-width="1.5"/>`;
   $('#gfacts').innerHTML =
     `<div><dt>Created</dt><dd>${esc(created)}</dd></div>` +
     `<div><dt>Data</dt><dd>${st.gb.toFixed(1)} GB</dd></div>` +
@@ -779,8 +1091,8 @@ function applyName(){ $('#gname').textContent = meta.name; document.title = `${m
 function openMenu(){ fillMenu(); gmenu.hidden = false; gbtn.setAttribute('aria-expanded', 'true'); }
 function closeMenu(refocus){ if (gmenu.hidden) return; gmenu.hidden = true; gbtn.setAttribute('aria-expanded', 'false'); if (refocus) gbtn.focus(); }
 applyName();
-document.addEventListener('pointerdown', e => { if (!gmenu.hidden && !e.target.closest('.gwrap')) closeMenu(false); });
-document.addEventListener('keydown', e => { if (e.key==='Escape' && !gmenu.hidden) closeMenu(true); });
+$('#gpanel-close').onclick = () => closeMenu(true);       // it stays open until you collapse it
+document.addEventListener('keydown', e => { if (e.key==='Escape' && !gmenu.hidden && !document.querySelector('dialog[open]')) closeMenu(true); });
 const dlgRename = $('#dlg-rename'), renameInput = $('#rename-input');
 $('#g-rename').onclick = () => { closeMenu(false); renameInput.value = meta.name; dlgRename.showModal(); renameInput.focus(); renameInput.select(); };
 function saveRename(){
@@ -793,6 +1105,54 @@ renameInput.addEventListener('keydown', e => { if (e.key==='Enter'){ e.preventDe
 $('#rename-cancel').onclick = () => dlgRename.close();
 $('#rename-x').onclick = () => dlgRename.close();
 $('#g-exit').onclick = () => { try { sessionStorage.removeItem('dg:entered'); } catch (e) {} location.href = 'onboarding.html'; };
+
+/* ---------- Music badge: plays by default (click to pause). Every garden has its own song. ---------- */
+const np = $('#np'), npTitle = $('#np-title');
+const OWN_SONG = {title:'Mice on Venus', seed:1};
+const SONG_POOL = ['Sweden','Wet Hands','Subwoofer Lullaby','Aria Math','Dry Hands','Haggstrom','Living Mice','Moog City','Danny','Blocks'];
+const slug = t => t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');       // audio/<song-title>.mp3
+const SCALES = [[261.63,293.66,329.63,392,440,523.25,587.33], [220,246.94,261.63,329.63,349.23,440,493.88], [293.66,329.63,369.99,440,493.88,587.33,659.25], [196,220,246.94,293.66,329.63,392,440]];
+let curSong = OWN_SONG, wantPlay = true, playing = false, usingSynth = false, ac = null, synth = null;
+const track = new Audio(); track.loop = true; track.preload = 'none';
+function makeAmbient(seed){            // stand-in when a song has no audio file: slow soft notes, a different mood for every seed
+  const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return {start(){}, stop(){}};
+  ac = ac || new AC();
+  const master = ac.createGain(), delay = ac.createDelay(1), fb = ac.createGain(), lp = ac.createBiquadFilter();
+  master.gain.value = 0; master.connect(ac.destination); delay.delayTime.value = .3 + (seed % 3) * .1; fb.gain.value = .42; lp.type = 'lowpass'; lp.frequency.value = 1800;
+  delay.connect(fb); fb.connect(delay); delay.connect(lp); lp.connect(master);
+  const scale = SCALES[seed % SCALES.length], gap = 700 + (seed % 4) * 150, wave = seed % 2 ? 'triangle' : 'sine'; let timer = null;
+  const note = () => {
+    if (ac.state !== 'running') return;                 // don't pile notes up while the browser is still waiting for a click
+    const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+    o.type = wave; o.frequency.value = scale[Math.floor(Math.random()*scale.length)] * (Math.random() < .25 ? .5 : 1);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.2, t + .03); g.gain.exponentialRampToValueAtTime(.0008, t + 2.4);
+    o.connect(g); g.connect(master); g.connect(delay); o.start(t); o.stop(t + 2.6);
+  };
+  return {
+    start(){ ac.resume(); master.gain.linearRampToValueAtTime(.5, ac.currentTime + .8); note(); timer = setInterval(() => { if (Math.random() < .8) note(); }, gap); },
+    stop(){ clearInterval(timer); master.gain.cancelScheduledValues(ac.currentTime); master.gain.linearRampToValueAtTime(0, ac.currentTime + .4); setTimeout(() => master.disconnect(), 700); }
+  };
+}
+function showPlaying(on){ playing = on; np.classList.toggle('playing', on); np.setAttribute('aria-pressed', on); setSongLabel(); }
+function setSongLabel(){ npTitle.textContent = curSong.title; np.setAttribute('aria-label', (playing ? 'Pause ' : 'Play ') + curSong.title); }
+function stopAudio(){ track.pause(); if (synth){ synth.stop(); synth = null; } }
+async function startAudio(){
+  stopAudio(); showPlaying(true); usingSynth = false;
+  track.src = `audio/${slug(curSong.title)}.mp3`;
+  try { await track.play(); return; }
+  catch (e) { if (e && e.name === 'NotAllowedError') return; }      // the browser wants a click first; unlock() retries on the first one
+  usingSynth = true; synth = makeAmbient(curSong.seed); synth.start();
+}
+function setSong(song){ curSong = song; stopAudio(); showPlaying(false); if (wantPlay) startAudio(); }
+function togglePlay(){ wantPlay = !wantPlay; if (wantPlay) startAudio(); else { stopAudio(); showPlaying(false); } }
+function unlock(){                      // browsers block sound until the page is touched once
+  if (!wantPlay) return;
+  if (ac && ac.state === 'suspended') ac.resume();
+  if (!usingSynth && track.src && track.paused) track.play().catch(() => {});
+}
+['pointerdown', 'keydown'].forEach(ev => document.addEventListener(ev, unlock));
+np.addEventListener('click', togglePlay);
+startAudio();
 
 render();
 </script>
