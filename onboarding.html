@@ -8,14 +8,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+  *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text}
   :root{
-    --bg:#f5f5f5; --ink:#323232; --muted:rgba(0,0,0,.4); --faint:rgba(50,50,50,.4); --glass:rgba(245,245,245,.75);
+    --bg:#f5f5f5; --ink:#323232; --muted:rgba(0,0,0,.4); --faint:rgba(50,50,50,.4); --glass:rgba(245,245,245,.5);
     --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
     --sans:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
     color-scheme:light; box-sizing:border-box;
     padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
   }
-  :root[data-theme="dark"]{--bg:#1b1b1b; --ink:#ececec; --muted:rgba(255,255,255,.4); --faint:rgba(236,236,236,.4); --glass:rgba(27,27,27,.75); color-scheme:dark}
+  :root[data-theme="dark"]{--bg:#1b1b1b; --ink:#ececec; --muted:rgba(255,255,255,.4); --faint:rgba(236,236,236,.4); --glass:rgba(27,27,27,.5); color-scheme:dark}
   html,body{margin:0;min-height:100%}
   body{background:var(--bg);color:var(--ink);font-family:var(--mono)}
   h1,h2,p{margin:0}
@@ -39,12 +41,12 @@
   #trail{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
 
   /* ---------- Buttons and fields (from the Paper designs) ---------- */
-  .btn{display:flex;align-items:center;justify-content:center;gap:12px;font:400 16px/20px var(--mono);padding:4px 16px;border:1px solid var(--ink);border-radius:4px;background:var(--bg);color:var(--ink);cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .btn{display:flex;align-items:center;justify-content:center;gap:12px;font:400 16px/20px var(--mono);padding:4px 16px;border:1px solid var(--ink);border-radius:4px;background:var(--glass);color:var(--ink);cursor:pointer;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
   .btn:hover{background:color-mix(in srgb,var(--ink) 8%,var(--bg))}
   .btn.on,.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
   .btn.on:hover,.btn[aria-pressed="true"]:hover{background:var(--ink)}
   .btn svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.667;stroke-linecap:round;stroke-linejoin:round}
-  .field{font:400 16px/20px var(--sans);color:var(--ink);background:var(--bg);border:1px solid var(--ink);border-radius:4px;padding:4px 16px;box-sizing:border-box;min-width:0;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .field{font:400 16px/20px var(--sans);color:var(--ink);background:var(--bg);border:1px solid var(--ink);border-radius:4px;padding:4px 16px;box-sizing:border-box;min-width:0;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
   .field::placeholder{color:var(--muted)}
   .field.sug{color:var(--muted)}
   .ulink{font:400 16px/20px var(--mono);background:none;border:0;padding:0;color:var(--ink);text-decoration:underline 1px;text-decoration-skip-ink:none;text-underline-position:from-font;cursor:pointer}
@@ -56,7 +58,7 @@
   #scene pre{position:absolute;margin:0;font:400 24px/100% var(--mono);color:var(--ink);white-space:pre;text-align:center}
 
   /* ---------- The Garden Initialization modal ---------- */
-  .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(800px,calc(100vw - 32px));height:min(600px,calc(100vh - 32px));box-sizing:border-box;padding:24px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--ink);border-radius:4px;background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:2}
+  .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(800px,calc(100vw - 32px));height:min(600px,calc(100vh - 32px));box-sizing:border-box;padding:24px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--ink);border-radius:4px;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);z-index:2}
   .modal.full{left:0;top:0;transform:none;width:100%;height:100%}
   .mh{display:flex;justify-content:space-between;align-items:center;flex:none}
   .ib{width:20px;height:20px;padding:0;border:0;background:none;cursor:pointer;color:var(--ink);display:block}
@@ -65,12 +67,15 @@
   .mt{flex:none;font:400 16px/20px var(--mono)}
   .mt h1{font:inherit;text-align:center}
   .mt .rule{overflow:hidden;white-space:nowrap}
-  .mb{flex:1 1 0;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:32px}
+  .mb{flex:1 1 0;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:24px}
   .mb.fit{overflow:hidden}
-  .mb.fixed{flex:0 1 400px}
+  .mb.fixed{flex:0 0 auto;overflow:visible;gap:20px}
+  @media (max-height:660px){.mb.fixed{flex:1 1 0;overflow:auto}}
   .mc.sb{justify-content:space-between}
   .mf{flex:none;display:flex;justify-content:space-between;align-items:center}
   .dots{display:flex;align-items:center;gap:24px}
+  .stat{display:flex;flex-direction:column;align-items:center;gap:22px}
+  .loader{margin:0;min-height:150px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;font:400 28px/30px var(--mono);white-space:pre;text-align:center;color:var(--ink)}
   .dot{width:16px;height:16px;padding:0;border:0;background:none;cursor:pointer;display:block}
   .dot:disabled{cursor:default}
   .dot svg{width:16px;height:16px;display:block}
@@ -85,7 +90,7 @@
   .seg{display:flex;gap:13px}
   .seg .btn{flex:1 1 0;min-width:0}
   .types{display:flex;gap:24px;flex-wrap:wrap}
-  .dz{flex:1 1 0;min-height:96px;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;border:1px solid var(--ink);border-radius:4px;background:var(--bg);text-align:center;font:400 16px/150% var(--sans);color:var(--muted);cursor:pointer;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .dz{flex:1 1 0;min-height:96px;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;border:1px solid var(--ink);border-radius:4px;background:var(--bg);text-align:center;font:400 16px/150% var(--sans);color:var(--muted);cursor:pointer;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
   .dz.has{color:var(--ink)}
   .dz.over{background:color-mix(in srgb,var(--ink) 8%,var(--bg));outline:1px solid var(--ink);outline-offset:-1px}
   .ta{flex:1 1 0;min-height:96px;display:flex;padding:24px;box-sizing:border-box;border:1px solid var(--ink);border-radius:4px;background:var(--bg)}
@@ -130,10 +135,42 @@
 
   .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));z-index:5;background:var(--ink);color:var(--bg);font:400 13px/1.4 var(--mono);padding:6px 14px;border-radius:4px;max-width:calc(100vw - 32px);text-align:center}
 
+  .catsearch,.caret,.count,.m-only{display:none}
   @media (max-width:700px){
-    .modal{left:0;top:0;transform:none;width:100%;height:100%;border-radius:0;border-width:0}
-    .focusrow .field{width:100%}
-    .seg{flex-wrap:wrap}
+    /* Home: two small buttons (the marks still only appear as you move around) */
+    .home .stack{gap:12px}
+    .home .btn{width:172px;font-size:14px;line-height:20px;padding:5px 0}
+    /* The window is a card with room around it, vertically centred; Expand still takes it full screen */
+    .modal{width:calc(100vw - 56px);height:min(460px,calc(100vh - 48px));padding:22px 22px 20px;gap:10px}
+    .modal.full{left:0;top:0;transform:none;width:100%;height:100%;border-radius:0;border-width:0;padding:24px}
+    .mt,.q,.row,.chk,.ulink,.btn,.center,.ta textarea,.draw .hint{font-size:13px;line-height:18px}
+    .field{font-size:13px;line-height:18px;padding:3px 12px}
+    .btn{padding:3px 12px;gap:8px}
+    .btn svg{width:18px;height:18px}
+    .mc,.mb,.mb.fixed{gap:16px}
+    .grp{gap:8px}
+    .row2{flex-direction:column;align-items:stretch;gap:8px}
+    .row2 .field,.focusrow .field{width:100% !important}
+    .seg{flex-wrap:nowrap;gap:10px}
+    .types{width:100%;justify-content:space-between;gap:8px;flex-wrap:nowrap}
+    .dots{gap:7px}.dot,.dot svg{width:14px;height:14px}
+    .r-name{order:1}.g-vis{order:2}.g-time{order:3}.r-song{order:4}.g-focus{display:none}   /* the phone design: name, who can see it, time of day, music */
+    .dz{display:none}.fill.nodz{flex:0 0 auto}
+    .plabel{display:none}
+    .draw{border-radius:4px}
+    .ta{padding:16px}
+    /* Categories: one column, a search box, a collapse arrow and a count on every category */
+    .d-only{display:none}.m-only{display:inline}
+    .catsearch{display:block;flex:none}
+    .catgrid,.modal.full .catgrid{--cols:1;gap:22px;padding-right:18px}
+    .cathead{align-items:center;gap:8px}
+    .caret{display:block;flex:none;width:12px;padding:0;border:0;background:none;font:400 13px/18px var(--mono);color:var(--ink);cursor:pointer;transform:rotate(90deg)}
+    .cat.collapsed .caret{transform:none}
+    .cat.collapsed > .row{display:none}
+    .count{display:block;flex:none;font:400 13px/18px var(--mono)}
+    .cathead .rm{position:static}
+    .cat > .row{padding-left:20px}
+    .newcat > .row{padding-left:0}
   }
 </style>
 </head>
@@ -154,6 +191,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&
 const norm = s => String(s).toLowerCase().replace(/\.(app|exe|dmg|apk)$/,'').replace(/[^a-z0-9]+/g,'');
 let _u = 0; const uid = p => p + (++_u);
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const phone = () => matchMedia('(max-width: 700px)').matches;
 
 /* =====================================================================
    What each app is for. Categories are the twelve from the design, plus three that only appear when needed.
@@ -289,7 +327,7 @@ const CATALOG_SRC = `
 7|Pocket Casts|
 7|Overcast|
 8|Merlin Bird ID|merlin
-8|KiwiBird|kiwi bird
+8|Kiwibit|kiwi bird,kiwibird
 8|AllTrails|all trails
 8|iNaturalist|inaturalist
 9|Anki|
@@ -350,7 +388,7 @@ CATALOG_SRC.trim().split('\n').forEach(line=>{
 const SAMPLE = ['Google Drive','Dropbox','Photos','OneDrive','VSCO','Safari','Google Chrome','Firefox','Opera.gx','Arc Browser','DuckDuckGo','Capcut','Facetune','Lightroom','Photoshop',
   'Figma','Canva','Affinity','Paper','Illustrator','Indesign','Claude','Cursor','Codex','Notion','Obsidian','Milanote','GoogleKeep','OneNote','EverNote','Voice Memo','WisprFlow','Granola','Apple Notes','GoodNotes','Notability',
   'Doordash','UberEats','Resy','OpenTable','MyFitness Pal','Apple Health','iMessage','WhatsApp','KakaoTalk','Instagram','Tiktok','Linkedin','Youtube','Discord','Reddit','Slack','Email','Gmail',
-  'Spotify','Apple Music','Sirius.XM','NPR','SeatGeek','Stubhub','LiveNation','Merlin Bird ID','KiwiBird','Anki','Quizlet','Duolingo','Google Translate','Pinterest','Are.na','Cosmos','X',
+  'Spotify','Apple Music','Sirius.XM','NPR','SeatGeek','Stubhub','LiveNation','Merlin Bird ID','Kiwibit','Anki','Quizlet','Duolingo','Google Translate','Pinterest','Are.na','Cosmos','X',
   'BofA','Sofi','Venmo','Coinbase','Robinhood','Ramp'];
 
 /* =====================================================================
@@ -361,7 +399,7 @@ const state = {
   expanded:false, draw:null, pattern:null,     // the drawn plot outline, and its pattern (star | plus | circle)
   plot:'', focus:{audit:false, screen:false}, custom:'', time:null, visibility:null, song:null,
   mode:'file', types:{txt:false, csv:false, json:false}, fileName:'', fileApps:[], fileNote:'', list:'',
-  cats:null, sig:'', adding:null, moving:null, drag:null, focusMe:null, sample:false
+  cats:null, sig:'', adding:null, moving:null, drag:null, focusMe:null, sample:false, collapsed:new Set(), q:''
 };
 let timer = 0;
 
@@ -454,9 +492,9 @@ const CLOUD_S = ['  ︵','︵(  )','(      )','(        )','︶︶︶︶︶'];
 const CLOUD_L = [' ︵︵','︵(    )','(        )','(            )','(              )','︶︶︶︶︶︶︶︶ '];
 const SUN = ['\\ | /','— ( ) —','/ | \\'];
 const SCENE = [
-  [['{+} | ~|~'], 'left:calc(50% - 547.27px);top:calc(50% + 276px);transform:translate(-50%,-50%)'],
-  [['vvv (  )','| \\|/'], 'left:calc(50% - 4.89px);top:calc(50% + 264px);transform:translate(-50%,-50%)'],
-  [['[=] | ~|~'], 'left:calc(50% + 528.49px);top:calc(50% + 276px);transform:translate(-50%,-50%)'],
+  [['{+}','|','~|~'], 'left:calc(50% - 547.27px);top:calc(50% + 276px);transform:translate(-50%,-50%)'],
+  [['vvv','(   )','|','\\|/'], 'left:calc(50% - 4.89px);top:calc(50% + 264px);transform:translate(-50%,-50%)'],
+  [['[=]','|','~|~'], 'left:calc(50% + 528.49px);top:calc(50% + 276px);transform:translate(-50%,-50%)'],
   [['||'], 'left:1020.85px;top:796px;line-height:30px', 'b'],
   [['||'], 'left:50%;top:956px;transform:translateX(-50%);line-height:30px', 'b'],
   [['||'], 'left:31.67px;top:950px;line-height:30px', 'b'],
@@ -467,8 +505,8 @@ const SCENE = [
   [SUN, 'left:50%;top:65px;transform:translateX(-50%);line-height:150%'],
   [CLOUD_L, 'left:470.67px;top:388px;transform:rotate(180deg);transform-origin:0 0'],
   [CLOUD_L, 'left:1171.36px;top:25px'],
-  [['oo','o * o','oo','| |'], 'left:1013.05px;top:873px'],
-  [['^','< @ >','⌄','| |'], 'left:355.17px;top:876px']
+  [['oo','o * o','oo','|','|'], 'left:1013.05px;top:873px'],
+  [['^','< @ >','v','|','|'], 'left:355.17px;top:876px']
 ];
 /* Grass is the only thing that moves. Every blade leans the same way at the same moment, exactly like the garden. */
 const GRASS_FRAMES = {b:['\\\\','||','//'], t:['\\\\/','\\|/','\\//']};      // lean left, upright, lean right
@@ -479,20 +517,45 @@ function hash(i, j, k){
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 }
 const grassPre = (kind, css, cls='') => `<pre class="grass ${cls}" data-k="${kind}" data-f="1" style="${css}">${GRASS_FRAMES[kind][1]}</pre>`;
-const SCENE_HTML = SCENE.map(([l,css,kind]) => kind ? grassPre(kind, css) : `<pre style="${css}">${esc(l.join('\n'))}</pre>`).join('');
+const DAY_SKY = new Set([CLOUD_S, CLOUD_L, SUN]);
+const sceneItem = ([l,css,kind]) => kind ? grassPre(kind, css) : `<pre style="${css}">${esc(l.join('\n'))}</pre>`;
+const GROUND_HTML = SCENE.filter(it => !DAY_SKY.has(it[0])).map(sceneItem).join('');
+const DAY_SKY_HTML = SCENE.filter(it => DAY_SKY.has(it[0])).map(sceneItem).join('');
+/* Night sky: a crescent where the sun was, and four-point stars on an evenly staggered lattice, each with the same '+' and 'o' beside it.
+   The lattice is centred on the frame and keeps going to the edges of whatever screen this is, so the sky never runs out. */
+const MOON = ['  ,-,','/ /','\\ \\','  `-`'], STAR4 = ['^','<   >','v'];
+const STAR_DX = 432, STAR_DY = 240, STAR_TOP = 90, STAR_ROWS_TO = 570;
+function nightSkyHtml(left, right, top){
+  let out = `<pre style="left:50%;top:65px;transform:translateX(-50%);line-height:150%;text-align:left">${esc(MOON.join('\n'))}</pre>`;
+  const k0 = Math.ceil((top - STAR_TOP) / STAR_DY) - 1;
+  for (let k = k0; STAR_TOP + k * STAR_DY <= STAR_ROWS_TO; k++){
+    const y = STAR_TOP + k * STAR_DY, odd = ((k % 2) + 2) % 2, shift = odd ? STAR_DX / 2 : 0;
+    for (let m = Math.floor((left - 60 - shift - 720) / STAR_DX); 720 + shift + m * STAR_DX <= right + 60; m++){
+      const x = 720 + shift + m * STAR_DX;
+      if (x < left - 60) continue;
+      if (k === 0 && Math.abs(x - 720) < 140) continue;                                // room for the moon
+      out += `<pre style="left:${x}px;top:${y}px;transform:translate(-50%,-50%)">${esc(STAR4.join('\n'))}</pre>`
+           + `<pre style="left:${x + 62}px;top:${y - 34}px;transform:translate(-50%,-50%)">+</pre>`
+           + `<pre style="left:${x - 58}px;top:${y + 46}px;transform:translate(-50%,-50%)">o</pre>`;
+    }
+  }
+  return out;
+}
+const isNight = () => document.documentElement.getAttribute('data-theme') === 'dark';
+const HORIZON = 700;     // grass only grows below this line of the frame; above it is sky
 const TUFTS = [[628,880,'b'],[866,671,'b'],[77,373,'b'],[1176,373,'b'],[1390,155,'b'],[310,155,'t'],[1346,671,'t'],[96,880,'t'],[310,671,'t'],[1132,880,'t']];
 function fitScene(){
-  const vw = window.innerWidth, vh = window.innerHeight, sc = Math.min(vw/1440, vh/1024), W = vw/sc, H = vh/sc;
+  const vw = window.innerWidth, vh = window.innerHeight, sc = vw < 700 && vh > vw ? vw/900 : Math.min(vw/1440, vh/1024), W = vw/sc, H = vh/sc;       // a phone held upright shows the middle of the scene, larger
   $('#scene').style.setProperty('--s', sc.toFixed(4));
   /* the artwork is one 1440 x 1024 frame; repeat grass around it so the garden reaches every edge of the screen */
   const i0 = Math.floor((1440-W)/2/1440), i1 = Math.floor((1440+W)/2/1440), j0 = Math.floor((1024-H)/2/1024), j1 = Math.floor((1024+H)/2/1024);
   let extra = '';
   for (let j=j0; j<=j1; j++) for (let i=i0; i<=i1; i++){
     if (!i && !j) continue;
-    TUFTS.forEach(([x,y,k],n) => { extra += grassPre(k, `left:${(i*1440 + x + (hash(i,j,n*3)-.5)*90).toFixed(0)}px;top:${(j*1024 + y + (hash(i,j,n*3+1)-.5)*70).toFixed(0)}px;line-height:30px`, 'extra'); });
-    for (let n=0; n<8; n++) extra += grassPre(hash(i,j,100+n*3) < .5 ? 'b' : 't', `left:${(i*1440 + 40 + hash(i,j,101+n*3)*1320).toFixed(0)}px;top:${(j*1024 + 40 + hash(i,j,102+n*3)*904).toFixed(0)}px;line-height:30px`, 'extra');
+    TUFTS.forEach(([x,y,k],n) => { const gx = i*1440 + x + (hash(i,j,n*3)-.5)*90, gy = j*1024 + y + (hash(i,j,n*3+1)-.5)*70; if (gy >= HORIZON) extra += grassPre(k, `left:${gx.toFixed(0)}px;top:${gy.toFixed(0)}px;line-height:30px`, 'extra'); });
+    for (let n=0; n<8; n++){ const gx = i*1440 + 40 + hash(i,j,101+n*3)*1320, gy = j*1024 + 40 + hash(i,j,102+n*3)*904; if (gy >= HORIZON) extra += grassPre(hash(i,j,100+n*3) < .5 ? 'b' : 't', `left:${gx.toFixed(0)}px;top:${gy.toFixed(0)}px;line-height:30px`, 'extra'); }
   }
-  $('#scene').innerHTML = `<div class="stage">${SCENE_HTML}${extra}</div>`;
+  $('#scene').innerHTML = `<div class="stage">${GROUND_HTML}${isNight() ? nightSkyHtml((1440-W)/2, (1440+W)/2, (1024-H)/2) : DAY_SKY_HTML}${extra}</div>`;
   windStep(true);
 }
 function windStep(force, t = performance.now()/1000){
@@ -552,36 +615,37 @@ function homeHtml(){
 function plotHtml(){
   const f = state.focus;
   return modal('plot', `
-    <div class="row2"><label class="q" for="plot">Name your plot:</label>
+    <div class="row2 r-name"><label class="q" for="plot">Name your plot:</label>
       <input class="field" id="plot" style="width:241.33px" maxlength="24" placeholder="whimsical-glade" value="${esc(state.plot)}" autocomplete="off" spellcheck="false"></div>
-    <div class="grp"><div class="q">What’s your core focus?</div>
+    <div class="grp g-focus"><div class="q">What’s your core focus?</div>
       <div class="focusrow">
         <button class="chk" role="checkbox" aria-checked="${f.audit}" data-focus="audit">${checkTxt(f.audit)} System audit</button>
         <button class="chk" role="checkbox" aria-checked="${f.screen}" data-focus="screen">${checkTxt(f.screen)} Reduce screentime</button>
         <input class="field" id="custom" placeholder="Enter your own" value="${esc(state.custom)}" maxlength="40" autocomplete="off" aria-label="Enter your own focus">
       </div></div>
-    <div class="grp"><div class="q">What’s your favorite time of day?</div>
+    <div class="grp g-time"><div class="q">What’s your favorite time of day?</div>
       <div class="seg" role="group" aria-label="Favorite time of day">
         <button class="btn" data-time="day" ${pressed(state.time==='day')}>${ICON_SUN}Day</button>
         <button class="btn" data-time="night" ${pressed(state.time==='night')}>${ICON_MOON}Night</button>
         <button class="btn" data-time="system" ${pressed(state.time==='system')}>System</button>
       </div></div>
-    <div class="grp"><div class="q">Would you like others to be able to view your plot?</div>
-      <div class="seg" role="group" aria-label="Who can view your plot">
+    <div class="grp g-vis"><div class="q">Would you like others to be able to view your app data?</div>
+      <div class="seg" role="group" aria-label="Who can see your app data">
         <button class="btn" data-vis="public" ${pressed(state.visibility==='public')}>Public</button>
         <button class="btn" data-vis="private" ${pressed(state.visibility==='private')}>Private</button>
       </div></div>
-    <div class="row2"><label class="q" for="song">Add your own music:</label>
+    <div class="row2 r-song"><label class="q" for="song">Add your own music:</label>
       <input class="field" id="song" type="text" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste link here" value="${esc(state.song || '')}"></div>
   `, {fixed:true, sb:true});
 }
 /* ---- Draw your plot of land ---- */
-const PAT = {star:{w:60,h:62,g:'*',size:24}, plus:{w:44,h:44,g:'\u22B9',size:15}, circle:{w:70,h:38,g:'o',size:12}};
+const PAT = {"glyphs":{"circle":{"d":"M3.6 10.7C3.6 10.5 3.3 10.3 2.8 10.1C1.9 9.7 1.1 8.7 0.9 8C0.8 7.4 0.5 6.9 0.2 6.9C0 6.9 -0 6.6 -0 5.6L-0 4.3L0.4 4.1C0.7 3.9 0.8 3.7 0.9 3.2C1.2 2.2 2.1 1.2 3 0.9C3.5 0.8 3.7 0.6 3.9 0.4L4.1 0L5.6 0C7.1 0 7.2 0 7.3 0.3C7.4 0.5 7.6 0.6 8.1 0.7C8.6 0.9 8.9 1.1 9.8 2.1L11 3.2L11 5.5C11 7.8 11 7.8 10.7 7.9C10.5 8.1 10.2 8.4 9.7 9.2C9.6 9.5 9.3 9.7 8.7 10C8.2 10.2 7.9 10.5 7.8 10.7L7.6 11L5.7 11L3.8 11L3.6 10.7ZM7.2 8.7C8.6 7.9 8.9 7.2 8.9 5.3C8.8 3.8 8.5 3.4 7.2 2.6C6 1.9 5.5 1.9 4.2 2.6C3.2 3.2 2.9 3.6 2.9 4.1C2.9 4.2 2.7 4.5 2.6 4.8C2.2 5.4 2.2 5.6 2.5 6.2C2.6 6.5 2.8 6.9 2.9 7.2C3 7.8 4 8.6 4.9 9C5.5 9.2 6.5 9.1 7.2 8.7Z","w":11,"h":11},"plus":{"d":"M6.6 14.2C6.6 13.8 6.6 12.8 6.6 12C6.5 10.6 6.5 10.6 6.8 10.3C7.1 10 7.2 10 7.7 10C8.5 10.1 8.5 10.3 8.5 12.8L8.5 15L7.6 15L6.6 15L6.6 14.2ZM0 7.2L0 6L2.2 6C4.9 6 5 6 5 7.1C5 7.7 4.9 7.9 4.7 8.2L4.5 8.5L2.2 8.5L0 8.5L0 7.2ZM10.3 8.2C9.9 7.6 9.9 6.6 10.2 6.3C10.5 6 10.6 6 12.8 6L15 6L15 7.2C15 8.6 15.2 8.5 12.5 8.5L10.5 8.5L10.3 8.2ZM7.1 4.4C6.6 4.1 6.5 3.5 6.6 1.7L6.7 0L7.6 0L8.5 0L8.5 1.9C8.5 3.8 8.5 3.9 8.2 4.2C7.9 4.5 7.5 4.6 7.1 4.4Z","w":15,"h":15},"star":{"d":"M5.9 23.8C5.9 23.5 5.4 23 4.9 22.9C4.1 22.7 4 22.3 4.5 21.6C4.7 21.3 4.9 20.9 5 20.7C5.1 20.5 5.3 20.2 5.5 20C5.7 19.9 6 19.5 6.1 19.3C6.2 19 6.7 18.5 7.1 18C7.4 17.6 7.8 17 7.9 16.8C8.1 16.5 8.3 16.1 8.5 15.9C9.2 15.2 9.5 14.6 9.5 14.3C9.3 13.8 8.5 13.4 7.2 13.1C6.6 12.9 5.9 12.7 5.6 12.5C5.4 12.4 4.7 12.2 4.2 12.1C3.6 11.9 3 11.7 2.8 11.6C2.6 11.5 2.2 11.3 1.9 11.3C1.6 11.2 1.1 11 0.8 10.8L0.2 10.5L0.5 10.2C0.8 9.8 1 9.4 1 9C1 8 2 7.7 3.5 8.4C3.9 8.6 4.7 8.8 5.2 8.9C5.6 9 6.3 9.3 6.6 9.4C7 9.6 7.6 9.8 8.1 9.9C8.6 10 9.3 10.3 9.6 10.4C10.2 10.7 10.3 10.8 10.6 10.6L10.9 10.4L10.9 6C10.9 1.8 10.9 1.5 11.1 0.8L11.4 -0L12.5 -0L13.6 0L13.9 0.7L14.3 1.4L14.2 5.8C14.2 11.1 14.2 10.9 15.5 10.4C15.8 10.3 16.4 10.1 16.9 10C17.3 9.9 18 9.7 18.4 9.5C18.7 9.3 19.4 9.1 19.9 9C20.3 8.9 20.8 8.8 21.1 8.6C21.3 8.5 21.6 8.4 21.8 8.4C22 8.4 22.4 8.3 22.8 8.2C23.5 7.9 23.9 8 24.2 8.6C24.4 8.9 24.6 9.2 24.8 9.3C25 9.4 25 9.5 25 10.1L25 10.8L24.4 11C24.1 11.1 23.6 11.3 23.3 11.4C23.1 11.6 22.6 11.8 22.2 11.9C21.1 12.1 20.6 12.3 20.2 12.5C19.9 12.7 19.4 12.9 18.4 13.1C18.1 13.1 17.5 13.4 16.9 13.7C15.6 14.3 15.5 14.5 16.3 15.2C16.6 15.5 16.9 15.8 16.9 16C17 16.2 17.2 16.5 17.4 16.8C17.7 17 18.2 17.6 18.5 18.2C18.9 18.8 19.6 19.8 20.1 20.4C21.3 22 21.3 22.5 20.1 23.1C19.8 23.3 19.6 23.5 19.5 23.7C19.3 24.2 18.3 24.1 18.2 23.6C18.1 23.4 17.9 23 17.7 22.8C17.4 22.5 17.1 22.1 17 21.9C16.9 21.6 16.6 21.3 16.4 21.1C16.3 21 16 20.6 15.9 20.4C15.7 20.1 15.5 19.8 15.4 19.7C15.3 19.7 15.1 19.3 14.9 18.9C14.8 18.6 14.5 18.2 14.3 18.1C14.2 18 13.8 17.5 13.5 17.1C12.9 16.2 12.6 16.1 12.2 16.5C11.7 17.2 11.2 17.9 11 18.3C10.9 18.5 10.6 18.8 10.4 19C10.3 19.2 10 19.5 9.9 19.7C9.8 19.9 9.4 20.5 9 21C8.6 21.5 8.2 21.9 8.2 22C8.2 22.1 8 22.4 7.6 22.8C7.3 23.1 7 23.6 7 23.7C6.9 24 5.9 24.1 5.9 23.8Z","w":25,"h":24}},"tiles":{"circle":{"w":80,"h":80,"p":[[20,20],[60,60]]},"plus":{"w":80,"h":80,"p":[[20,20],[60,60]]},"star":{"w":120,"h":120,"p":[[30,30],[90,90]]}}};
+const SK = 24 / 46.8;
 const PLABEL = {star:'*', plus:'\u22B9', circle:'\u00B0'};
-function patternDefs(){
-  return Object.keys(PAT).map(k => { const p = PAT[k], st = `font-size:${p.size}px`;
-    return `<pattern id="pat-${k}" width="${p.w}" height="${p.h}" patternUnits="userSpaceOnUse"><rect width="${p.w}" height="${p.h}" style="fill:var(--bg)"/>` +
-      `<text class="pglyph" style="${st}" x="${p.w/4}" y="${p.h/4}">${p.g}</text><text class="pglyph" style="${st}" x="${p.w*3/4}" y="${p.h*3/4}">${p.g}</text></pattern>`; }).join('');
+function patternDefs(){               // the design's own dot marks on a diagonal grid
+  return ['star','plus','circle'].map(k => { const tl = PAT.tiles[k], g = PAT.glyphs[k];
+    const marks = tl.p.map(([x, y]) => `<path transform="translate(${(x - g.w/2).toFixed(2)} ${(y - g.h/2).toFixed(2)})" d="${g.d}"/>`).join('');
+    return `<pattern id="pat-${k}" width="${tl.w}" height="${tl.h}" patternUnits="userSpaceOnUse" patternTransform="scale(${SK.toFixed(4)})"><rect width="${tl.w}" height="${tl.h}" style="fill:var(--bg)"/><g style="fill:var(--ink)">${marks}</g></pattern>`; }).join('');
 }
 function smoothClosed(pts){
   const n = pts.length, f = v => v.toFixed(1);
@@ -593,11 +657,11 @@ function smoothClosed(pts){
   return d + 'Z';
 }
 function drawHtml(){
-  const opts = Object.keys(PAT).map(k => `<button class="chk" role="checkbox" aria-checked="${state.pattern===k}" data-pattern="${k}">${checkTxt(state.pattern===k)} ${PLABEL[k]}</button>`).join('');
+  const opts = ['star','plus','circle'].map(k => `<button class="chk" role="checkbox" aria-checked="${state.pattern===k}" data-pattern="${k}">${checkTxt(state.pattern===k)} ${PLABEL[k]}</button>`).join('');
   return modal('draw', `
     <div class="q">Draw your plot of land.</div>
     <div class="draw" id="draw" role="application" aria-label="Drawing area. Click and drag to draw the outline of your plot."><svg id="drawsvg" aria-hidden="true"></svg><div class="hint" id="drawhint">Click and drag to draw</div></div>
-    <div class="row2"><span class="q">Choose your pattern:</span><div class="types">${opts}</div></div>
+    <div class="row2"><span class="q plabel">Choose your pattern:</span><div class="types">${opts}</div></div>
   `, {fit:true});
 }
 function paintDraw(live){
@@ -647,18 +711,41 @@ function devicesHtml(){
         <button class="btn" data-mode="list" ${pressed(!file)}>List</button>
       </div></div>`;
   const fileBody = `
-      <div class="row2" style="flex-wrap:wrap"><span class="q">Choose your file type:</span>
+      <div class="fill nodz"><div class="row2" style="flex-wrap:wrap"><span class="q">Choose your file type:</span>
         <div class="types">${['txt','csv','json'].map(k=>`<button class="chk" role="checkbox" aria-checked="${t[k]}" data-type="${k}">${checkTxt(t[k])} .${k}</button>`).join('')}</div></div>
-      <div class="dz${state.fileName?' has':''}" id="dz" data-act="pick" tabindex="0" role="button" aria-label="Drop your file here, or press Enter to choose one">${esc(state.fileNote || 'Drop your file here')}</div>
+        <div class="dz${state.fileName?' has':''}" id="dz" data-act="pick" tabindex="0" role="button" aria-label="Drop your file here, or press Enter to choose one">${esc(state.fileNote || 'Drop your file here')}</div></div>
       <button class="btn on" data-act="pick" style="align-self:stretch">Upload</button>`;
   const listBody = `
       <div class="fill"><label class="q" for="list">One app per line, or separated by commas</label>
-        <div class="ta"><textarea id="list" placeholder="Notion&#10;Figma&#10;Spotify" spellcheck="false">${esc(state.list)}</textarea></div></div>
+        <div class="ta"><textarea id="list" placeholder="${phone() ? 'Notion, Figma, Spotify' : 'Notion&#10;Figma&#10;Spotify'}" spellcheck="false">${esc(state.list)}</textarea></div></div>
       <button class="btn on" data-act="upload" style="align-self:stretch">Upload</button>`;
-  return modal('devices', head + (file ? fileBody : listBody), {fixed:true});
+  return modal('devices', head + (file ? fileBody : listBody));   // the upload area fills the space, so Upload always sits just above Back / Next
+}
+/* Loading screens: a flower grows from a seed (stem, leaves, bud, bloom), a different flower each time */
+const F_EQ = ['[=]','|','~|~'], F_HASH = ['(#)','|','~|~'], F_PLUS = ['{+}','|','~|~'], F_WAVE = ['~~~','\\ /','|','\\|/'], F_VVV = ['vvv','(   )','|','\\|/'], F_STAR = ['^','< @ >','v','|','|'], F_RING = ['oo','o * o','oo','|','|'];
+const BUD = {'[=]':['[.]'], '(#)':['(.)'], '{+}':['{.}'], 'vvv':['vv','( )'], '~~~':['.','\\/'], '^':['^','(@)','v'], 'oo':['.','(*)','.']};
+function growFrames(mark){
+  const last = mark[mark.length - 1], base = /[\\~]/.test(last) ? last : null, body = base ? mark.slice(0, -1) : mark;
+  const stems = body.filter(l => l === '|'), head = body.filter(l => l !== '|'), bud = BUD[head[0]] || head.map(() => '.'), tail = [...stems, ...(base ? [base] : [])];
+  const f = [['o'], ['|'], base ? [base] : stems.slice()];
+  if (base) f.push(['|', base]);
+  f.push(['Y', ...tail], [...bud, ...tail], mark);
+  return f;
+}
+let loaderStop = null, loaderLast = -1;
+function startLoader(el){
+  const pool = [F_EQ, F_HASH, F_PLUS, F_WAVE, F_VVV, F_STAR, F_RING]; let timer = 0, stopped = false;
+  const play = () => {
+    let k; do { k = Math.floor(Math.random() * pool.length); } while (k === loaderLast); loaderLast = k;
+    const frames = growFrames(pool[k]); let i = reduced() ? frames.length - 1 : 0;
+    const step = () => { if (stopped) return; el.textContent = frames[i].join('\n'); i++; timer = setTimeout(i < frames.length ? step : () => { timer = setTimeout(play, 600); }, i < frames.length ? 380 : 900); };
+    step();
+  };
+  play();
+  return () => { stopped = true; clearTimeout(timer); };
 }
 function statusHtml(step, word){
-  return modal(step, `<div class="center" role="status"><span id="dots" data-word="${word}">${word}...</span></div>`);
+  return modal(step, `<div class="center" role="status"><div class="stat"><span id="dots">${word}…</span><pre class="loader" id="loader" aria-hidden="true"></pre></div></div>`);
 }
 function catsHtml(){
   const options = c => state.cats.map(x=>`<option value="${x.id}" ${x.id===c.id?'selected':''}>${esc(x.name)}</option>`).join('');
@@ -674,34 +761,47 @@ function catsHtml(){
     ? `<div class="row"><div class="l" style="flex:1"><span class="tw tw2">└───</span><input class="field" data-addin="${c.id}" data-focus-me="1" placeholder="App name" maxlength="60" autocomplete="off" aria-label="Add an app to ${esc(c.name)}"></div></div>`
     : `<div class="row"><div class="l"><span class="tw tw2">└───</span><button class="rm" data-add="${c.id}" aria-label="Add an app to ${esc(c.name)}">[+]</button></div></div>`;
   const grid = state.cats.map(c=>`
-    <div class="cat" data-cat="${c.id}">
-      <div class="cathead"><input class="field cat-name${c.edited?'':' sug'}" data-rename="${c.id}" value="${esc(c.name)}" maxlength="32" aria-label="Category name" ${state.focusMe===c.id?'data-focus-me="1"':''}>
-        ${c.apps.length ? '' : `<button class="rm" data-rmcat="${c.id}" aria-label="Delete empty category ${esc(c.name)}">[-]</button>`}</div>
+    <div class="cat${state.collapsed.has(c.id) ? ' collapsed' : ''}" data-cat="${c.id}">
+      <div class="cathead"><button class="caret" data-collapse="${c.id}" aria-expanded="${!state.collapsed.has(c.id)}" aria-label="Show or hide ${esc(c.name)}">&gt;</button><input class="field cat-name${c.edited?'':' sug'}" data-rename="${c.id}" value="${esc(c.name)}" maxlength="32" aria-label="Category name" ${state.focusMe===c.id?'data-focus-me="1"':''}>
+        ${c.apps.length ? '' : `<button class="rm" data-rmcat="${c.id}" aria-label="Delete empty category ${esc(c.name)}">[-]</button>`}<span class="count" aria-hidden="true">(${c.apps.length})</span></div>
       ${rows(c)}${adder(c)}
     </div>`).join('') + `<div class="cat newcat"><div class="row"><div class="l"><button class="rm" data-newcat="1">[+] New category</button></div></div></div>`;
   return modal('categories', `
-    <div class="q">Here’s your suggested categorization. Drag and drop to rearrange, customize category names, or add anything we missed.</div>
+    <div class="q">Here’s your suggested categorization. <span class="d-only">Drag and drop to rearrange, customize category names, or add anything we missed.</span><span class="m-only">Rearrange or add anything we missed.</span></div>
+    <input class="field catsearch" id="catsearch" type="search" placeholder="Search" value="${esc(state.q || '')}" autocomplete="off" aria-label="Search your apps">
     <div class="catgrid" id="catgrid">${grid}</div>`, {fit:true});
 }
 
 /* =====================================================================
    Rendering and moving between steps
    ===================================================================== */
+function filterCats(q){                 // narrow the list to what matches; nothing is rebuilt, so the search box keeps focus
+  state.q = q; const k = norm(q);
+  document.querySelectorAll('#catgrid .cat[data-cat]').forEach(cat => {
+    const nameHit = !!k && norm(cat.querySelector('.cat-name').value).includes(k); let any = false;
+    cat.querySelectorAll('.row[data-app]').forEach(r => { const nm = r.querySelector('.nm'), hit = !k || nameHit || !nm || norm(nm.textContent).includes(k); r.hidden = !hit; if (hit) any = true; });
+    cat.querySelectorAll('.row:not([data-app])').forEach(r => { r.hidden = !!k; });
+    cat.hidden = !!k && !any && !nameHit;
+  });
+  const nc = document.querySelector('#catgrid .newcat'); if (nc) nc.hidden = !!k;
+}
+document.addEventListener('input', e => { if (e.target.matches && e.target.matches('.catsearch')) filterCats(e.target.value); });
 function render(){
   const s = state.step, home = s==='home';
   const grid = $('#catgrid'), keep = grid ? grid.scrollTop : 0;
   $('#scene').hidden = home;
   $('#main').innerHTML = home ? homeHtml() : s==='plot' ? plotHtml() : s==='draw' ? drawHtml() : s==='devices' ? devicesHtml()
-    : s==='sorting' ? statusHtml('sorting','Sorting') : s==='planting' ? statusHtml('planting','Planting') : catsHtml();
+    : s==='sorting' ? statusHtml('sorting','Sorting') : s==='planting' ? statusHtml('planting', phone() ? 'Initializing' : 'Planting') : catsHtml();
   if (home) field.resize(); else field.stop();
   if (s==='draw') paintDraw();
-  const g = $('#catgrid'); if (g) g.scrollTop = keep;
+  const g = $('#catgrid'); if (g){ g.scrollTop = keep; if (state.q) filterCats(state.q); }
   const me = document.querySelector('[data-focus-me]'); if (me){ me.focus(); if (me.select && me.tagName==='INPUT') me.select(); }
   state.focusMe = null;
-  const d = $('#dots'); if (d && !reduced()){ let n = 0; timer && clearInterval(timer.dots); timer = timer || {}; timer.dots = setInterval(()=>{ const el = $('#dots'); if (!el) return clearInterval(timer.dots); n = (n+1)%4; el.textContent = el.dataset.word + '.'.repeat(n||3).padEnd(n||3,'.'); }, 380); }
+  if (loaderStop){ loaderStop(); loaderStop = null; }
+  const L = $('#loader'); if (L) loaderStop = startLoader(L);
 }
 function go(step, opts={}){
-  clearTimeout(timer && timer.t); if (timer && timer.dots) clearInterval(timer.dots);
+  clearTimeout(timer && timer.t); if (loaderStop){ loaderStop(); loaderStop = null; }
   timer = {};
   state.step = step; state.adding = null; state.moving = null;
   render(); window.scrollTo(0,0);
@@ -744,9 +844,10 @@ function enterGarden(){ try { sessionStorage.setItem('dg:entered', '1'); } catch
    Events
    ===================================================================== */
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-act],[data-focus],[data-time],[data-vis],[data-mode],[data-type],[data-pattern],[data-dot],[data-move],[data-rm],[data-rmcat],[data-add],[data-newcat]');
+  const t = e.target.closest('[data-act],[data-focus],[data-time],[data-vis],[data-mode],[data-type],[data-pattern],[data-dot],[data-move],[data-rm],[data-rmcat],[data-add],[data-newcat],[data-collapse]');
   if (!t) return;
   const d = t.dataset;
+  if (d.collapse){ const cat = t.closest('.cat'), on = cat.classList.toggle('collapsed'); on ? state.collapsed.add(d.collapse) : state.collapsed.delete(d.collapse); t.setAttribute('aria-expanded', !on); return; }
   if (d.focus){ state.focus[d.focus] = !state.focus[d.focus]; t.setAttribute('aria-checked', state.focus[d.focus]); t.textContent = `${checkTxt(state.focus[d.focus])} ${d.focus==='audit'?'System audit':'Reduce screentime'}`; return; }
   if (d.time){ state.time = d.time; t.parentElement.querySelectorAll('.btn').forEach(b=>b.setAttribute('aria-pressed', b===t)); applyTime(); return; }
   if (d.vis){ state.visibility = d.vis; t.parentElement.querySelectorAll('.btn').forEach(b=>b.setAttribute('aria-pressed', b===t)); return; }
@@ -775,22 +876,24 @@ document.addEventListener('click', e => {
     case 'next':
       if (state.step==='plot') go('draw');
       else if (state.step==='draw') go('devices');
-      else if (state.step==='devices'){ go('sorting'); timer.t = setTimeout(sortNow, reduced() ? 200 : 1700); }
+      else if (state.step==='devices'){ go('sorting'); timer.t = setTimeout(sortNow, reduced() ? 200 : 2800); }
       else if (state.step==='sorting'){ sortNow(); }
-      else if (state.step==='categories'){ go('planting'); timer.t = setTimeout(finish, reduced() ? 200 : 1500); }
+      else if (state.step==='categories'){ go('planting'); timer.t = setTimeout(finish, reduced() ? 200 : 2800); }
       else if (state.step==='planting') finish();
       break;
     case 'pick': { const picked = Object.keys(state.types).filter(k=>state.types[k]); $('#devfile').accept = picked.length ? picked.map(k=>'.'+k).join(',') : '.txt,.csv,.tsv,.json'; $('#devfile').click(); break; }
     case 'upload': {                       // the List modal's Upload button
       if (!state.list.trim()){ toast('Add at least one app first.'); break; }
-      go('sorting'); timer.t = setTimeout(sortNow, reduced() ? 200 : 1700); break;
+      go('sorting'); timer.t = setTimeout(sortNow, reduced() ? 200 : 2800); break;
     }
   }
 });
 function applyTime(){
   const t = state.time==='day' ? 'light' : state.time==='night' ? 'dark' : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   document.documentElement.setAttribute('data-theme', t);
+  fitScene();                              // swap the sky: sun and clouds by day, moon and stars by night
 }
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (state.time === 'system') applyTime(); });
 document.addEventListener('input', e => {
   const t = e.target;
   if (t.id==='plot') state.plot = t.value;
@@ -949,6 +1052,7 @@ window.addEventListener('resize', () => { if (state.step==='home') field.resize(
 let savedTheme = null; try { savedTheme = localStorage.getItem(THEME_KEY); } catch (e) {}
 document.documentElement.setAttribute('data-theme', savedTheme==='light' || savedTheme==='dark' ? savedTheme : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
 if (savedTheme==='light' || savedTheme==='dark') state.time = savedTheme==='light' ? 'day' : 'night';
+fitScene();
 render();
 </script>
 </body>
