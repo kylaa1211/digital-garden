@@ -1,5 +1,8 @@
 /* Shared controls for onboarding and habitat screens. */
 :root {
+  accent-color: var(--ink);
+  --stroke-weight: 1.25;
+  --border-weight: 1.25px;
   --button-height: 36px;
   --button-font-size: 14px;
   --button-line-height: 20px;
@@ -88,4 +91,487 @@ input.field,
   .rename-input {
     padding: 9px var(--button-padding-x);
   }
+}
+
+
+/* Keep interface outlines consistent across both pages. */
+.btn,
+.home .btn,
+.modal,
+.gmenu,
+.rail,
+.theme,
+.tray,
+input.field,
+.rename-input,
+.ta,
+.draw,
+.gshape,
+.applications-finder {
+  border-width: var(--border-weight);
+}
+.btn svg,
+.home .btn svg,
+.ib svg,
+.icon-btn svg,
+.gclose svg,
+.rail svg,
+.theme svg,
+.finder-sidebar svg {
+  stroke-width: var(--stroke-weight);
+}
+
+
+.tree-line,
+.compost-tile,
+.plot,
+.gshape path {
+  stroke-width: var(--stroke-weight);
+  stroke: var(--ink);
+}
+.tile rect {
+  stroke: var(--ink);
+}
+.ascii,
+#scene pre,
+.tray svg text,
+.pglyph {
+  font-weight: 400;
+}
+
+/* SVG outlines retain the same screen weight when their viewBox scales. */
+.tree-line,
+.compost-tile,
+.plot,
+.gshape path,
+.tile rect,
+.tray svg rect {
+  vector-effect: non-scaling-stroke;
+  stroke-width: var(--stroke-weight);
+}
+.gmenu hr {
+  border-top-width: var(--border-weight);
+}
+
+ .tree-group .tree-label {
+  display: none;
+}
+.tree-hover-area {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 120px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  pointer-events: stroke;
+}
+
+/* Dialog outlines share the same weight as buttons and app tiles. */
+dialog.card,
+dialog.card .who img,
+dialog.card .who svg {
+  border: var(--border-weight) solid var(--ink);
+}
+dialog.card .dash {
+  box-sizing: border-box;
+  height: 0;
+  min-height: 0;
+  border-top: var(--border-weight) dashed var(--ink);
+  font-size: 0;
+  line-height: 0;
+  color: transparent;
+  flex-shrink: 0;
+}
+dialog.card .who svg rect {
+  stroke-width: 0;
+}
+
+/* Consistent typography for Umwelt action dialogs. */
+dialog.card {
+  font-size: 14px;
+  line-height: 20px;
+}
+dialog.card h2,
+dialog.card .offmain h2 {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+}
+dialog.card .who,
+dialog.card .facts,
+dialog.card .linkish,
+dialog.card .offbody .sub,
+dialog.card .sub {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+dialog.card .actions .btn,
+dialog.card .actions.col .btn {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* Shared panel and action-dialog typography. */
+.gmenu,
+dialog.card,
+dialog.card .who,
+dialog.card .facts,
+dialog.card .linkish,
+dialog.card .sub,
+dialog.card .offbody .sub,
+.gmenu .gfacts,
+.gmenu .cnone,
+.gmenu .ctotal,
+:root[data-theme] .gmenu button.gitem {
+  font-family: var(--mono);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+.gmenu h3,
+.gmenu #cmenu-body h4,
+dialog.card h2,
+dialog.card .offmain h2 {
+  font-family: var(--mono);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 500;
+}
+
+/* Reserve a separate header row for action-dialog close controls. */
+dialog.card .dlg-x {
+  position: static;
+  align-self: flex-end;
+  margin: -8px -8px 8px 0;
+  flex-shrink: 0;
+}
+dialog.card {
+  height: auto;
+  min-height: 360px;
+}
+dialog.card .actions {
+  padding-top: 24px;
+}
+.modes .btn svg,
+.gclose svg,
+.chev,
+.icon-btn svg,
+.ib svg,
+.rail svg,
+.theme svg {
+  stroke-width: var(--stroke-weight);
+  vector-effect: non-scaling-stroke;
+}
+@media (max-width: 700px) {
+  dialog.card {
+    height: auto;
+    min-height: 340px;
+    max-height: calc(100svh - 32px);
+    overflow-y: auto;
+  }
+}
+
+dialog.card {
+  height: 420px;
+  min-height: 0;
+  max-height: calc(100svh - 32px);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+@media (max-width: 700px) {
+  dialog.card {
+    height: 420px;
+    min-height: 0;
+  }
+}
+
+#dlg-prune {
+  height: fit-content;
+  min-height: 0;
+}
+#dlg-prune .actions {
+  margin-top: 24px;
+  padding-top: 0;
+}
+
+/* Shared dashed separators across screens. */
+hr,
+.gmenu hr,
+.rail hr {
+  border: 0;
+  border-top: var(--border-weight) dashed var(--ink);
+}
+.rule,
+.dash,
+dialog.card .dash {
+  box-sizing: border-box;
+  height: 0;
+  min-height: 0;
+  border: 0;
+  border-top: var(--border-weight) dashed var(--ink);
+  font-size: 0;
+  line-height: 0;
+  color: transparent;
+  flex-shrink: 0;
+}
+.finder-title,
+.ios-app {
+  border-bottom: var(--border-weight) dashed var(--ink);
+}
+.finder-footer,
+.ios-kv + .ios-kv,
+:root[data-theme] dialog.ios button.ia-b {
+  border-top: var(--border-weight) dashed var(--ink);
+}
+
+/* Shared foreground across onboarding, worlds, dialogs, and system mockups. */
+:root {
+  --ink: #323232;
+}
+:root[data-theme="dark"] {
+  --ink: #323232;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #323232;
+  }
+}
+.gfacts dt,
+.cnone,
+.ctotal,
+.home-pronunciation,
+.finder-footer > span,
+.finder-sidebar p,
+.finder-toolbar,
+.finder-arrows,
+input::placeholder,
+textarea::placeholder {
+  color: var(--ink);
+}
+.tray svg text {
+  fill: var(--ink);
+}
+
+/* One text color throughout the interface. */
+body,
+button,
+input,
+textarea,
+select,
+a,
+dialog,
+.gmenu,
+dialog.card,
+.applications-finder {
+  color: #323232;
+}
+.btn.on,
+.btn[aria-selected="true"],
+.btn[aria-pressed="true"],
+.home .btn.on,
+:root[data-theme] .btn.on,
+:root[data-theme] .btn[aria-selected="true"],
+:root[data-theme] .btn[aria-pressed="true"],
+.applications-finder .finder-footer .btn.on,
+.finder-app[aria-pressed="true"] span {
+  color: #323232;
+  background: #dedede;
+}
+:root[data-theme="dark"] {
+  --bg: #f5f5f5;
+  --glass: rgba(245,245,245,.5);
+}
+
+/* Every button retains an outline, including selected and hover states. */
+:where(button:not(#export):not(#export-info):not(:where(#os-files .osfoot .osb, #os-alert .osbtns .osb, #dlg-browser button))),
+a.btn {
+  border: var(--border-weight) solid #323232 !important;
+}
+#export,
+#export-info {
+  border: 0 !important;
+}
+
+/* Zoom controls share their outer frame without doubled button borders. */
+.rail #zin,
+.rail #zout {
+  border: 0 !important;
+  width: 100%;
+}
+.rail #zin {
+  border-top: var(--border-weight) solid #323232 !important;
+}
+.rail svg {
+  stroke-width: 1;
+}
+
+/* Keep selected theme icons legible and avoid doubled segmented borders. */
+:root[data-theme] .theme button[aria-pressed="true"] {
+  background: #dedede;
+  color: #323232;
+}
+.theme button {
+  border: 0 !important;
+  color: #323232;
+}
+.theme button + button {
+  border-left: var(--border-weight) solid #323232 !important;
+}
+.theme svg {
+  stroke: currentColor;
+  fill: none;
+}
+
+/* Match segmented controls to the shared outline and icon weight. */
+.rail,
+.theme {
+  border: var(--border-weight) solid var(--ink);
+}
+.rail svg,
+.theme svg {
+  stroke-width: var(--stroke-weight);
+  stroke: currentColor;
+}
+.btn.on,
+.btn[aria-selected="true"],
+.btn[aria-pressed="true"],
+.home .btn.on,
+:root[data-theme] .btn.on,
+:root[data-theme] .btn[aria-selected="true"],
+:root[data-theme] .btn[aria-pressed="true"],
+:root[data-theme] .theme button[aria-pressed="true"],
+:root[data-theme] .rail button[aria-pressed="true"] {
+  background: #323232;
+  color: #fcfcfc;
+}
+.btn.on svg,
+.btn[aria-selected="true"] svg,
+.btn[aria-pressed="true"] svg,
+:root[data-theme] .theme button[aria-pressed="true"] svg,
+:root[data-theme] .rail button[aria-pressed="true"] svg {
+  stroke: currentColor;
+}
+
+/* One outer frame and one separator for each segmented control. */
+.rail,
+.theme,
+.tray {
+  border: var(--border-weight) solid #323232;
+  box-shadow: none;
+  outline: none;
+}
+.rail button,
+.theme button {
+  border: 0 !important;
+  box-shadow: none;
+  border-radius: 0;
+}
+.rail #zin {
+  border-top: var(--border-weight) solid #323232 !important;
+}
+.theme button + button {
+  border-left: var(--border-weight) solid #323232 !important;
+}
+.rail svg,
+.theme svg {
+  stroke-width: var(--stroke-weight);
+}
+.tray button[data-pflower],
+.tray button[data-flower] {
+  border: var(--border-weight) solid #323232 !important;
+  box-shadow: none;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.tray button[data-pflower] svg rect,
+.tray button[data-flower] svg rect {
+  stroke: none;
+  stroke-width: 0;
+}
+
+/* Borderless utility controls and text navigation. */
+button.ib,
+button.icon-btn,
+button.gclose,
+button.ulink,
+button.dot,
+button.linkish,
+button.finder-close,
+button.caret,
+button.rm,
+button.nm,
+:root[data-theme] .gmenu button.gclose {
+  border: 0 !important;
+  box-shadow: none;
+  background: transparent;
+}
+
+button.chk {
+  border: 0 !important;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* Night mode uses the inverse interface palette. */
+:root[data-theme="dark"] {
+  --bg: #1b1b1b;
+  --ink: #ececec;
+  --glass: rgba(27,27,27,.5);
+  --line: #a5a5a5;
+  --tile: #242424;
+  --modal: #242424;
+}
+:root[data-theme="dark"] :is(body,button,input,textarea,select,a,dialog,.gmenu,.gfacts dt,.home-pronunciation,.finder-footer>span,.finder-sidebar p,.finder-toolbar,.finder-arrows) {
+  color: var(--ink);
+}
+:root[data-theme="dark"] :is(.btn,.gmenu,.rail,.theme,.tray,.gshape,dialog.card,.who img,.who svg),
+:root[data-theme="dark"] button:not(#export):not(#export-info):not(:where(#os-files .osfoot .osb, #os-alert .osbtns .osb, #dlg-browser button)) {
+  border-color: var(--ink) !important;
+}
+:root[data-theme="dark"] :is(.btn.on,.btn[aria-selected="true"],.btn[aria-pressed="true"]),
+:root[data-theme="dark"] .theme button[aria-pressed="true"],
+:root[data-theme="dark"] .rail button[aria-pressed="true"] {
+  background: var(--ink);
+  color: #1b1b1b;
+}
+:root[data-theme="dark"] :is(.dash,.rule,hr,.gmenu hr,.rail #zin,.theme button+button) {
+  border-color: var(--ink) !important;
+}
+:root[data-theme="dark"] .gfacts dt {
+  opacity: 1;
+}
+:root[data-theme="dark"] :is(.applications-finder,.finder-title,.finder-sidebar,.finder-apps,.finder-footer,.finder-app,.finder-app span,.ios-fld input) {
+  background: #242424;
+  color: var(--ink);
+}
+:root[data-theme="dark"] .finder-app[aria-pressed="true"] span {
+  background: var(--ink);
+  color: #1b1b1b;
+}
+:root[data-theme="dark"] .applications-finder .finder-footer .btn {
+  background: #323232;
+  color: var(--ink);
+}
+
+
+/* Umwelt dialogs provide the surface behind their own controls. */
+:is(dialog.card, #dlg-rename) button {
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+:is(dialog.card, #dlg-rename) button.btn.on:not(#prune-app) {
+  font-weight: 600;
+}
+
+/* Use a neutral indicator across both pages, including native form controls. */
+:where(:focus:not(:focus-visible)) {
+  outline: none;
+}
+:where(:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }

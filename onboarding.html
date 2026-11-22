@@ -29,27 +29,27 @@
   :focus-visible{outline:1px solid var(--ink);outline-offset:-1px}
   .ulink:focus-visible,.chk:focus-visible,.rm:focus-visible,.nm:focus-visible{outline:none;text-decoration:underline 2px;text-underline-offset:3px}
   .ib:focus-visible,.dot:focus-visible{outline:none}
-  .ib:focus-visible svg{stroke-width:2.6}
-  .dot:focus-visible circle{stroke-width:2.5}
+  .ib:focus-visible svg{stroke-width:var(--stroke-weight,1.5)}
+  .dot:focus-visible circle{stroke-width:var(--stroke-weight,1.5)}
 
   /* ---------- Entrance ---------- */
   .home{min-height:100svh;display:grid;place-content:center;box-sizing:border-box;padding:72px 16px 96px}
   .home-copy{position:relative;isolation:isolate;width:min(800px,calc(100vw - 32px))}
-  .home-copy::before{content:"";position:absolute;inset:-48px;z-index:-1;border-radius:4px;background:color-mix(in srgb,var(--bg) 50%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);pointer-events:none}
+
   .home h1{margin:0 0 8px;font:400 32px/40px var(--sans)}
   .intro-character{position:relative}
   .intro-character.intro-pending{visibility:hidden}
   .intro-character.scrambled{color:transparent}
   .intro-character.scrambled::after{content:attr(data-symbol);position:absolute;inset:0;color:var(--ink);text-align:center;font-family:var(--mono)}
   .intro-space{white-space:pre}
-  .home .btn.on .intro-character.scrambled::after{color:var(--bg)}
-  .home-pronunciation .intro-character.scrambled::after{color:var(--muted)}
+  .home .btn.on .intro-character.scrambled::after{color:#323232}
+  .home-pronunciation .intro-character.scrambled::after{color:var(--ink)}
   .umwelt-title{display:inline-flex}
   .umwelt-letter{display:inline-block;position:relative;white-space:pre}
   .umwelt-letter::after{content:attr(data-symbol);position:absolute;inset:0;text-align:center;font-family:var(--mono);font-size:.8em;line-height:inherit}
   .umwelt-letter.scrambled{color:transparent}
   .umwelt-letter.scrambled::after{color:var(--ink)}
-  .home-pronunciation{margin:0 0 24px;font:400 14px/20px var(--mono);color:var(--muted)}
+  .home-pronunciation{margin:0 0 24px;font:400 14px/20px var(--mono);color:var(--ink)}
   .home-definition{margin:0 0 32px;font:400 16px/25px var(--sans)}
   .home .stack{display:flex;gap:16px;align-items:stretch;flex-wrap:wrap}
   .home .btn{display:flex;box-sizing:border-box;flex:1;min-width:160px;min-height:44px;padding:10px 20px;font-size:14px;line-height:20px;text-align:center;text-decoration:none}
@@ -68,12 +68,12 @@
   /* ---------- Buttons and fields (from the Paper designs) ---------- */
   .btn{display:flex;align-items:center;justify-content:center;gap:12px;font:400 16px/20px var(--mono);padding:4px 16px;border:1px solid var(--ink);border-radius:4px;background:var(--glass);color:var(--ink);cursor:pointer;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
   .btn:hover{background:color-mix(in srgb,var(--ink) 8%,var(--bg))}
-  .btn.on,.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+  .btn.on,.btn[aria-pressed="true"]{background:var(--ink);color:#323232}
   .btn.on:hover,.btn[aria-pressed="true"]:hover{background:var(--ink)}
-  .btn svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.667;stroke-linecap:round;stroke-linejoin:round}
+  .btn svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:var(--stroke-weight,1.5);stroke-linecap:round;stroke-linejoin:round}
   .field{font:400 16px/20px var(--sans);color:var(--ink);background:var(--bg);border:1px solid var(--ink);border-radius:4px;padding:4px 16px;box-sizing:border-box;min-width:0;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
-  .field::placeholder{color:var(--muted)}
-  .field.sug{color:var(--muted)}
+  .field::placeholder{color:var(--ink)}
+  .field.sug{color:var(--ink)}
   .ulink{font:400 16px/20px var(--mono);background:none;border:0;padding:0;color:var(--ink);text-decoration:underline 1px;text-decoration-skip-ink:none;text-underline-position:from-font;cursor:pointer}
   .chk{font:400 16px/20px var(--mono);background:none;border:0;padding:0;color:var(--ink);cursor:pointer;white-space:pre;text-align:left}
 
@@ -87,7 +87,7 @@
   .modal.full{left:0;top:0;transform:none;width:100%;height:100%}
   .mh{display:flex;justify-content:space-between;align-items:center;flex:none}
   .ib{width:20px;height:20px;padding:0;border:0;background:none;cursor:pointer;color:var(--ink);display:block}
-  .ib svg{width:20px;height:20px;display:block;fill:none;stroke:currentColor;stroke-width:1.667;stroke-linecap:round;stroke-linejoin:round}
+  .ib svg{width:20px;height:20px;display:block;fill:none;stroke:currentColor;stroke-width:var(--stroke-weight,1.5);stroke-linecap:round;stroke-linejoin:round}
   .mc{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:24px}
   .mt{flex:none;font:400 16px/20px var(--mono)}
   .mt h1{font:inherit;text-align:center}
@@ -120,10 +120,10 @@
   .ta{flex:1 1 0;min-height:96px;display:flex;padding:24px;box-sizing:border-box;border:1px solid var(--ink);border-radius:4px;background:var(--bg)}
   .ta:focus-within{outline:1px solid var(--ink);outline-offset:-1px}
   .ta textarea{flex:1;min-width:0;border:0;padding:0;margin:0;background:transparent;resize:none;outline:none;font:400 16px/150% var(--sans);color:var(--ink)}
-  .ta textarea::placeholder{color:var(--muted)}
+  .ta textarea::placeholder{color:var(--ink)}
   .draw{position:relative;flex:1 1 0;min-height:120px;border:1px solid var(--ink);background:var(--bg);cursor:crosshair;touch-action:none;overflow:hidden;user-select:none;-webkit-user-select:none}
   .draw svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-  .draw .hint{position:absolute;inset:0;display:grid;place-items:center;font:400 16px/150% var(--sans);color:var(--muted);pointer-events:none}
+  .draw .hint{position:absolute;inset:0;display:grid;place-items:center;font:400 16px/150% var(--sans);color:var(--ink);pointer-events:none}
   .pglyph{fill:var(--ink);text-anchor:middle;dominant-baseline:central;font-family:var(--mono),'Noto Sans Symbols 2','Apple Symbols','Segoe UI Symbol',sans-serif}
   .fill{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:24px}
   .center{flex:1 1 0;display:flex;align-items:center;justify-content:center;text-align:center;font:400 16px/20px var(--mono)}
@@ -157,7 +157,7 @@
   select.mv{font:400 14px/18px var(--mono);color:var(--ink);background:var(--bg);border:1px solid var(--ink);border-radius:4px;padding:0 4px;max-width:100%}
   .newcat{grid-column:auto;align-self:start}
 
-  .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));z-index:5;background:var(--ink);color:var(--bg);font:400 13px/1.4 var(--mono);padding:6px 14px;border-radius:4px;max-width:calc(100vw - 32px);text-align:center}
+  .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));z-index:5;background:var(--ink);color:#323232;font:400 13px/1.4 var(--mono);padding:6px 14px;border-radius:4px;max-width:calc(100vw - 32px);text-align:center}
 
   .catsearch,.caret,.count,.m-only{display:none}
   @media (max-width:700px){
@@ -167,7 +167,7 @@
     .home .btn{width:auto;min-height:48px;font-size:16px;line-height:24px;padding:11px 16px}
     .home{padding-top:72px;padding-bottom:88px}
     .home-copy{width:calc(100vw - 56px)}
-    .home-copy::before{inset:-24px}
+
     .home-definition{margin-bottom:24px}
     /* The window is a card with room around it, vertically centred; Expand still takes it full screen */
     .modal{width:calc(100vw - 56px);height:min(460px,calc(100vh - 48px));padding:22px 22px 20px;gap:10px}
@@ -202,7 +202,7 @@
     .newcat > .row{padding-left:0}
   }
 </style>
-<link rel="stylesheet" href="controls.css">
+<link rel="stylesheet" href="controls.css?v=20261122-neutral-focus">
 </head>
 <body>
 
@@ -426,7 +426,7 @@ const SAMPLE = ['Google Drive','Dropbox','Photos','OneDrive','VSCO','Safari','Go
 const state = {
   step:'home',                     // home | plot | draw | devices | sorting | categories | planting
   expanded:false, draw:null, pattern:null,     // the drawn plot outline, and its pattern (star | plus | circle)
-  plot:'', time:null, visibility:null,
+  plot:'', time:'system', visibility:null,
   list:'',
   cats:null, sig:'', adding:null, moving:null, drag:null, focusMe:null, sample:false, collapsed:new Set(), q:''
 };
@@ -625,7 +625,37 @@ function fitScene(){
   }
   $('#scene').innerHTML = `<div class="stage">${GROUND_HTML}${isNight() ? nightSkyHtml((1440-W)/2, (1440+W)/2, (1024-H)/2) : daySkyHtml((1440-W)/2, (1440+W)/2)}${extra}</div>`;
   windStep(true);
+  hideOverlappingClouds();
 }
+function hideOverlappingClouds(){
+  const targets = [
+    ...document.querySelectorAll('.home h1, .home-pronunciation, .home-definition, .home .stack .btn'),
+    ...document.querySelectorAll('.sky-sun')
+  ];
+  const bounds = [];
+  for (const target of targets){
+    if (target.classList.contains('sky-sun')){
+      bounds.push(target.getBoundingClientRect());
+      continue;
+    }
+    const walker = document.createTreeWalker(target, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())){
+      if (!node.textContent.trim()) continue;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      bounds.push(...range.getClientRects());
+    }
+  }
+  document.querySelectorAll('.floating-cloud').forEach(cloud => {
+    const box = cloud.getBoundingClientRect();
+    const overlaps = bounds.some(text =>
+      box.left < text.right && box.right > text.left &&
+      box.top < text.bottom && box.bottom > text.top);
+    cloud.style.visibility = overlaps ? 'hidden' : 'visible';
+  });
+}
+setInterval(hideOverlappingClouds, 80);
 function windStep(force, t = performance.now()/1000){
   const scene = $('#scene'); if (scene.hidden || document.hidden || reduced()) return;
   const cycle = Math.floor(t / 2.5);
@@ -667,7 +697,7 @@ function modal(step, body, {fit=false, fixed=false, sb=false}={}){
       <button class="ib" data-act="expand" aria-label="${full?'Shrink':'Expand'} this window" aria-pressed="${full}">${ICON_EXPAND}</button>
     </div>
     <div class="mc${sb?' sb':''}">
-      <div class="mt"><h1 id="h" tabindex="-1">Habitat Initialization v0.1</h1><div class="rule" aria-hidden="true">${'-'.repeat(260)}</div></div>
+      <div class="mt"><h1 id="h" tabindex="-1">Initialization v0.1</h1><div class="rule" aria-hidden="true">${'-'.repeat(260)}</div></div>
       <div class="mb${fit?' fit':''}${fixed?' fixed':''}">${body}</div>
       <div class="mf">
         <button class="ulink" data-act="back">Back</button>
@@ -780,7 +810,7 @@ function drawHtml(){
   return modal('draw', `
     <div class="q">Draw your habitat of land. It will appear on this laptop’s Explore map.</div>
     <div class="draw" id="draw" role="application" aria-label="Drawing area. Click and drag to draw the outline of your habitat."><svg id="drawsvg" aria-hidden="true"></svg><div class="hint" id="drawhint">Click and drag to draw</div></div>
-    <div class="row2"><span class="q plabel">Choose your pattern:</span><div class="types">${opts}</div></div>
+    <div class="row2"><span class="q plabel">Choose your pattern</span><div class="types">${opts}</div></div>
   `, {fit:true});
 }
 function paintDraw(live){
@@ -930,7 +960,7 @@ function go(step, opts={}){
 function sortNow(){
   const names = parseText(state.list);
   let use = names;
-  if (!names.length){ use = SAMPLE; state.sample = true; toast('No apps added, so we used a sample set for this demo.'); } else state.sample = false;
+  if (!names.length){ use = SAMPLE; state.sample = true; } else state.sample = false;
   const sig = JSON.stringify(use);
   if (sig !== state.sig || !state.cats){ state.cats = suggestCats(use); state.sig = sig; }
   state.expanded = false; go('categories');
@@ -951,14 +981,14 @@ function finish(){
       categories:state.cats.map(c=>({name:c.name, apps:c.apps.map(a=>a.name)}))};
     if (state.draw){
       const key = 'digitalGarden.strollPlots';
-      const plots = JSON.parse(localStorage.getItem(key) || '[]');
+      const plots = JSON.parse(sessionStorage.getItem(key) || '[]');
       const entry = {id:created, name, ...setup.plotShape};
       if (visibility === 'public') entry.categories = setup.categories;
-      localStorage.setItem(key, JSON.stringify([...plots, entry]));
+      sessionStorage.setItem(key, JSON.stringify([...plots, entry]));
     }
-    localStorage.setItem('digitalGarden.setup', JSON.stringify(setup));
-    localStorage.setItem('digitalGarden.meta', JSON.stringify({name, created}));
-    if (time==='system') localStorage.removeItem(THEME_KEY); else localStorage.setItem(THEME_KEY, time==='day' ? 'light' : 'dark');
+    sessionStorage.setItem('digitalGarden.setup', JSON.stringify(setup));
+    sessionStorage.setItem('digitalGarden.meta', JSON.stringify({name, created}));
+    if (time==='system') sessionStorage.removeItem(THEME_KEY); else sessionStorage.setItem(THEME_KEY, time==='day' ? 'light' : 'dark');
   } catch (e) { toast("Couldn’t save this habitat. Check that browser storage is available."); return; }
   enterGarden();
 }
@@ -1155,9 +1185,8 @@ document.addEventListener('pointermove', e => {
 /* =====================================================================
    Theme (remembered across both pages) and first render
    ===================================================================== */
-let savedTheme = null; try { savedTheme = localStorage.getItem(THEME_KEY); } catch (e) {}
-document.documentElement.setAttribute('data-theme', savedTheme==='light' || savedTheme==='dark' ? savedTheme : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-if (savedTheme==='light' || savedTheme==='dark') state.time = savedTheme==='light' ? 'day' : 'night';
+state.time = 'system';
+document.documentElement.setAttribute('data-theme', matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 fitScene();
 render();
 </script>
