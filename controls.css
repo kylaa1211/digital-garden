@@ -1,0 +1,91 @@
+/* Shared controls for onboarding and habitat screens. */
+:root {
+  --button-height: 36px;
+  --button-font-size: 14px;
+  --button-line-height: 20px;
+  --button-padding-x: 16px;
+}
+.btn,
+.home .btn,
+.actions .btn,
+dialog.card .actions .btn,
+dialog.card .actions.col .btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--button-height);
+  padding: 7px var(--button-padding-x);
+  font: 400 var(--button-font-size)/var(--button-line-height) var(--mono);
+  border-radius: 4px;
+}
+.btn svg {
+  width: 20px;
+  height: 20px;
+  flex: none;
+}
+.ib,
+.icon-btn,
+:root[data-theme] .gmenu button.gclose,
+.rail button,
+.theme button {
+  box-sizing: border-box;
+  width: var(--button-height);
+  height: var(--button-height);
+  min-height: var(--button-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+}
+.ib svg,
+.icon-btn svg {
+  width: 20px;
+  height: 20px;
+}
+.rail {
+  width: calc(var(--button-height) + 2px);
+}
+.ulink,
+.chk,
+:root[data-theme] .gmenu button.gitem {
+  box-sizing: border-box;
+  min-height: var(--button-height);
+  font-size: var(--button-font-size);
+  line-height: var(--button-line-height);
+}
+.ulink,
+.chk {
+  display: inline-flex;
+  align-items: center;
+}
+@media (max-width: 700px) {
+  :root {
+    --button-height: 40px;
+    --button-font-size: 14px;
+    --button-line-height: 20px;
+  }
+  .home .btn {
+    padding: 9px var(--button-padding-x);
+  }
+}
+
+input.field,
+.row input.field,
+.rename-input {
+  box-sizing: border-box;
+  height: var(--button-height);
+  min-height: var(--button-height);
+  padding: 7px var(--button-padding-x);
+  font-size: var(--button-font-size);
+  line-height: var(--button-line-height);
+  border-radius: 4px;
+}
+@media (max-width: 700px) {
+  input.field,
+  .row input.field,
+  .rename-input {
+    padding: 9px var(--button-padding-x);
+  }
+}
