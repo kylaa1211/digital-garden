@@ -115,7 +115,6 @@
   .seg{display:flex;gap:13px}
   .seg .btn{flex:1 1 0;min-width:0}
   .types{display:flex;gap:24px;flex-wrap:wrap}
-  .app-list-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
   .app-list-help{margin:0}
   .ta{flex:1 1 0;min-height:96px;display:flex;padding:24px;box-sizing:border-box;border:1px solid var(--ink);border-radius:4px;background:var(--bg)}
   .ta:focus-within{outline:1px solid var(--ink);outline-offset:-1px}
@@ -135,10 +134,6 @@
   @media (max-width:1100px){.modal.full .catgrid{--cols:3}}
   @media (max-width:820px){.modal.full .catgrid{--cols:2}}
   @media (max-width:520px){.catgrid,.modal.full .catgrid{--cols:1}}
-  .catgrid::-webkit-scrollbar{width:12px}
-  .catgrid::-webkit-scrollbar-track{background:var(--bg);border:1px solid var(--ink);border-radius:24px}
-  .catgrid::-webkit-scrollbar-thumb{background:var(--ink);border:1px solid var(--ink);border-radius:24px}
-  @supports not selector(::-webkit-scrollbar){.catgrid{scrollbar-width:thin;scrollbar-color:var(--ink) transparent}}
   .cat{display:flex;flex-direction:column;gap:4px;min-width:0;align-self:start}
   .cat.over{background:color-mix(in srgb,var(--ink) 6%,transparent);border-radius:4px}
   .cat.over .cat-name{outline:1px solid var(--ink);outline-offset:-1px}
@@ -202,7 +197,7 @@
     .newcat > .row{padding-left:0}
   }
 </style>
-<link rel="stylesheet" href="controls.css?v=20261122-neutral-focus">
+<link rel="stylesheet" href="controls.css?v=20261123-scrollbar">
 </head>
 <body>
 
@@ -211,6 +206,7 @@
 <main id="main"></main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
+<script src="app-names.js"></script>
 <script>
 /* =====================================================================
    Helpers
@@ -223,12 +219,12 @@ const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const phone = () => matchMedia('(max-width: 700px)').matches;
 
 /* =====================================================================
-   What each app is for. Categories are the twelve from the design, plus three that only appear when needed.
+   What each app is for. Categories appear only when they contain apps.
    Format: category index | name | aliases
    ===================================================================== */
 const CATS = ['Archiving life','Surfing the web','Editing media','Creating things','Capturing thoughts','Fueling your body',
   'Connecting with people','Experiencing audio','Exploring nature','Building knowledge','Collecting inspiration','Managing finances',
-  'Watching and playing','Getting around','Buying things'];
+  'Watching and playing','Getting around','Buying things','Managing your device','Everyday tools'];
 const CATALOG_SRC = `
 0|Google Drive|drive,gdrive
 0|Dropbox|
@@ -236,6 +232,8 @@ const CATALOG_SRC = `
 0|OneDrive|microsoft onedrive
 0|VSCO|
 0|iCloud|icloud drive
+0|Preview|
+0|Time Machine|
 1|Safari|
 1|Google Chrome|chrome
 1|Firefox|
@@ -251,12 +249,19 @@ const CATALOG_SRC = `
 2|Premiere Pro|premiere,adobe premiere
 2|Final Cut Pro|final cut
 2|DaVinci Resolve|davinci
+2|Adobe After Effects|after effects
+2|Adobe Media Encoder|media encoder
+2|iMovie|
+2|Image Capture|
+2|Photo Booth|
+2|Image Playground|
+2|QuickTime Player|
 3|Figma|
 3|Canva|
 3|Affinity|affinity designer
 3|Paper|
 3|Illustrator|adobe illustrator
-3|Indesign|adobe indesign
+3|InDesign|adobe indesign
 3|Claude|
 3|Cursor|
 3|Codex|
@@ -275,6 +280,13 @@ const CATALOG_SRC = `
 3|GarageBand|
 3|Logic Pro|logic
 3|Ableton Live|ableton
+3|Adobe Acrobat DC|adobe acrobat,acrobat dc,acrobat
+3|Adobe Creative Cloud|creative cloud
+3|Keynote|
+3|Pages|
+3|Numbers|
+3|Freeform|
+3|Font Book|
 4|Notion|
 4|Obsidian|
 4|Milanote|
@@ -305,6 +317,10 @@ const CATALOG_SRC = `
 4|Google Docs|docs
 4|Microsoft Word|word
 4|Loop|microsoft loop
+4|Calendar|
+4|Journal|
+4|Stickies|
+4|TextEdit|
 5|Doordash|door dash
 5|UberEats|uber eats
 5|Resy|
@@ -343,8 +359,9 @@ const CATALOG_SRC = `
 6|Threads|
 6|Snapchat|
 6|Superhuman|
+6|Contacts|
+6|Phone|
 7|Spotify|
-7|Apple Music|
 7|Sirius.XM|siriusxm,sirius
 7|NPR|
 7|SeatGeek|seat geek
@@ -355,6 +372,7 @@ const CATALOG_SRC = `
 7|Apple Podcasts|podcasts
 7|Pocket Casts|
 7|Overcast|
+7|Apple Music|music
 8|Merlin Bird ID|merlin
 8|Kiwibit|kiwi bird,kiwibird
 8|AllTrails|all trails
@@ -370,6 +388,9 @@ const CATALOG_SRC = `
 9|Apple Books|books
 9|Readwise|
 9|Khan Academy|khan
+9|Dictionary|
+9|News|
+9|Tips|
 10|Pinterest|
 10|Are.na|arena
 10|Cosmos|
@@ -386,6 +407,7 @@ const CATALOG_SRC = `
 11|YNAB|
 11|Apple Wallet|wallet
 11|Cash App|cashapp
+11|Stocks|
 12|Netflix|
 12|Disney+|disney plus
 12|Hulu|
@@ -395,9 +417,11 @@ const CATALOG_SRC = `
 12|Twitch|
 12|Steam|
 12|Minecraft|
-12|Chess.com|chess
-13|Google Maps|maps
-13|Apple Maps|
+12|Chess.com|
+12|Chess|
+12|Games|
+13|Google Maps|
+13|Apple Maps|maps
 13|Uber|
 13|Lyft|
 13|Airbnb|
@@ -406,6 +430,20 @@ const CATALOG_SRC = `
 14|Etsy|
 14|eBay|
 14|Target|
+14|App Store|
+15|CleanMyMac|cleanmymac x
+15|Automator|
+15|Find My|
+15|iPhone Mirroring|
+15|Mission Control|
+15|Passwords|
+15|Shortcuts|
+15|System Settings|system preferences
+16|Calculator|
+16|Clock|
+16|Home|
+16|Siri|
+16|Weather|
 `;
 const INDEX = new Map();
 CATALOG_SRC.trim().split('\n').forEach(line=>{
@@ -436,62 +474,37 @@ let timer = 0;
    Reading what people give us
    ===================================================================== */
 function clean(t){ return String(t).replace(/^\s*(?:[-*•·]|\d+[.)])\s+/,'').replace(/^["'`\s]+|["'`\s]+$/g,'').replace(/\.app$/i,'').trim(); }
-function parseText(t){ return t.split(/[\n\r,;\t]+/).map(clean).filter(Boolean); }
-let choosingFolder = false;
-async function importApplications(){
-  if (choosingFolder || typeof window.showDirectoryPicker !== 'function') return;
-  choosingFolder = true;
-  try {
-    const folder = await window.showDirectoryPicker({mode:'read'});
-    const names = [];
-    for await (const entry of folder.values()){
-      if (entry.kind === 'directory' && /\.app$/i.test(entry.name)){
-        const name = entry.name.slice(0, -4).trim();
-        if (name) names.push(name);
-      }
-    }
-    if (state.step !== 'devices') return;
-    if (!names.length){
-      toast('No apps found in that folder.');
-      return;
-    }
-    const existing = new Set(parseText(state.list).map(norm));
-    const added = names.sort((a,b) => a.localeCompare(b)).filter(name => {
-      const key = norm(name);
-      if (existing.has(key)) return false;
-      existing.add(key);
-      return true;
-    });
-    if (added.length){
-      state.list = [state.list.trimEnd(), ...added].filter(Boolean).join('\n');
-      $('#list').value = state.list;
-    }
-    toast(added.length ? `Added ${added.length} ${added.length === 1 ? 'app' : 'apps'} to your list.` : 'Those apps are already on your list.');
-  } catch (error){
-    if (error.name !== 'AbortError' && state.step === 'devices'){
-      toast('Couldn’t read that folder. Try again or enter app names below.');
-    }
-  } finally {
-    choosingFolder = false;
-  }
+function appName(raw){ return normalizeAppName(clean(raw)); }
+function parseText(t){
+  const ignored = new Set(['apps', 'hp', 'utilities']);
+  const seen = new Set();
+  return t.split(/[\n\r,;\t]+/).map(appName).filter(name => {
+    const key = INDEX.get(norm(name))?.id || appNameKey(name);
+    if (!key || ignored.has(key) || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 /* =====================================================================
    Sorting: group apps by what they're for
    ===================================================================== */
+function appCategory(name){
+  return /^Adobe\s/i.test(name) ? CATS.indexOf('Creating things') : -1;
+}
 function suggestCats(names){
   const seen = new Set(), apps = [];
   names.forEach(raw=>{
-    const n = clean(raw); if (!n || n.length>60 || !norm(n)) return;
-    const hit = INDEX.get(norm(n)), id = hit ? hit.id : 'x-'+norm(n);
+    const n = appName(raw); if (!n || n.length>60 || !norm(n)) return;
+    const hit = INDEX.get(norm(n)), id = hit ? hit.id : 'x-'+appNameKey(n);
     if (seen.has(id)) return; seen.add(id);
-    apps.push(hit ? {id, name:hit.name, cat:hit.cat} : {id, name:n, cat:-1});
+    apps.push(hit ? {id, name:hit.name, cat:hit.cat} : {id, name:n, cat:appCategory(n)});
   });
   const cats = [];
   CATS.forEach((name,i)=>{ const list = apps.filter(a=>a.cat===i); if (list.length) cats.push({id:uid('c'), name, edited:false, apps:list}); });
   const rest = apps.filter(a=>a.cat===-1);
   if (rest.length) cats.push({id:uid('c'), name:'Unsorted', edited:false, apps:rest});
-  return cats;
+  return groupTreeCategories(cats);
 }
 const findCat = id => state.cats.find(c=>c.id===id);
 function findApp(id){ for (const c of state.cats){ const i = c.apps.findIndex(a=>a.id===id); if (i>=0) return {c, i, a:c.apps[i]}; } return null; }
@@ -503,11 +516,11 @@ function moveApp(appId, catId, beforeId){
   to.apps.splice(at, 0, f.a);
 }
 function addAppTo(catId, raw){
-  const name = clean(raw); if (!name || name.length>60 || !norm(name)) return false;
-  const hit = INDEX.get(norm(name)), id = hit ? hit.id : 'x-'+norm(name);
+  const name = appName(raw); if (!name || name.length>60 || !norm(name)) return false;
+  const hit = INDEX.get(norm(name)), id = hit ? hit.id : 'x-'+appNameKey(name);
   const existing = findApp(id);
   if (existing){ moveApp(id, catId); return true; }
-  findCat(catId).apps.push({id, name:hit ? hit.name : name, cat:hit ? hit.cat : -1});
+  findCat(catId).apps.push({id, name:hit ? hit.name : name, cat:hit ? hit.cat : appCategory(name)});
   return true;
 }
 
@@ -518,9 +531,6 @@ const CLOUD_S = ['  ︵','︵(  )','(      )','(        )','︶︶︶︶︶'];
 const CLOUD_L = [' ︵︵','︵(    )','(        )','(            )','(              )','︶︶︶︶︶︶︶︶ '];
 const SUN = ['\\ | /','— ( ) —','/ | \\'];
 const SCENE = [
-  [['{+}','|','~|~'], 'left:calc(50% - 547.27px);top:calc(50% + 276px);transform:translate(-50%,-50%)'],
-  [['vvv','(   )','|','\\|/'], 'left:calc(50% - 4.89px);top:calc(50% + 264px);transform:translate(-50%,-50%)'],
-  [['[=]','|','~|~'], 'left:calc(50% + 528.49px);top:calc(50% + 276px);transform:translate(-50%,-50%)'],
   [['||'], 'left:1020.85px;top:796px;line-height:30px', 'b'],
   [['||'], 'left:50%;top:956px;transform:translateX(-50%);line-height:30px', 'b'],
   [['||'], 'left:31.67px;top:950px;line-height:30px', 'b'],
@@ -531,8 +541,6 @@ const SCENE = [
   [SUN, 'left:50%;top:65px;transform:translateX(-50%);line-height:150%'],
   [CLOUD_L, 'left:244px;top:185px'],
   [CLOUD_L, 'left:1171.36px;top:25px'],
-  [['oo','o * o','oo','|','|'], 'left:1013.05px;top:873px'],
-  [['^','< @ >','v','|','|'], 'left:355.17px;top:876px']
 ];
 /* Grass is the only thing that moves. Every blade leans the same way at the same moment, exactly like the habitat. */
 const GRASS_FRAMES = {b:['\\\\','||','//'], t:['\\\\/','\\|/','\\//']};      // lean left, upright, lean right
@@ -624,6 +632,7 @@ function fitScene(){
     for (let n=0; n<8; n++){ const gx = i*1440 + 40 + hash(i,j,101+n*3)*1320, gy = j*1024 + 40 + hash(i,j,102+n*3)*904; if (gy >= HORIZON) extra += grassPre(hash(i,j,100+n*3) < .5 ? 'b' : 't', `left:${gx.toFixed(0)}px;top:${gy.toFixed(0)}px;line-height:30px`, 'extra'); }
   }
   $('#scene').innerHTML = `<div class="stage">${GROUND_HTML}${isNight() ? nightSkyHtml((1440-W)/2, (1440+W)/2, (1024-H)/2) : daySkyHtml((1440-W)/2, (1440+W)/2)}${extra}</div>`;
+  clearEntryAnimal();
   windStep(true);
   hideOverlappingClouds();
 }
@@ -656,6 +665,67 @@ function hideOverlappingClouds(){
   });
 }
 setInterval(hideOverlappingClouds, 80);
+const ENTRY_ANIMALS = {
+  day: { sky: ['ƸӜƷ', 'ᵛӜᵛ'], ground: ['(\\_/)\n(• x •)\n(____)', ' (•)>\n /__)', ' (•)>\n /__]'] },
+  night: { sky: ['\\^..^/', '⌣^..^⌣'], ground: [' /\\_/\\\n(•ᴥ•)\n(____)', ' _o_o_\n(_____ )', ' _o_o_\n(_____)'] }
+};
+function clearEntryAnimal(){
+  $('#scene > .entry-animal')?.remove();
+}
+function showEntryAnimal(){
+  const scene = $('#scene');
+  const stage = scene.querySelector('.stage');
+  if (!stage || scene.hidden || document.hidden || reduced()) return;
+  const frame = stage.getBoundingClientRect();
+  const horizon = frame.top + frame.height * HORIZON / 1024;
+  const sky = Math.random() < .5;
+  const top = sky ? 16 : Math.max(16, horizon);
+  const bottom = sky ? Math.min(horizon, innerHeight - 16) : innerHeight - 16;
+  const obstacles = [...document.querySelectorAll('.modal, .home h1, .home-pronunciation, .home-definition, .home .stack, .sky-sun')]
+    .map(el => el.getBoundingClientRect());
+  const glyphs = ENTRY_ANIMALS[isNight() ? 'night' : 'day'][sky ? 'sky' : 'ground'];
+  const frames = sky ? glyphs : glyphs.slice(Math.random() < .5 ? 0 : 1);
+  const travel = Math.min(sky ? 210 : 95, innerWidth - 108);
+  if (bottom - top < 70 || travel < 30) return;
+  for (let attempt = 0; attempt < 24; attempt++){
+    const x = 12 + Math.random() * (innerWidth - travel - 96);
+    const y = top + Math.random() * (bottom - top - 64);
+    if (obstacles.some(box => x < box.right && x + travel + 84 > box.left && y < box.bottom && y + 64 > box.top)) continue;
+    const animal = document.createElement('pre');
+    animal.className = 'entry-animal';
+    animal.style.cssText = `left:${x}px;top:${y + 10}px;font-size:${sky ? 18 : 15}px`;
+    animal.textContent = frames[0];
+    scene.append(animal);
+    const reverse = Math.random() < .5;
+    const start = reverse ? travel : 0, end = reverse ? 0 : travel;
+    const animation = animal.animate([
+      { transform: `translate(${start}px,0)`, opacity: 0 },
+      { opacity: 1, offset: .18 },
+      { transform: `translate(${travel / 2}px,${sky ? -9 : -4}px)`, offset: .5 },
+      { opacity: 1, offset: .82 },
+      { transform: `translate(${end}px,0)`, opacity: 0 }
+    ], { duration: sky ? 4800 : 5600 });
+    const flap = setInterval(() => {
+      if (!animal.isConnected || reduced()){
+        animation.cancel();
+        animal.remove();
+        clearInterval(flap);
+        return;
+      }
+      animal.textContent = frames[(frames.indexOf(animal.textContent) + 1) % frames.length];
+    }, sky ? 220 : 420);
+    animation.onfinish = () => { clearInterval(flap); animal.remove(); };
+    break;
+  }
+}
+function scheduleEntryAnimal(delay){
+  setTimeout(() => {
+    showEntryAnimal();
+    scheduleEntryAnimal(16000 + Math.random() * 19000);
+  }, delay);
+}
+scheduleEntryAnimal(3500 + Math.random() * 5000);
+
 function windStep(force, t = performance.now()/1000){
   const scene = $('#scene'); if (scene.hidden || document.hidden || reduced()) return;
   const cycle = Math.floor(t / 2.5);
@@ -857,16 +927,43 @@ const endStroke = e => { if (!stroke || e.pointerId !== stroke.id) return; const
 document.addEventListener('pointerup', endStroke); document.addEventListener('pointercancel', endStroke);
 window.addEventListener('resize', () => { if (state.step==='draw') paintDraw(); });
 
+const finderEndpoint = '/_local/open-applications';
+let canOpenApplications = false;
+if (location.origin === 'http://127.0.0.1:8001'){
+  fetch(finderEndpoint, {method:'HEAD'}).then(response => {
+    if (response.status !== 204) return;
+    canOpenApplications = true;
+    if (state.step === 'devices') render();
+  }).catch(() => {});
+}
+async function openApplications(button){
+  if (!canOpenApplications) return;
+  button.disabled = true;
+  try {
+    const response = await fetch(finderEndpoint, {
+      method:'POST', headers:{'X-Umwelt-Action':'open-applications'}
+    });
+    if (response.status !== 204) throw new Error('Finder could not open');
+  } catch (error){
+    const status = $('#finder-status');
+    if (button.isConnected && status){
+      status.textContent = 'Couldn’t open Finder. You can open Applications from Finder’s Go menu.';
+      status.hidden = false;
+    }
+  } finally {
+    button.disabled = false;
+  }
+}
 function devicesHtml(){
-  const canImport = typeof window.showDirectoryPicker === 'function';
   return modal('devices', `
     <div class="fill">
-      <div class="app-list-heading">
-        <label class="q" for="list">What’s on your devices?</label>
-        ${canImport ? '<button class="btn" data-act="pick-folder" aria-describedby="app-list-help">Import from Applications</button>' : ''}
+      <label class="q" for="list">What’s on your devices?</label>
+      <p class="q app-list-help" id="app-list-help">Open Finder → Applications. Press ⌘A to select everything, ⌘C to copy, then click the field below and press ⌘V to paste.</p>
+      <div>
+        <button type="button" class="btn" data-act="open-applications" ${canOpenApplications ? '' : 'disabled aria-describedby="finder-status"'}>Open Applications in Finder</button>
+        <p id="finder-status" class="app-list-help" role="status" ${canOpenApplications ? 'hidden' : ''}>${canOpenApplications ? '' : 'Available in the local macOS preview.'}</p>
       </div>
       <div class="ta"><textarea id="list" aria-describedby="app-list-help" placeholder="Notion&#10;Figma&#10;Spotify" spellcheck="false">${esc(state.list)}</textarea></div>
-      <p class="q app-list-help" id="app-list-help">${canImport ? 'Choose the Applications folder on this Mac to fill in app names, or type or paste your own.' : 'Type or paste app names, one per line or separated by commas.'}</p>
     </div>`);
 }
 /* Loading screens: a flower grows from a seed (stem, leaves, bud, bloom), a different flower each time */
@@ -915,7 +1012,7 @@ function catsHtml(){
       ${rows(c)}${adder(c)}
     </div>`).join('') + `<div class="cat newcat"><div class="row"><div class="l"><button class="rm" data-newcat="1">[+] New category</button></div></div></div>`;
   return modal('categories', `
-    <div class="q">Here’s your suggested categorization. <span class="d-only">Drag and drop to rearrange, customize category names, or add anything we missed.</span><span class="m-only">Rearrange or add anything we missed.</span></div>
+    <div class="q">Here’s your suggested categorization. Groups with fewer than three apps are combined when planted. <span class="d-only">Drag and drop to rearrange, customize category names, or add anything we missed.</span><span class="m-only">Rearrange or add anything we missed.</span></div>
     <input class="field catsearch" id="catsearch" type="search" placeholder="Search" value="${esc(state.q || '')}" autocomplete="off" aria-label="Search your apps">
     <div class="catgrid" id="catgrid">${grid}</div>`, {fit:true});
 }
@@ -937,6 +1034,7 @@ document.addEventListener('input', e => { if (e.target.matches && e.target.match
 function render(){
   const s = state.step, home = s==='home';
   const grid = $('#catgrid'), keep = grid ? grid.scrollTop : 0;
+  clearEntryAnimal();
   $('#scene').hidden = false;
   $('#main').innerHTML = home ? homeHtml() : s==='plot' ? plotHtml() : s==='draw' ? drawHtml() : s==='devices' ? devicesHtml()
     : s==='sorting' ? statusHtml('sorting','Sorting') : s==='planting' ? statusHtml('planting', phone() ? 'Initializing' : 'Planting') : catsHtml();
@@ -978,12 +1076,16 @@ function finish(){
   try {
     const setup = {version:3, savedAt:created, plot:name, timeOfDay:time, visibility,
       plotShape:{pts:state.draw ? state.draw.norm : null, pattern:state.pattern || 'star'},
-      categories:state.cats.map(c=>({name:c.name, apps:c.apps.map(a=>a.name)}))};
+      categories:groupTreeCategories(state.cats).map(c=>({name:c.name, apps:c.apps.map(a=>a.name)}))};
     if (state.draw){
       const key = 'digitalGarden.strollPlots';
       const plots = JSON.parse(sessionStorage.getItem(key) || '[]');
-      const entry = {id:created, name, ...setup.plotShape};
-      if (visibility === 'public') entry.categories = setup.categories;
+      const entry = {id:created, name, ...setup.plotShape, private:visibility === 'private'};
+      if (entry.private){
+        entry.trees = setup.categories.map(category => ({name:category.name, count:category.apps.length}));
+      } else {
+        entry.categories = setup.categories;
+      }
       sessionStorage.setItem(key, JSON.stringify([...plots, entry]));
     }
     sessionStorage.setItem('digitalGarden.setup', JSON.stringify(setup));
@@ -1016,6 +1118,7 @@ document.addEventListener('click', e => {
   if (d.add){ state.adding = d.add; render(); return; }
   if (d.newcat){ const c = {id:uid('c'), name:'New category', edited:false, apps:[]}; state.cats.push(c); state.focusMe = c.id; render(); $('#catgrid').scrollTop = 1e6; return; }
   switch (d.act){
+    case 'open-applications': openApplications(t); break;
     case 'start': go('plot'); break;
     case 'close': state.expanded = false; go('home'); break;
     case 'expand': state.expanded = !state.expanded; render(); break;
@@ -1032,7 +1135,6 @@ document.addEventListener('click', e => {
       else if (state.step==='categories'){ go('planting'); timer.t = setTimeout(finish, reduced() ? 200 : 2800); }
       else if (state.step==='planting') finish();
       break;
-    case 'pick-folder': importApplications(); break;
   }
 });
 function applyTime(){

@@ -229,8 +229,13 @@ dialog.card .offbody .sub,
   line-height: 20px;
   font-weight: 400;
 }
+.gmenu .cnone {
+  color: var(--ink);
+  opacity: 1;
+}
 .gmenu h3,
 .gmenu #cmenu-body h4,
+.gmenu #inventory-add-title,
 dialog.card h2,
 dialog.card .offmain h2 {
   font-family: var(--mono);
@@ -477,15 +482,13 @@ a.btn {
 .theme svg {
   stroke-width: var(--stroke-weight);
 }
-.tray button[data-pflower],
-.tray button[data-flower] {
+.tray button[data-pflower] {
   border: var(--border-weight) solid #323232 !important;
   box-shadow: none;
   border-radius: 4px;
   overflow: hidden;
 }
-.tray button[data-pflower] svg rect,
-.tray button[data-flower] svg rect {
+.tray button[data-pflower] svg rect {
   stroke: none;
   stroke-width: 0;
 }
@@ -574,4 +577,26 @@ button.chk {
 :where(:focus-visible) {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
+}
+
+/* Umwelt scrollbar styling for vertical and horizontal overflow. */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg);
+  border: 1px solid var(--ink);
+  border-radius: 24px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 24px;
+}
+@supports not selector(::-webkit-scrollbar) {
+  :root {
+    scrollbar-width: thin;
+    scrollbar-color: var(--ink) var(--bg);
+  }
 }

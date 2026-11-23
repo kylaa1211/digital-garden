@@ -54,6 +54,12 @@
   .heart{opacity:0;font-size:16px;animation:heartUp 1.5s ease-out forwards}
   @keyframes heartUp{0%{opacity:0;transform:translateY(0)}15%{opacity:1}100%{opacity:0;transform:translateY(-46px)}}
   .shroom,.shroom *{pointer-events:none}
+  .shroom{transition:opacity 1.4s ease-out}
+  .shroom.fading{opacity:0}
+  #rain{position:fixed;inset:0;overflow:hidden;pointer-events:none;color:var(--ink)}
+  #rain i{position:absolute;left:var(--x);top:var(--y);width:1px;height:14px;background:currentColor;opacity:.16;animation:rainfall var(--speed) linear var(--delay) infinite}
+  @keyframes rainfall{from{transform:translate(0,-32px) rotate(13deg)}to{transform:translate(-85px,100vh) rotate(13deg)}}
+  @media (prefers-reduced-motion:reduce){#rain i{animation:none;transform:rotate(13deg)}.shroom{transition:none}}
   .spr{fill:var(--ink)}
   .sh-in{transform-box:fill-box;transform-origin:50% 100%;transform:scale(var(--k,1));transition:transform 1.6s ease}
   .sh-in.enter{animation:shgrow 1.6s ease-out both}
@@ -69,14 +75,12 @@
   .caption{font:400 11px var(--sans);fill:var(--ink);text-anchor:middle}
   .empty{font:400 14px var(--mono);fill:var(--ink);text-anchor:middle}
   .compost-ascii{text-anchor:middle}
+  .seed-dig-target{fill:transparent;pointer-events:all;cursor:var(--cur-shovel,pointer)}
+  .seed-dig-target:focus-visible{stroke:var(--ink);stroke-width:var(--stroke-weight,1.5)}
   .compost-ascii.sprout{transform-box:fill-box;transform-origin:50% 100%;animation:sprout 1.5s cubic-bezier(.2,.7,.2,1) both}
   @keyframes sprout{0%{opacity:0;transform:translateY(12px) scale(.55)}100%{opacity:1;transform:none}}
   @media (prefers-reduced-motion: reduce){.compost-ascii.sprout{animation:none}}
   .flower-ascii{text-anchor:middle}
-  .flower.earned{outline:none}
-  .flower.earned .fhit{fill:transparent;stroke:none;pointer-events:all}
-  .flower.earned:focus-visible .fhit{stroke:var(--ink);stroke-width:var(--stroke-weight,1.5)}
-  .tip.ui{font-family:var(--ui);font-size:15px;line-height:1.4}
   .tile rect{fill:var(--tile);stroke:var(--line);stroke-width:var(--sw,1.25)}
   .tile.blank rect{fill:var(--bg)}
   .tile .mono{font:500 14px var(--mono);fill:#333}
@@ -332,6 +336,16 @@
   :root[data-theme] .gmenu button.gitem{display:block;width:100%;box-sizing:border-box;text-align:left;border:0;border-radius:4px;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;color:var(--ink);font:400 14px/21px var(--mono);padding:5px 8px;margin:0 0 4px;cursor:pointer}
   :root[data-theme] .gmenu button.gitem:hover,:root[data-theme] .gmenu button.gitem:focus-visible{background:color-mix(in srgb,var(--ink) 10%,transparent);outline:none}
   #dlg-rename{min-height:210px}
+  #field-guide{width:min(640px,calc(100vw - 32px));height:auto;max-height:calc(100dvh - 40px);overflow:hidden}
+  #field-guide h2{margin:0 0 16px;padding-inline:32px}
+  .guide-body{width:100%;min-height:0;overflow:auto;padding-right:10px;box-sizing:border-box}
+  .guide-body h3{font:600 14px var(--mono);margin:20px 0 8px}
+  .guide-body h3:first-child{margin-top:0}
+  .guide-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(114px,1fr));gap:8px}
+  .guide-grid figure{margin:0;display:grid;gap:5px;align-content:start;text-align:center}
+  .guide-grid svg{display:block;width:100%;height:auto;aspect-ratio:1;box-sizing:border-box;border:1px solid var(--line);border-radius:4px}
+  .guide-grid figcaption{visibility:hidden;font:400 12px/1.3 var(--mono)}
+  .guide-grid figure:is(:hover,:focus-visible) figcaption{visibility:visible}
   .rename-input{width:100%;box-sizing:border-box;margin:20px 0 0;font:400 14px/21px var(--mono);color:var(--ink);background:transparent;border:1px solid var(--ink);border-radius:4px;padding:5px 10px}
   .rename-input:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
   #dlg-rename .actions{margin-top:auto;padding-top:20px}
@@ -362,6 +376,13 @@
 
   /* ===== Compost panel: Offboard Queue, Deleted Apps, Deleted Accounts ===== */
   .cmenu{width:300px;padding-bottom:16px}
+  #inventory-add{display:grid;gap:7px;margin:0 0 16px}
+  #inventory-add h4{margin:0;font:400 14px/1.2 var(--ui)}
+  #inventory-add input{min-width:0;padding:6px 8px;background:var(--bg);color:var(--ink);font:inherit;border:1px solid var(--ink);border-radius:4px}
+  #inventory-status{margin:0;overflow-wrap:anywhere}
+  .inventory-item{display:flex;align-items:center;gap:8px;margin:8px 0}
+  .inventory-item span,.inventory-item a{flex:1;overflow-wrap:anywhere}
+  .inventory-item button{flex:none}
   #cmenu-body h4{margin:16px 0 8px;font:400 14px/1.2 var(--ui)}
   #cmenu-body h4:first-child{margin-top:0}
   .cgrid{display:flex;flex-wrap:wrap;gap:8px}
@@ -490,17 +511,19 @@
   :root[data-theme] dialog.ios button.ia-b.red{color:var(--ink);font-weight:600}
   @media (prefers-reduced-motion: reduce){dialog.ios[open],dialog.ios.closing,.bw-modal,.bw-dim,.ios-alert-wrap,.ios-alert{animation:none}}
 </style>
-<link rel="stylesheet" href="controls.css?v=20261122-neutral-focus">
+<link rel="stylesheet" href="controls.css?v=20261123-scrollbar">
 </head>
 <body>
 <svg id="stage" viewBox="0 0 1440 1024" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Your habitat"></svg>
+
+<div id="rain" hidden aria-hidden="true"></div>
 
 <header class="top">
   <div class="tabs" id="tabs" role="tablist" aria-label="Habitat views">
     <div class="gwrap">
       <button class="btn" role="tab" id="tab-garden" aria-selected="true" aria-expanded="false" aria-controls="gmenu"><span id="gname">My World</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     </div>
-    <button class="btn" role="tab" id="tab-compost" aria-selected="false" aria-expanded="false" aria-controls="cmenu">Queue<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button class="btn" role="tab" id="tab-compost" aria-selected="false" aria-expanded="false" aria-controls="cmenu">Inventory<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
   </div>
   <div class="btn on vtag" id="vtag" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span id="vtag-name"></span></div>
   <button class="btn stroll" id="stroll">Explore</button>
@@ -514,16 +537,26 @@
   <svg class="gshape" id="gshape" viewBox="0 0 236 150" role="group" tabindex="0" aria-label="World map. Click your outline to navigate, or use the arrow keys to pan."></svg>
   <dl class="gfacts" id="gfacts"></dl>
   <div role="group" aria-label="Garden actions">
+    <button class="gitem" id="g-guide" aria-haspopup="dialog">Field Guide</button>
     <button class="gitem" id="g-rename">Rename</button>
     <button class="gitem" id="g-exit">Exit</button>
   </div>
 </aside>
 
-<aside class="gmenu cmenu" id="cmenu" hidden aria-label="Queue">
+<aside class="gmenu cmenu" id="cmenu" hidden aria-label="Inventory">
   <div class="ghead">
-    <h3>Queue</h3>
+    <h3>Inventory</h3>
     <button class="gclose" id="cpanel-close" aria-label="Collapse panel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
   </div>
+  <form id="inventory-add" aria-labelledby="inventory-add-title">
+    <h4 id="inventory-add-title">Add</h4>
+    <label for="inventory-entry">App name or site link (optional)</label>
+    <input id="inventory-entry" name="entry" placeholder="e.g. Notion or https://are.na" maxlength="2048">
+    <label for="inventory-category">Category</label>
+    <input id="inventory-category" name="category" maxlength="32" placeholder="e.g. Creative projects" required>
+    <button class="btn" type="submit">Add</button>
+    <p id="inventory-status" role="status" hidden></p>
+  </form>
   <div id="cmenu-body"></div>
 </aside>
 
@@ -576,7 +609,7 @@
   <div class="mn-main"><p id="mn-text">This application doesn’t allow data export on mobile.</p></div>
   <div class="actions col">
     <button class="btn" id="mn-anyway">Delete Anyway</button>
-    <button class="btn on" id="mn-queue">Add to Offboard Queue</button>
+    <button class="btn on" id="mn-queue">Add to Inventory</button>
   </div>
 </dialog>
 
@@ -646,6 +679,12 @@
   <div class="osbtns"><button class="osb big" id="os-deny">Don’t Allow</button><button class="osb big blue" id="os-allow">Allow</button></div>
 </dialog>
 
+<dialog class="card" id="field-guide" aria-labelledby="guide-title">
+  <button class="icon-btn dlg-x" id="guide-close" aria-label="Close field guide"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+  <h2 id="guide-title">Field Guide</h2>
+  <div class="guide-body" id="guide-body"></div>
+</dialog>
+
 <dialog id="dlg-rename" aria-labelledby="rename-title">
   <div class="dlg-head">
     <button class="icon-btn" id="rename-x" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
@@ -659,6 +698,7 @@
 </dialog>
 
 
+<script src="app-names.js"></script>
 <script>
 /* ---------- Sample garden ---------- */
 const NS = 'http://www.w3.org/2000/svg';
@@ -713,32 +753,19 @@ const MY_PLOT = (() => {
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const normName = s => String(s).toLowerCase().replace(/\.(app|exe|dmg|apk)$/,'').replace(/[^a-z0-9]+/g,'');   // icons/<this>.png, e.g. icons/googlechrome.png
 /* Every file that exists in /icons (matches the folder). Names are matched against this list first. */
-const KNOWN_ICONS = new Set(('affinity anki applehealth applemail applemusic applephotos arcbrowser arena asana bofa canva capcut claude codex coinbase confluence cosmos cursor discord doordash dropbox duckduckgo duolingo evernote facebook facetune figma firefox freeform gmail goodnotes googlechrome googledrive googlephotos googletranslate granola icloud illustrator imessage inaturalist indesign instagram kakaotalk kalshi keep kiwibit lightroom linkedin livenation logseq lyft merlinbirdid milanote myfitnesspal notability notes notion npr obsidian onedrive onenote opentable operagx ottarai paper perplexity photoshop pinterest quizlet ramp reddit resy robinhood safari seatgeek siriusxm slack sofi spotify stubhub tiktok uber ubereats venmo voicememo vsco vscode whatsapp wisprflow x youtube').split(' '));
+const KNOWN_ICONS = new Set(('adobeacrobatdc adobeaftereffects adobecreativecloud adobemediaencoder affinity anki applebooks applehealth applemail applemaps applemusic applephotos applepodcasts appletv appstore arcbrowser arena asana automator bofa calculator calendar canva capcut chatgpt chess claude cleanmymac clock codex coinbase confluence contacts cosmos cursor dictionary discord doordash dropbox duckduckgo duolingo evernote facebook facetime facetune figma findmy firefox fontbook freeform games garageband gmail goodnotes googlechrome googledrive googlephotos googletranslate granola home icloud illustrator imagecapture imageplayground imessage imovie inaturalist indesign instagram iphonemirroring journal kakaotalk kalshi keep keynote kiwibit lightroom linkedin livenation logseq lyft merlinbirdid milanote missioncontrol myfitnesspal news notability notes notion npr numbers obsidian onedrive onenote opentable operagx ottarai pages paper passwords perplexity phone photobooth photoshop pinterest preview quicktimeplayer quizlet ramp reddit reminders resy robinhood safari seatgeek shortcuts siri siriusxm slack sofi spotify stickies stocks stubhub systemsettings textedit tiktok timemachine tips uber ubereats venmo voicememo vsco vscode weather whatsapp wisprflow x xcode youtube zoom').split(' '));
 /* Short or alternate names that should land on the icon files in /icons */
-const ICON_ALIAS = {visualstudiocode:'vscode', iclouddrive:'icloud', chrome:'googlechrome', arc:'arcbrowser', photos:'applephotos', mail:'applemail', email:'applemail', health:'applehealth', music:'applemusic',
+const ICON_ALIAS = {adobeillustrator:'illustrator', adobeindesign:'indesign', adobephotoshop:'photoshop', adobelightroom:'lightroom', visualstudiocode:'vscode', iclouddrive:'icloud', chrome:'googlechrome', arc:'arcbrowser', photos:'applephotos', mail:'applemail', email:'applemail', health:'applehealth', music:'applemusic',
   messages:'imessage', translate:'googletranslate', bankofamerica:'bofa', twitter:'x', merlin:'merlinbirdid', merlinbird:'merlinbirdid',
   opera:'operagx', sirius:'siriusxm', googlemail:'gmail', drive:'googledrive', fitnesspal:'myfitnesspal', inat:'inaturalist', kakao:'kakaotalk',
   ticketmaster:'livenation', googlekeep:'keep', applenotes:'notes', kiwibird:'kiwibit', kiwi:'kiwibit', otter:'ottarai', otterai:'ottarai',
   ubereat:'ubereats', voicememos:'voicememo', memo:'voicememo', memos:'voicememo', eats:'ubereats', duckduck:'duckduckgo', ddg:'duckduckgo', openetable:'opentable', wispr:'wisprflow', googletrans:'googletranslate'};
-const lev = (a, b) => {            // edit distance, for near-miss names (kiwibird / kiwibit)
-  if (Math.abs(a.length - b.length) > 2) return 9;
-  let prev = Array.from({length:b.length + 1}, (_, j) => j);
-  for (let i = 1; i <= a.length; i++){ const cur = [i]; for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j-1] + 1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1)); prev = cur; }
-  return prev[b.length];
-};
-function fuzzyIcon(k){
-  if (k.length < 5) return null;
-  const lim = k.length >= 8 ? 2 : 1; let best = null, bd = 9;
-  KNOWN_ICONS.forEach(f => { if (f.length < 4) return; const d = lev(k, f); if (d <= lim && d < bd){ best = f; bd = d; } });
-  return best;
-}
 function iconAlts(n){            // every file name worth trying, best first
-  const raw = String(n).trim(), k = normName(raw), first = normName(raw.split(/\s+/)[0]);
+  const raw = normalizeAppName(n), k = normName(raw);
   const generic = ['apple','google','microsoft','adobe','music','mobile','messenger','my','app','browser'];
   const keep = x => x && (x.length > 1 || KNOWN_ICONS.has(x)) && !generic.includes(x);
-  const list = [ICON_ALIAS[k], k, k.replace(/^(apple|google|microsoft|adobe|ms|my)/, ''), k.replace(/(app|browser|music|mobile|messenger)$/, ''), ICON_ALIAS[first], first].filter(keep);
-  let hits = list.filter(x => KNOWN_ICONS.has(x));
-  if (!hits.length){ const f = fuzzyIcon(k); if (f) hits = [f]; }
+  const list = [ICON_ALIAS[k], k, k.replace(/^(apple|google|microsoft|adobe|ms|my)/, ''), k.replace(/(app|browser|music|mobile|messenger)$/, '')].filter(keep);
+  const hits = list.filter(x => KNOWN_ICONS.has(x));
   const low = raw.toLowerCase();                                   // last resorts: other ways the file might be spelled
   const spell = [low.replace(/\s+/g, '-'), low.replace(/\s+/g, '_'), raw.replace(/\s+/g, '')].map(x => x.replace(/[^\w-]/g, '')).filter(x => x.length > 1);
   return [...new Set([...hits, ...list, ...spell])].map(ICO);
@@ -760,10 +787,10 @@ function polar(cx, cy, dist, deg){
   const r = deg * Math.PI / 180;
   return {x: cx + dist * Math.sin(r), y: cy - dist * Math.cos(r)};
 }
-function dRadial(per){          // a hub with five rays; each ray ends in 1, 2 or 3 apps
+function dRadial(per, rays = [0,72,144,216,288]){          // a hub with five rays; each ray ends in 1, 2 or 3 apps
   const C = {1:{H:250,RAY:100}, 2:{H:300,RAY:100,SIDE:50,SPLAY:38}, 3:{H:327,RAY:105.325,STEM:67.714,SIDE:56.428}}[per];
   const hub = {x:0, y:-C.H}, names = ['TOP','UR','LR','LL','UL'], slots = [], segs = [{x1:0,y1:0,x2:0,y2:hub.y,when:null}];
-  [0,72,144,216,288].forEach((deg, i) => {
+  rays.forEach((deg, i) => {
     const id = names[i], n = polar(hub.x, hub.y, C.RAY, deg), ids = [];
     const add = (d, a, j) => { const p = polar(n.x, n.y, d, a); slots.push({id:id+j, x:p.x, y:p.y, rot:a, fx:n.x, fy:n.y}); ids.push(id+j); };
     if (per === 1){ slots.push({id:id+'0', x:n.x, y:n.y, rot:deg, fx:hub.x, fy:hub.y}); return; }
@@ -788,11 +815,11 @@ function dLadder(L, v){         // a trunk with a pair of diamonds at every leve
 }
 function dArc(n, R, H, span){   // apps fan out along an arc above the trunk
   const slots = [], segs = [{x1:0,y1:0,x2:0,y2:-H,when:null}];
-  for (let i = 0; i < n; i++){ const a = -span + 2*span*i/(n - 1), p = polar(0, -H, R, a); slots.push({id:'S'+i, x:p.x, y:p.y, rot:a, fx:0, fy:-H}); }
+  for (let i = 0; i < n; i++){ const a = -span + 2*span*i/(n - 1), p = polar(0, -H, R, a); slots.push({id:'S'+i, x:p.x, y:p.y, rot:0, fx:0, fy:-H}); }
   return {slots, segs};
 }
 function dComb(n){              // apps in one straight row, every one on its own stem
-  const H = 268, pitch = 44, slots = [], segs = [{x1:0,y1:0,x2:0,y2:-H,when:null}];
+  const H = 268, pitch = 54, slots = [], segs = [{x1:0,y1:0,x2:0,y2:-H,when:null}];
   for (let i = 0; i < n; i++) slots.push({id:'S'+i, x:(i - (n-1)/2) * pitch, y:-(H + 189), rot:0, fx:0, fy:-H});
   return {slots, segs};
 }
@@ -800,39 +827,181 @@ function dRings(n){             // very large categories: concentric arcs of app
   const H = 200, slots = [], segs = [{x1:0,y1:0,x2:0,y2:-H,when:null}];
   let r = 125;
   while (slots.length < n){
-    const full = Math.max(3, Math.floor(Math.PI * r / 58) + 1), count = Math.min(full, n - slots.length), step = 170 / (full - 1);
+    const full = Math.max(3, Math.floor(Math.PI * r / 65) + 1), count = Math.min(full, n - slots.length), step = 170 / (full - 1);
     for (let i = 0; i < count; i++){ const a = (i - (count - 1)/2) * step, p = polar(0, -H, r, a); slots.push({id:'S'+slots.length, x:p.x, y:p.y, rot:a, fx:0, fy:-H}); }
     r += 62;
   }
+  return {slots, segs, minScale:1};
+}
+function dTaperedSeven(){
+  const slots = [{id:'T', x:0, y:-490, rot:0, fx:0, fy:-400}];
+  const segs = [{x1:0,y1:0,x2:0,y2:-400,when:null}];
+  const tiers = [
+    {anchor:-334, length:110, angle:29, rotation:30},
+    {anchor:-259, length:150, angle:45, rotation:45},
+    {anchor:-200, length:180, angle:60, rotation:30}
+  ];
+  tiers.forEach(({anchor, length, angle, rotation}, index) => {
+    [-1, 1].forEach(side => {
+      const point = polar(0, anchor, length, angle * side);
+      slots.push({id:`B${index}-${side}`, ...point, rot:rotation * side, fx:0, fy:anchor});
+    });
+  });
   return {slots, segs};
 }
-function makeGeom(d){
-  const g = d.k === 'radial1' ? dRadial(1) : d.k === 'radial2' ? dRadial(2) : d.k === 'radial3' ? dRadial(3)
-    : d.k === 'ladder' ? dLadder(d.L, 'sym') : d.k === 'twin' ? dLadder(d.L, 'twin') : d.k === 'lean' ? dLadder(d.L, 'lean')
-    : d.k === 'arc7' ? dArc(7, 165, 240, 72) : d.k === 'arc9' ? dArc(9, 190, 270, 90) : d.k === 'comb10' ? dComb(10) : dRings(d.n);
-  let minY = 0, hw = 0;
-  g.slots.forEach(s => { minY = Math.min(minY, s.y - 30); hw = Math.max(hw, Math.abs(s.x) + 30); });
-  g.minY = minY; g.hw = hw;
-  return g;
+function dAlternatingForks({base, pitch, stagger, reach, rise, tips}){
+  const tiers = 3, slots = [], segs = [
+    {x1:0, y1:0, x2:0, y2:-(base + (tiers - 1) * pitch + stagger), when:null}
+  ];
+  for (let tier = 0; tier < tiers; tier++){
+    for (const side of [-1, 1]){
+      const stemY = -(base + (tiers - 1 - tier) * pitch + (side < 0 ? stagger : 0));
+      const x = side * reach, y = stemY - rise;
+      const ids = tips.map(({out, up, rotation}, tip) => {
+        const id = `B${tier}-${side}-${tip}`;
+        slots.push({id, x:x + side * out, y:y - up, rot:side * rotation, fx:x, fy:y});
+        return id;
+      });
+      segs.push({x1:0,y1:stemY,x2:x,y2:y,when:ids});
+    }
+  }
+  return {slots, segs, preserveTileSpacing:true};
 }
-/* The smallest design that holds every app; where two designs hold the same number, the category picks one so neighbours differ. */
-function pickDesign(n, seed){
-  const h = hash(seed, 5, 5);
-  if (n <= 5)  return {k:'radial1'};
-  if (n <= 7)  return {k:'arc7'};
-  if (n === 8) return {k: h < .5 ? 'twin' : 'lean', L:4};
-  if (n === 9) return h < .5 ? {k:'ladder', L:4} : {k:'arc9'};
-  if (n === 10) return {k: h < .5 ? 'comb10' : 'radial2'};
-  if (n <= 15) return h < .5 ? {k:'radial3'} : {k:'ladder', L:Math.ceil((n - 1) / 2)};
-  return {k:'rings', n};
+function dAlternatingPairs(){
+  // A 45° branch repeats up each side, with the right side offset by half a tier.
+  return dAlternatingForks({
+    base:143, pitch:104, stagger:48, reach:64, rise:64,
+    tips:[{out:15, up:54.5, rotation:15}, {out:54.5, up:15, rotation:-15}]
+  });
+}
+function dAlternatingTriples(){
+  return dAlternatingForks({
+    base:86, pitch:124, stagger:67, reach:58, rise:69.5,
+    tips:[{out:55.5, up:-10, rotation:10}, {out:43.5, up:52, rotation:41}, {out:-19, up:53, rotation:-20}]
+  });
+}
+function dBranched(levels, per, style, crown){
+  const slots = [], segs = [];
+  const add = (x, y, rot, fx, fy) => {
+    const id = 'S' + slots.length;
+    slots.push({id, x, y, rot, fx, fy});
+    return id;
+  };
+  const tapered = style === 'taper';
+  const staggered = style === 'stagger' || style === 'lean';
+  const pitch = per === 3 ? 145 : 92;
+  const crownGap = crown ? 132 : 46;
+  const top = -(175 + crownGap + pitch * (levels - 1) + (staggered ? 42 : 0));
+  segs.push({x1:0,y1:0,x2:0,y2:top,when:null});
+  if (crown % 2) add(0, top - (crown === 3 ? 110 : 65), 0, 0, top);
+  if (crown >= 2){
+    add(-30, top - 58, -30, 0, top);
+    add(30, top - 58, 30, 0, top);
+  }
+  for (let level = 0; level < levels; level++){
+    for (const side of [-1, 1]){
+      const y = top + crownGap + pitch * level + (staggered && side === 1 ? 42 : 0);
+      const reach = tapered ? 42 + level * 45 : 64;
+      const rise = style === 'lean' ? (side === 1 ? 82 : 42) : 50;
+      const x = side * reach, tip = y - rise;
+      if (per === 1){
+        add(x, tip, side * (tapered && level === 1 ? 45 : 30), 0, y);
+        continue;
+      }
+      const ids = [
+        add(x - side * 17, tip - 55, -side * 16, x, tip),
+        add(x + side * 45, tip - 21, side * 28, x, tip)
+      ];
+      if (per === 3) ids.push(add(x + side * 31, tip + 35, side * 43, x, tip));
+      segs.push({x1:0,y1:y,x2:x,y2:tip,when:ids});
+    }
+  }
+  return {slots, segs, preserveTileSpacing:true};
 }
 
+/* Group the sheet's forms by the number of app positions they provide. */
+const INFLORESCENCES = [
+  [3, [() => dRadial(1, [0,72,288])]],
+  [5, [() => dRadial(1)]],
+  [7, [dTaperedSeven]],
+  [8, [() => dLadder(4, 'twin'), () => dLadder(4, 'lean')]],
+  [9, [() => dLadder(4, 'sym'), () => dArc(9, 196, 270, 90), () => dComb(9)]],
+  [10, [() => dRadial(2)]],
+  [12, [dAlternatingPairs, () => dBranched(3, 2, 'lean', 0)]],
+  [14, [() => dBranched(3, 2, 'sym', 2), () => dBranched(3, 2, 'taper', 2)]],
+  [15, [() => dRadial(3), () => dBranched(2, 3, 'sym', 3)]],
+  [18, [dAlternatingTriples, () => dBranched(3, 3, 'lean', 0)]],
+  [19, [() => dBranched(3, 3, 'taper', 1)]]
+];
+function pickDesign(count, seed){
+  const group = INFLORESCENCES.find(([capacity]) => capacity >= count);
+  if (!group) return {key:`rings-${count}`, geometry:() => dRings(count)};
+  const [capacity, variants] = group;
+  const variant = Math.floor(hash(seed, 5, 5) * variants.length);
+  return {key:`${capacity}-${variant}`, geometry:variants[variant]};
+}
+function minimumSlotSpacing(slots){
+  let spacing = Infinity;
+  for (let i = 0; i < slots.length; i++){
+    for (let j = i + 1; j < slots.length; j++){
+      spacing = Math.min(spacing, Math.hypot(slots[i].x - slots[j].x, slots[i].y - slots[j].y));
+    }
+  }
+  return spacing;
+}
+function balancedSlots(slots, count){
+  if (!count || slots.length === count) return slots.slice(0, count);
+  const bounds = slots.reduce((box, slot) => ({
+    left:Math.min(box.left, slot.x), right:Math.max(box.right, slot.x),
+    top:Math.min(box.top, slot.y), bottom:Math.max(box.bottom, slot.y)
+  }), {left:Infinity,right:-Infinity,top:Infinity,bottom:-Infinity});
+  const width = bounds.right - bounds.left || 1, height = bounds.bottom - bounds.top || 1;
+  const center = slots.reduce((sum, slot) => sum + slot.x, 0) / slots.length;
+  let best = [], bestScore = -Infinity;
+  // Compare the small number of possible omissions between catalog capacities.
+  function choose(start, selected){
+    if (selected.length === count){
+      const xs = selected.map(slot => slot.x), ys = selected.map(slot => slot.y);
+      const drift = Math.abs(xs.reduce((sum,x) => sum+x, 0) / count - center) / width;
+      const coverage = (Math.max(...xs) - Math.min(...xs)) / width
+        + (Math.max(...ys) - Math.min(...ys)) / height;
+      const score = coverage - 3 * drift + Math.min(minimumSlotSpacing(selected) / 56, 1.5);
+      if (score > bestScore){ bestScore = score; best = [...selected]; }
+      return;
+    }
+    for (let i = start; i <= slots.length - (count - selected.length); i++){
+      selected.push(slots[i]);
+      choose(i + 1, selected);
+      selected.pop();
+    }
+  }
+  choose(0, []);
+  return best;
+}
+function fitTreeApps(tree, apps, seed){
+  const design = pickDesign(apps.length, seed);
+  if (tree.design === design.key && tree.appCount === apps.length) return false;
+  const changedForm = tree.design !== design.key;
+  const geom = design.geometry();
+  const slots = balancedSlots(geom.slots, apps.length);
+  let minY = 0, hw = 0;
+  geom.slots.forEach(slot => {
+    minY = Math.min(minY, slot.y - 30);
+    hw = Math.max(hw, Math.abs(slot.x) + 30);
+  });
+  tree.design = design.key;
+  tree.appCount = apps.length;
+  const tileDiagonal = 40 * Math.SQRT2;
+  tree.geom = {...geom, minY, hw, minScale:Math.max(geom.minScale || 0, tileDiagonal / minimumSlotSpacing(slots))};
+  apps.forEach((app, index) => { app.slot = slots[index].id; });
+  return changedForm;
+}
 /* ---------- Sample garden (used until onboarding has saved one) ---------- */
 function fromCategories(cats, pfx){
   const trees = [], apps = []; let n = 0;
-  cats.filter(c => c && Array.isArray(c.apps) && c.apps.length).forEach((c, ci) => {
+  groupTreeCategories(cats.filter(c => c && Array.isArray(c.apps))).forEach((c, ci) => {
     const id = pfx + 't' + ci, name = String(c.name || 'Garden');
-    trees.push({id, name, design:pickDesign(c.apps.length, ci + 1)});
+    trees.push({id, name});
     c.apps.forEach(raw => {
       n++; const nm = String(raw);
       apps.push({id:pfx+'a'+n, name:nm, label:nm, tree:id, kind:name, gb:+(.1 + hash(n,7,3) * hash(n,7,3) * 9).toFixed(1),
@@ -842,15 +1011,29 @@ function fromCategories(cats, pfx){
   return {trees, apps};
 }
 function buildData(){
-  if (SETUP) return {...fromCategories(SETUP.categories, ''), assign:true};
+  if (SETUP){
+    const seen = new Set();
+    const categories = SETUP.categories.filter(c => c && Array.isArray(c.apps)).map(c => ({
+      ...c,
+      apps:c.apps.map(normalizeAppName).filter(name => {
+        const key = appNameKey(name);
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+    }));
+    return {...fromCategories(categories, ''), assign:true};
+  }
   return {
-    trees:[{id:'collect', name:'Collecting Thoughts', design:{k:'radial3'}}, {id:'create', name:'Creating Things', design:{k:'ladder', L:4}}],
+    trees:[{id:'collect', name:'Collecting Thoughts'}, {id:'create', name:'Creating Things'}],
     apps:APPS0.map(a => ({...a})), assign:false
   };
 }
-function assemble(d){                    // draw each tree's geometry and (for generated gardens) seat every app in a slot
-  d.trees.forEach(t => { t.geom = makeGeom(t.design); });
-  if (d.assign) d.trees.forEach(t => d.apps.filter(a => a.tree === t.id).forEach((a, i) => { a.slot = t.geom.slots[i].id; }));
+function assemble(d){
+  d.trees.forEach((tree, index) => {
+    const apps = d.apps.filter(app => app.tree === tree.id && (d.assign || app.slot));
+    fitTreeApps(tree, apps, index + 1);
+  });
   return d;
 }
 
@@ -863,7 +1046,8 @@ function layoutTrees(trees, seed = 0){
     const r = Math.floor(i / cols), c = i - r * cols, inRow = r === rows - 1 ? N - r * cols : cols;     // the last row is centred
     t.cx = 720 - inRow * CELL_W / 2 + c * CELL_W + CELL_W / 2 + (hash(i, seed, 11) - .5) * 160;
     t.baseY = top + r * CELL_H + (CELL_H - 75) + (stagger ? (c % 2 ? -SH : SH) : 0) + (hash(i, seed, 12) - .5) * 160;
-    t.scale = Math.min(1, 520 / -t.geom.minY, 215 / t.geom.hw);                                         // very tall or wide trees shrink a little
+    const fit = Math.min(1, 520 / -t.geom.minY, 215 / t.geom.hw);
+    t.scale = Math.max(fit, t.geom.minScale || 0);                                         // very tall or wide trees shrink a little
   });
   return {cols, rows, fit:1};                                                                           // the habitat opens at full size; zoom out or pan to see the rest
 }
@@ -880,9 +1064,7 @@ const FLOWERS = [F_EQ, F_HASH, F_PLUS, F_WAVE, F_VVV, F_STAR, F_RING];
 const AMBIENT = [
   [628,880,['||']],[866,671,['||']],[77,373,['||']],[1176,373,['||']],[1390,155,['||']],
   [310,155,['\\|/']],[1346,671,['\\|/']],[96,880,['\\|/']],[310,671,['\\|/']],[1132,880,['\\|/']],
-  [1230,448,F_HASH],[246,745,F_VVV],[805,120,F_RING]
 ];
-const SPOTS = [[140,520],[1180,590],[1300,770],[740,600],[150,690],[1250,230],[80,230],[1090,190]];
 
 /* Compost: the layout from the Figma compost frame. Three rows of branches; `top` is the horizontal run, `c` the stem. */
 const COMPOST_GROUPS = [
@@ -915,25 +1097,15 @@ const state = {
   beds: COMPOST_GROUPS.map(g => ({slots:g.tiles.map(() => null), flower:null})),   // each flower bed has boxes to fill with apps
   pile: [],           // pruned apps waiting to be dragged into a bed
   queue: [],          // apps added to the Offboard Queue (from the phone, where nothing can be exported)
-  stock: [],          // flowers dug up and ready to plant (each is its lines of ASCII)
   cmode:null, lastCmode:'plant',
-  flowers: [],        // flowers planted in the habitat: {lines, spot, fresh}
   mode:null, lastMode:'prune', view:'garden', zoom:1, panX:0, panY:0, hand:true,
   pending:null, fresh:new Set(), visit:null, own:null,
   critters:[],        // little animals wandering the habitat
-  shrooms:[]          // mushrooms growing beside the compost beds
+  shrooms:[],         // mushrooms growing after rain
+  rainCycle:null
 };
 const LAYOUT = layoutTrees(state.trees);
 state.zoom = LAYOUT.fit;
-let USER_SPOTS = SPOTS, AMBIENT_USE = AMBIENT;
-function setSpots(custom){
-  if (custom || SETUP){      // with several trees the habitat has no fixed gaps, so flowers go beside each trunk instead
-    USER_SPOTS = state.trees.map(t => [t.cx - 165, t.baseY - 140]);
-    AMBIENT_USE = AMBIENT.filter(([,,l]) => l.length === 1).concat(state.trees.flatMap((t, i) =>
-      hash(i,3,3) < .7 ? [[t.cx + 105, t.baseY - 140, FLOWERS[Math.floor(hash(i,4,4) * FLOWERS.length)]]] : []));
-  } else { USER_SPOTS = SPOTS; AMBIENT_USE = AMBIENT; }
-}
-setSpots(false);
 /* Each view remembers where you left it */
 const viewPos = {};
 function setView(v){
@@ -960,10 +1132,6 @@ function glyph(app, clipId='tileClip'){
   const mono = `<text class="mono" x="20" y="25" text-anchor="middle">${esc(app.mono||app.name.slice(0,2))}</text>`;
   if (!app.img) return mono;
   return mono + `<image href="${esc(app.img)}" x="0" y="0" width="40" height="40" preserveAspectRatio="xMidYMid slice" clip-path="url(#${clipId})" data-alt="${esc((app.alts||[]).join('|'))}" onload="this.previousElementSibling.style.display='none'" onerror="iconNext(this)"/>`;
-}
-function flowerSvg(lines){
-  const y0 = 22 - (lines.length - 1) * 3.8;
-  return `<svg viewBox="0 0 40 40" aria-hidden="true"><rect x=".5" y=".5" width="39" height="39" rx="4"/><text xml:space="preserve">${lines.map((l,i)=>`<tspan x="20" y="${(y0+i*7.6).toFixed(1)}">${esc(l)}</tspan>`).join('')}</text></svg>`;
 }
 function tileSvg(app){
   const id = 'clip-'+app.id;
@@ -1004,14 +1172,26 @@ function renderTree(t){
   const treeScale = Number(t.scale.toFixed(3));
   const tileScale = 1 / treeScale; // Fit the branches without shrinking their app tiles.
   g.slots.forEach(sl => { if (occupant(t.id, sl.id)) occ.add(sl.id); });
+  if (occ.size < MIN_TREE_APPS){
+    const apps = plantedApps(t);
+    return apps.map((app, index) => tile(app, t.cx + (index - (apps.length - 1) / 2) * 60, t.baseY - 150)).join('');
+  }
   let out = '';
-  g.segs.forEach(sg => { if (!sg.when || sg.when.some(id => occ.has(id))) out += line(sg.x1, sg.y1, sg.x2, sg.y2); });
-  out += dot(0, 0);
+  const joints = new Map();
+  const markJoint = (x, y) => joints.set(`${x.toFixed(2)},${y.toFixed(2)}`, [x,y]);
+  markJoint(0, 0);
+  g.segs.forEach(sg => {
+    if (sg.when && !sg.when.some(id => occ.has(id))) return;
+    out += line(sg.x1, sg.y1, sg.x2, sg.y2);
+    if (sg.when) markJoint(sg.x1, sg.y1);
+  });
   g.slots.forEach(sl => {
     const a = occupant(t.id, sl.id); if (!a) return;
     out += state.visit ? line(sl.fx, sl.fy, sl.x, sl.y) : stem(a, sl);
+    markJoint(sl.fx, sl.fy);
     tiles.push(tile(a, sl.x, sl.y, {rot:sl.rot, scale:tileScale}));
   });
+  for (const [x,y] of joints.values()) out += dot(x, y);
   const hoverPaths = [...out.matchAll(/<path class="tree-line" d="([^"]+)"/g)]
     .map(match => `<path class="tree-hover-area" d="${match[1]}"/>`).join('');
   return `<g class="tree-group"  tabindex="0" role="group" aria-label="${esc(t.name)}"><g class="tree" data-tree="${t.id}" transform="translate(${t.cx} ${t.baseY}) scale(${treeScale})"><g class="sway">${hoverPaths}${out}${tiles.join('')}</g></g></g>`;
@@ -1034,7 +1214,7 @@ function fitView(){
   stage.setAttribute('viewBox', `${VB.x.toFixed(1)} ${VB.y.toFixed(1)} ${VB.w.toFixed(1)} ${VB.h.toFixed(1)}`);
 }
 const fscale = r => Math.min(r.width / VB.w, r.height / VB.h);
-const TILE_W = 1440, TILE_H = 1024, GRASS_BASE = AMBIENT.filter(([,,l])=>l.length===1);
+const TILE_W = 1440, TILE_H = 1024, GRASS_BASE = AMBIENT;
 function grassTile(i, j){            // the habitat's own tufts, repeated with a little jitter, plus a few extra
   let out = '';
   GRASS_BASE.forEach(([x,y,l],k)=>{
@@ -1276,6 +1456,7 @@ function loadStrollPlots(){
   } catch (e) {}
   const own = {
     own:true,
+    private:SETUP?.visibility === 'private',
     pattern:MY_PLOT.pattern,
     pts:MY_PLOT.pts || [
       [-.29,-.14],[-.27,-.31],[-.1,-.43],[.04,-.4],[.14,-.34],[.28,-.37],
@@ -1295,7 +1476,7 @@ window.addEventListener('storage', event => {
   strollPlots = null;
   if (state.view === 'stroll') render();
 });
-const ensureWorld = (fresh = true) => { ensureGrass(); ensureGround(fresh); };
+const ensureWorld = () => ensureGrass();
 let worldQueued = false;
 const queueWorld = () => { if (worldQueued) return; worldQueued = true; requestAnimationFrame(() => { worldQueued = false; ensureWorld(); }); };
 fitView();
@@ -1313,24 +1494,11 @@ function windStep(t = performance.now()/1000){
 }
 setInterval(() => windStep(), 450);
 
-/* In someone else's garden each flower was earned by offboarding apps: 3 for a small flower, 5 for a bigger one (generated, like the rest of their garden) */
-let EARNED_POOL = null;                    // built on first use (the app lists it draws from are defined further down)
-function earnedBy(i, lines){
-  if (!EARNED_POOL) EARNED_POOL = [...new Set(CAT_POOL.flatMap(c => c.apps).concat(['X','Pinterest','Snapchat','Twitch','Netflix','Hinge','Bumble','BeReal','YouTube','Threads']))];
-  const n = lines.length >= 4 ? 5 : 3, seed = (state.visit ? state.visit.i * 7 + state.visit.j : 0);
-  return EARNED_POOL.map((a, k) => [hash(seed, i, 700 + k), a]).sort((a, b) => a[0] - b[0]).slice(0, n).map(x => x[1]);
-}
-function earnedFlower(x, y, lines, i){
-  const list = earnedBy(i, lines), names = state.visit && state.visit.priv ? `${list.length} apps` : list.join(', '), w = Math.max(...lines.map(l => l.length)) * 14.4 + 36, h = lines.length * 24 + 10;
-  return `<g class="flower earned" tabindex="0" role="img" aria-label="Earned by offboarding ${esc(names)}" data-earned="${esc(names)}"><rect class="fhit" x="${(x - w/2).toFixed(1)}" y="${y + 4}" width="${w.toFixed(1)}" height="${h}" rx="4"/>${ascii(lines, x, y, 'flower-ascii')}</g>`;
-}
 function renderGarden(){
   let out = '<g id="grass" aria-hidden="true"></g>';
-  AMBIENT_USE.forEach(([x,y,l],i)=>{
-    if (l.length===1){ if (!nearTree(x, y)) out += grassText(l[0]==='||' ? 'b' : 't', x, y); }
-    else out += state.visit ? earnedFlower(x, y, l, i) : ascii(l,x,y,'flower-ascii');
+  GRASS_BASE.forEach(([x,y,[mark]]) => {
+    if (!nearTree(x, y)) out += grassText(mark === '||' ? 'b' : 't', x, y);
   });
-  state.flowers.forEach(f=>{ out += `<g class="flower ${f.fresh?'enter':''}">${ascii(f.lines, f.x, f.y - f.lines.length*12, 'flower-ascii')}</g>`; });
   out += state.trees.map(renderTree).join('');
   return out + (state.visit ? '' : renderCompost().replace('<g id="grass" aria-hidden="true"></g>', '')) + '<g id="critters" aria-hidden="true"></g>';
 }
@@ -1355,7 +1523,13 @@ function renderCompost(){
     if (!bed.flower) return;
     const full = bed.slots.every(Boolean), grew = bed.grew; bed.grew = false;
     const lines = growthLines(bed.flower, bed.slots.filter(Boolean).length, bed.slots.length);
-    out += `<g class="bed${full ? ' full' : ''}" data-bed="${gi}">` + (lines ? ascii(lines, g.c, g.top - 48 - (lines.length-1)*24, 'compost-ascii' + (grew ? ' sprout' : '')) : '');
+    const flowerTop = g.top - 48 - (lines.length - 1) * 24;
+    out += `<g class="bed${full ? ' full' : ''}" data-bed="${gi}">` +
+      ascii(lines, g.c, flowerTop, 'compost-ascii' + (grew ? ' sprout' : ''));
+    if (state.mode === 'plant' || (state.view === 'compost' && state.cmode === 'plant')){
+      const width = Math.max(40, ...lines.map(line => line.length * 15 + 10));
+      out += `<rect class="seed-dig-target" data-dig-seed="${gi}" tabindex="0" role="button" aria-label="Dig up flower" x="${g.c - width / 2}" y="${flowerTop - 4}" width="${width}" height="${g.top - flowerTop - 12}" rx="4"/>`;
+    }
     g.tiles.forEach((x, k) => {
       const a = bed.slots[k], ty = g.top + 26.34;
       out += compostBranch(g.c, g.top, x) + dot(x, g.top+24);
@@ -1366,6 +1540,7 @@ function renderCompost(){
   });
   return out;
 }
+const isPrivatePlot = plot => plot.private ?? !Array.isArray(plot.categories);
 function renderStroll(){
   const plots = getStrollPlots();
   return '<g id="plots">' + plots.map((plot, index) => {
@@ -1373,9 +1548,9 @@ function renderStroll(){
     const name = own ? worldName() : plot.name;
     const label = esc(name);
     const chipHalf = Math.max(44, name.length * 4.3 + 12);
-    return `<g ${own ? '' : `data-plot="${index}" role="button" tabindex="0" aria-label="${label}"`} transform="translate(${plot.x} ${plot.y})">
-      ${own ? '' : `<title>${label}</title>`}
-      <path class="plot${own ? ' mine' : ''}" d="${plot.path}" fill-rule="evenodd" fill="url(#pat-${patId(plot.pattern, plot.angle)})"/>
+    const fill = isPrivatePlot(plot) ? 'var(--bg)' : `url(#pat-${patId(plot.pattern, plot.angle)})`;
+    return `<g data-world-name="${label}" ${own ? '' : `data-plot="${index}" role="button" tabindex="0" aria-label="${label}"`} transform="translate(${plot.x} ${plot.y})">
+      <path class="plot${own ? ' mine' : ''}" d="${plot.path}" fill-rule="evenodd" fill="${fill}"/>
       ${own ? `<g class="chip"><rect x="${-chipHalf}" y="-17" width="${chipHalf * 2}" height="34"/><text x="0" y="1">${label}</text></g>` : ''}
     </g>`;
   }).join('') + '</g>';
@@ -1557,72 +1732,89 @@ function critterTick(now){
 }
 requestAnimationFrame(critterTick);
 
-/* -- compost mushrooms: now and then one grows in, each a different design, never too many at once -- */
+/* A short shower starts a small crop of mushrooms with individual lifetimes. */
+const MAX_MUSHROOMS = 3, MUSHROOM_FADE = 1.5;
 let shroomId = 0;
-const SHROOM_GAP = 120;
-const groundPos = (i, j) => hash(i, j, 601) > .3 ? null : [i * GT_W + 50 + hash(i, j, 602) * (GT_W - 100), j * GT_H + 90 + hash(i, j, 603) * (GT_H - 120)];
-function shroomSpotOk(x, y){
-  if (bedBoxes.some(b => x > b.x0 && x < b.x1 && y > b.y0 && y < b.y1)) return false;
-  if (state.shrooms.some(s => Math.hypot(s.x - x, s.y - y) < SHROOM_GAP)) return false;
-  const i = Math.floor(x / GT_W), j = Math.floor(y / GT_H);
-  for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++){ const p = groundPos(i + di, j + dj); if (p && Math.hypot(p[0] - x, p[1] - y) < SHROOM_GAP) return false; }
-  return true;
+function clearOfBeds(x, y){
+  return COMPOST_GROUPS.every((g, i) => !state.beds[i].flower ||
+    x < g.tiles[0] - 55 || x > g.tiles[g.tiles.length - 1] + 55 ||
+    y < g.top - 190 || y > g.top + 85);
 }
-function growShroom(gi){                // beside bed gi, or anywhere on screen when gi is -1
-  const g = gi >= 0 ? COMPOST_GROUPS[gi] : null, vw = visibleWorld();
-  let x, y, ok = false;
-  for (let n = 0; n < 40 && !ok; n++){
-    if (g){ x = g.c + rnd(-420, 420); y = Math.max(100, g.top + rnd(-60, 230)); } else { x = rnd(vw.x0 + 60, vw.x1 - 60); y = rnd(vw.y0 + 120, vw.y1 - 30); }
-    ok = shroomSpotOk(x, y);
+function growShroom(now){
+  const view = visibleWorld();
+  for (let n = 0; n < 30; n++){
+    const x = rnd(view.x0 + (view.x1 - view.x0) * .12, view.x1 - (view.x1 - view.x0) * .12);
+    const y = rnd(view.y0 + (view.y1 - view.y0) * .24, view.y1 - (view.y1 - view.y0) * .12);
+    if ((!state.visit && !clearOfBeds(x, y)) || nearTree(x, y)) continue;
+    if (state.shrooms.some(s => Math.hypot(s.x - x, s.y - y) < 140)) continue;
+    const available = SHROOM_SPR.map((_, i) => i).filter(i => !state.shrooms.some(s => s.v === i));
+    return {id:`sh${++shroomId}`, x, y, v:available[Math.floor(Math.random() * available.length)],
+      fadeAt:now + rnd(18, 42)};
   }
-  if (!ok) return null;
-  const all = SHROOM_SPR.map((_, i) => i), used = new Set(state.shrooms.map(s => s.v)), free = all.filter(i => !used.has(i)), pool = free.length ? free : all;   // prefer a design that isn't out yet
-  const sh = {id:'sh' + (++shroomId), bed:gi, x, y, v:pool[Math.floor(Math.random() * pool.length)], fresh:true};
-  state.shrooms.push(sh); return sh;
+  return null;
 }
-let shroomNext = 20;
-setInterval(() => {                     // one grows in every so often while you look at the compost
-  return;   // no mushrooms in the nursery
-  if (--shroomNext > 0) return;
-  shroomNext = rnd(30, 60);
-  if (state.shrooms.length >= 12) return;
-  const sh = growShroom(-1), host = $('#shrooms'); if (sh && host) host.insertAdjacentHTML('beforeend', shroomMarkup(sh));
-}, 1000);
-function shroomMarkup(s){            // every mushroom is drawn at the same size; a new one just grows in
-  const sp = SHROOM_SPR[s.v], k = sp.k || SPR_K, w = sp.w * k, h = sp.h * k, enter = s.fresh; s.fresh = false;
-  return `<g class="shroom" data-sh="${s.id}" transform="translate(${s.x.toFixed(1)} ${s.y.toFixed(1)})"><g class="sh-in${enter ? ' enter' : ''}"${s.delay ? ` style="animation-delay:${s.delay.toFixed(2)}s"` : ''}><g class="spr" fill-rule="evenodd" transform="translate(${(-w/2).toFixed(1)} ${(-h).toFixed(1)}) scale(${k})">${sprPaths(sp.poses[0])}</g></g></g>`;
+function shroomMarkup(shroom, now, fresh = false){
+  const sp = SHROOM_SPR[shroom.v], k = sp.k || SPR_K;
+  const fading = now >= shroom.fadeAt;
+  return `<g class="shroom${fading ? ' fading' : ''}" data-sh="${shroom.id}" transform="translate(${shroom.x.toFixed(1)} ${shroom.y.toFixed(1)})"><g class="sh-in${fresh ? ' enter' : ''}"><g class="spr" fill-rule="evenodd" transform="translate(${-sp.w*k/2} ${-sp.h*k}) scale(${k})">${sprPaths(sp.poses[0])}</g></g></g>`;
 }
-/* The compost ground is an endless canvas: a few mushrooms scattered over it, the same every time, filling in wherever you look */
-const GT_W = 330, GT_H = 270, groundTiles = new Set();
-const bedBoxes = COMPOST_GROUPS.map(g => ({x0:Math.min(...g.tiles) - 70, x1:Math.max(...g.tiles) + 70, y0:g.top - 48 - (g.mark.length - 1) * 24 - 50, y1:g.top + 26 + 52 + 50}));
-const clearOfBeds = (x, y) => !bedBoxes.some(b => x > b.x0 && x < b.x1 && y > b.y0 && y < b.y1);
-function groundTile(i, j, fresh){
-  const p = groundPos(i, j); if (!p) return '';
-  const [x, y] = p; if (!clearOfBeds(x, y)) return '';
-  return shroomMarkup({id:`g${i}_${j}`, v:Math.floor(hash(i, j, 604) * SHROOM_SPR.length), x, y, fresh, delay:fresh ? hash(i, j, 605) * .9 : 0});
+const rainCycle = () => state.rainCycle ??= {clock:0, nextRain:rnd(45, 100), ends:0, sprouts:[]};
+function syncRain(){
+  const rain = $('#rain'), cycle = state.rainCycle;
+  const raining = state.view !== 'stroll' && cycle && cycle.ends > cycle.clock;
+  if (raining && rain.hidden){
+    rain.innerHTML = Array.from({length:40}, () =>
+      `<i style="--x:${rnd(0, 108)}%;--y:${rnd(-20, 95)}%;--speed:${rnd(.6, 1.1)}s;--delay:-${rnd(0, 1.3)}s"></i>`
+    ).join('');
+  }
+  rain.hidden = !raining;
 }
-function ensureGround(fresh = true){
-  const host = $('#ground'); if (!host || state.view !== 'compost') return;
-  const v = visibleWorld(), m = 150;
-  const i0 = Math.floor((v.x0 - m) / GT_W), i1 = Math.floor((v.x1 + m) / GT_W), j0 = Math.floor((v.y0 - m) / GT_H), j1 = Math.floor((v.y1 + m) / GT_H), need = new Set();
-  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) need.add(i + ',' + j);
-  need.forEach(key => { if (groundTiles.has(key)) return; const [i, j] = key.split(',').map(Number); groundTiles.add(key); host.insertAdjacentHTML('beforeend', `<g data-t="${key}">${groundTile(i, j, fresh)}</g>`); });
-  [...groundTiles].forEach(key => { const [i, j] = key.split(',').map(Number);
-    if (!need.has(key) && (i < i0 - 1 || i > i1 + 1 || j < j0 - 1 || j > j1 + 1)){ const g = host.querySelector(`[data-t="${key}"]`); if (g) g.remove(); groundTiles.delete(key); } });
+function tickRain(){
+  const host = $('#shrooms');
+  if (!host || document.hidden) return;
+  const cycle = rainCycle(), now = cycle.clock += .5;
+  if (cycle.ends && now >= cycle.ends){
+    cycle.ends = 0;
+    cycle.nextRain = now + rnd(100, 220);
+    cycle.sprouts = Array.from({length:Math.floor(rnd(1, 4))}, (_, i) => now + rnd(1, 4) + i * 3);
+  } else if (!cycle.ends && now >= cycle.nextRain){
+    cycle.ends = now + rnd(5, 9);
+  }
+  syncRain();
+  state.shrooms = state.shrooms.filter(shroom => {
+    const sprite = host.querySelector(`[data-sh="${shroom.id}"]`);
+    if (now < shroom.fadeAt) return true;
+    if (now < shroom.fadeAt + MUSHROOM_FADE){ sprite?.classList.add('fading'); return true; }
+    sprite?.remove();
+    return false;
+  });
+  cycle.sprouts = cycle.sprouts.filter(time => {
+    if (now < time) return true;
+    if (state.shrooms.length < MAX_MUSHROOMS){
+      const shroom = growShroom(now);
+      if (shroom){
+        state.shrooms.push(shroom);
+        host.insertAdjacentHTML('beforeend', shroomMarkup(shroom, now, true));
+      }
+    }
+    return false;
+  });
 }
+setInterval(tickRain, 500);
 
-let groundIntro = true;
 function render(){
   hideTip();
   if (state.hand){ state.mode = null; state.cmode = null; }                    // the hand and the tools are one group: only one is ever chosen
   else { if (!state.mode && !state.visit) state.mode = state.lastMode || 'prune'; if (!state.cmode) state.cmode = state.lastCmode || 'plant'; }
-  grassTiles.clear(); groundTiles.clear();
+  grassTiles.clear();
   stage.setAttribute('class', `view-${state.view} mode-${state.mode||'none'} ${state.hand?'pan':''} cm-${state.cmode}`);
   const world = state.view==='garden' ? renderGarden() : state.view==='compost' ? renderCompost() : renderStroll();
-  stage.innerHTML = `<defs><clipPath id="tileClip"><rect x=".5" y=".5" width="39" height="39" rx="4"/></clipPath>${patternDefs()}</defs><g id="world" transform="${transform()}">${world}</g>`;
+  const mushrooms = state.view === 'stroll' ? '' : `<g id="shrooms" aria-hidden="true">${state.shrooms.map(shroom => shroomMarkup(shroom, state.rainCycle?.clock || 0)).join('')}</g>`;
+  stage.innerHTML = `<defs><clipPath id="tileClip"><rect x=".5" y=".5" width="39" height="39" rx="4"/></clipPath>${patternDefs()}</defs><g id="world" transform="${transform()}">${world}${mushrooms}</g>`;
   const garden = state.view==='garden';
   if (garden) mountCritters();
-  ensureWorld(state.view === 'compost' && groundIntro ? !(groundIntro = false) : false);   // the mushrooms grow in the first time you arrive, not on every redraw
+  ensureWorld();
+  syncRain();
   const visiting = !!state.visit;
   const compost = state.view==='compost', trayOn = (garden && ['plant','water'].includes(state.mode) && !visiting) || compost;
   $('#modes').hidden = !garden; $('#cmodes').hidden = !compost;
@@ -1632,7 +1824,6 @@ function render(){
   $('#tab-compost').hidden = !garden || visiting;
   $('#tabs').hidden = visiting; $('#vtag').hidden = !visiting; if (visiting) $('#vtag-name').textContent = state.visit.name;
   document.querySelectorAll('[data-cmode]').forEach(b=>{const on=b.dataset.cmode===state.cmode;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
-  $('#tab-garden').setAttribute('aria-selected', state.view==='garden' && !visiting); $('#tab-compost').setAttribute('aria-selected', state.view==='compost');
   $('#stroll').classList.toggle('on', state.view==='stroll'); $('#stroll').setAttribute('aria-pressed', state.view==='stroll');
   document.querySelectorAll('[data-mode]').forEach(b=>{const on=b.dataset.mode===state.mode;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
   $('#hand').setAttribute('aria-pressed', state.hand);
@@ -1640,7 +1831,8 @@ function render(){
   $('#tray').hidden = !trayN; document.body.classList.toggle('tray-on', !!trayN);
   if (typeof gmenu !== 'undefined' && !gmenu.hidden){ if (garden && !visiting) fillMenu(); else closeMenu(false); }
   if (typeof cmenu !== 'undefined' && !cmenu.hidden){ if (garden && !visiting) fillCMenu(); else closeCMenu(false); }
-  state.fresh.clear(); state.flowers.forEach(f=>f.fresh=false);
+  updatePanelTabs();
+  state.fresh.clear();
 }
 const treeOf = id => state.trees.find(t => t.id === id);
 
@@ -1660,39 +1852,38 @@ function enterVisit(i){
   const plot = getStrollPlots()[i];
   if (!plot || plot.own) return;
   closeMenu(false);
-  const priv = plot.private ?? !plot.categories;
+  const priv = isPrivatePlot(plot);
   const categories = plot.groups ? plot.groups.map(index => CAT_POOL[index]) : (plot.categories || []);
-  const visibleGroups = priv ? categories.map((category, index) => ({
-    name:`Tree ${index + 1}`, apps:category.apps.map(() => 'Private app')
-  })) : categories;
+  const visibleGroups = priv
+    ? (plot.trees || categories.map(category => ({name:category.name, count:category.apps.length})))
+      .filter(tree => tree && Number.isSafeInteger(tree.count) && tree.count > 0)
+      .map(tree => ({name:tree.name, apps:Array(tree.count).fill('Private app')}))
+    : categories;
   const d = assemble({...fromCategories(visibleGroups, 'v'), assign:true});
   viewPos.stroll = {zoom:state.zoom, panX:state.panX, panY:state.panY};
-  state.own = {trees:state.trees, apps:state.apps, flowers:state.flowers, hand:state.hand, mode:state.mode, critters:state.critters};
-  state.trees = d.trees; state.apps = d.apps; state.flowers = []; state.critters = []; critNext = critClock + 3;
+  state.own = {trees:state.trees, apps:state.apps, hand:state.hand, mode:state.mode, critters:state.critters, shrooms:state.shrooms, rainCycle:state.rainCycle};
+  state.trees = d.trees; state.apps = d.apps; state.critters = []; state.shrooms = []; state.rainCycle = null; critNext = critClock + 3;
   state.visit = {name:plot.name, i, j:0, priv};
   const L = layoutTrees(state.trees, i * 7);
-  setSpots(true);
   state.view = 'garden'; state.zoom = L.fit; state.panX = state.panY = 0; state.hand = true; state.mode = null;     // visitors only get the hand
   render();
 }
 function leaveVisit(to){
   if (!state.visit) return;
   const o = state.own;
-  state.trees = o.trees; state.apps = o.apps; state.flowers = o.flowers; state.hand = o.hand; state.mode = o.mode; state.critters = o.critters || []; state.visit = null; state.own = null;
-  setSpots(false);
+  state.trees = o.trees; state.apps = o.apps; state.hand = o.hand; state.mode = o.mode; state.critters = o.critters || []; state.shrooms = o.shrooms; state.rainCycle = o.rainCycle; state.visit = null; state.own = null;
   state.view = to;
   Object.assign(state, (to === 'stroll' ? viewPos.stroll : viewPos.garden) || {zoom: to === 'garden' ? LAYOUT.fit : 1, panX:0, panY:0});
   render(); openViewMenu();
 }
 const seedsOf = () => state.apps.filter(a => a.slot === null);
 function renderTray(){
-  const flowerBtn = (f, i) => `<button data-flower="${i}" title="Plant this flower" aria-label="Plant this flower">${flowerSvg(f)}</button>`;
   const appBtn = a => `<button data-seed="${a.id}" title="Add ${esc(a.name)}" aria-label="Add ${esc(a.name)}">${tileSvg(a)}</button>`;
   const watering = state.mode === 'water';
   const items = watering
     ? state.pile.map(appBtn)
-    : FLOWERS.map((f,i) => `<button data-pflower="${i}" title="Plant a seed" aria-label="Plant a seed">${flowerSvg(f)}</button>`)
-      .concat(state.stock.map(flowerBtn), state.pile.map(appBtn), seedsOf().map(appBtn));
+    : [`<button data-pflower title="Plant a mystery seed" aria-label="Plant a mystery seed"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x=".5" y=".5" width="39" height="39" rx="4"/><path d="M13 25c-1-5 2-10 8-13 3-1 6-1 7 1 2 3-1 10-5 14-4 4-9 3-10-2Z" fill="var(--ink)"/></svg></button>`,
+      ...state.pile.map(appBtn), ...seedsOf().map(appBtn)];
   $('#tray').innerHTML = items.join('');
   return items.length;
 }
@@ -1707,7 +1898,6 @@ function placeApp(id, gi, si){
   if (si < 0){ toast('That flower’s roots are full.'); return false; }
   playToolSound('feed');
   bed.slots[si] = a; bed.grew = true; state.pile = state.pile.filter(p => p !== a); if (a.slot === null) a.slot = 'gone';
-            // only sometimes: not every app grows a mushroom
   render(); return true;
 }
 function moveApp(g0, s0, g1, s1){
@@ -1722,6 +1912,17 @@ function removeAppFromRoot(gi, si){
   if (!state.pile.includes(app)) state.pile.push(app);
   render();
 }
+function digUpSeed(index){
+  const bed = state.beds[index];
+  if (!bed?.flower) return;
+  bed.slots.forEach(app => {
+    if (app && !state.pile.includes(app)) state.pile.push(app);
+  });
+  bed.slots.fill(null);
+  bed.flower = null;
+  bed.grew = false;
+  render();
+}
 function isRootApp(id){
   return state.pile.some(app => app.id === id);
 }
@@ -1730,17 +1931,17 @@ function placeAnywhere(id){
   if (gi < 0){ toast(state.beds.some(b => b.flower) ? 'Every flower is full.' : 'There are no flowers with roots.'); return; }
   placeApp(id, gi);
 }
-function plantBed(gi, fi){               // plant a flower and reveal its roots
-  const bed = state.beds[gi]; if (!bed || !FLOWERS[fi]) return;
+function plantBed(gi){               // plant a flower and reveal its roots
+  const bed = state.beds[gi]; if (!bed) return;
   if (bed.flower){ toast('That spot already has a flower.'); return; }
-  bed.flower = FLOWERS[fi]; bed.grew = true; playToolSound('plant'); render();
+  bed.flower = FLOWERS[Math.floor(Math.random() * FLOWERS.length)]; bed.grew = true; playToolSound('plant'); render();
 }
 function moveBedTo(gi, point){
   const group = COMPOST_GROUPS[gi], dx = point.x - group.c;
   group.tiles = group.tiles.map(x => x + dx);
   group.c = point.x; group.top = point.y + 48;
 }
-function plantNext(fi){                  // clicked in the toolbar: goes in the next bed without a flower
+function plantNext(){                  // clicked in the toolbar: goes in the next bed without a flower
   const gi = state.beds.findIndex(b => !b.flower);
   if (gi < 0){ toast('Every bed has a flower.'); return; }
   const view = visibleWorld();
@@ -1750,7 +1951,7 @@ function plantNext(fi){                  // clicked in the toolbar: goes in the 
     if (!nearTree(candidate.x, candidate.y) && !state.beds.some((bed,index) => bed.flower && Math.hypot(COMPOST_GROUPS[index].c-candidate.x, COMPOST_GROUPS[index].top-candidate.y) < 240)){ point = candidate; break; }
   }
   moveBedTo(gi, point);
-  plantBed(gi, fi);
+  plantBed(gi);
 }
 /* screen position -> garden position, so a flower lands exactly where you drop it */
 function clientToWorld(cx, cy){
@@ -1770,20 +1971,12 @@ function toast(msg, ms = 4200){             // the only message there is: a new 
 /* ---------- Hover name ---------- */
 const tipEl = $('#tip');
 function hideTip(){ tipEl.hidden = true; }
-function showFlowerTip(el){                // the apps that were offboarded to earn this flower
-  if (drag) return;
-  tipEl.classList.add('ui'); tipEl.textContent = el.dataset.earned; tipEl.hidden = false;
-  const r = el.getBoundingClientRect(), w = tipEl.offsetWidth, h = tipEl.offsetHeight;
-  const x = Math.max(8, Math.min(window.innerWidth - w - 8, r.left + r.width/2 - w/2));
-  const y = r.top - h - 8 < 8 ? r.bottom + 8 : r.top - h - 8;
-  tipEl.style.transform = `translate(${x.toFixed(0)}px, ${y.toFixed(0)}px)`;
-}
 function showTip(tileEl){
   const app = state.apps.find(a => a.id === tileEl.dataset.app); if (!app || drag) return;
   showNameTip(appLabel(app), tileEl.getBoundingClientRect());
 }
 function showNameTip(name, r){
-  tipEl.classList.remove('ui'); tipEl.textContent = name; tipEl.hidden = false;
+  tipEl.textContent = name; tipEl.hidden = false;
   const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
   const x = Math.max(8, Math.min(window.innerWidth - w - 8, r.left + r.width/2 - w/2));
   const y = r.top - h - 8 < 8 ? r.bottom + 8 : r.top - h - 8;
@@ -1810,10 +2003,14 @@ function openPrune(app){
   if (app.offMode === 'account') app.accountDeleted = true;
   hideTip(); state.pending = app;
   fillCard(app, '#prune-who', '#prune-facts', 'export');
-  $('#prune-app').disabled = !!app.appDeleted;
-  $('#prune-account').disabled = !!app.accountDeleted;
-  $('#prune-app').textContent = app.appDeleted ? 'App deleted' : 'Delete App';
-  $('#prune-account').textContent = app.accountDeleted ? 'Account deleted' : 'Delete Account';
+  const appDeleted = !!app.appDeleted, accountDeleted = !!app.accountDeleted;
+  $('#prune-app').hidden = $('#prune-app').disabled = appDeleted;
+  $('#prune-account').hidden = $('#prune-account').disabled = accountDeleted;
+  $('#dlg-prune .actions').hidden = appDeleted && accountDeleted;
+  $('#export').hidden = appDeleted || accountDeleted;
+  $('#prune-title').textContent = appDeleted && accountDeleted
+    ? 'App and account deleted'
+    : 'Would you like to disconnect…';
   openModal(dlgPrune);
 }
 /* Details only (no actions): opened by clicking an app with the shovel or the hand */
@@ -1888,7 +2085,8 @@ function beginOffboard(app, mode){
 }
 function startOffboard(mode){ const app = state.pending; if (!app) return; closePrune(); beginOffboard(app, mode); }
 function prunePick(mode){                                  // on a phone, Delete first warns that nothing can be exported
-  const app = state.pending; if (!app) return;
+  const app = state.pending;
+  if (!app || (mode === 'app' ? app.appDeleted : app.accountDeleted)) return;
   if (isMobile()){ closePrune(); openMobileNotice(app, mode); } else startOffboard(mode);
 }
 $('#prune-app').onclick = () => prunePick('app');
@@ -1906,7 +2104,7 @@ $('#mn-anyway').onclick = () => { const m = mob; mob = null; dlgMN.close(); if (
 $('#mn-queue').onclick = () => { const m = mob; mob = null; dlgMN.close(); if (m) queueApp(m.app); };
 function queueApp(app){
   if (!state.queue.includes(app)) state.queue.push(app);
-  render(); toast(`${app.name} is in your Offboard Queue.`);
+  render(); toast(`${app.name} is in your Inventory.`);
 }
 
 /* ---------- Mac: a Safari window with the app's own account page ---------- */
@@ -2080,6 +2278,8 @@ function finishOffboard(){
   setTimeout(() => { app.slot = 'gone'; app.offMode = o.mode;
     if (o.mode === 'app') app.appDeleted = true;
     else app.accountDeleted = true;
+    const tree = treeOf(app.tree);
+    if (tree) regroupAfterRemoval(tree);
     if (!state.beds.some(bed => bed.slots.includes(app)) && !state.pile.includes(app)) state.pile.push(app); state.queue = state.queue.filter(q => q !== app); render(); }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 230);
   const body = $('#off-body'), fresh = body.cloneNode(false); body.replaceWith(fresh);       // a new node replays the fade, so the swap isn't a hard cut
   fresh.innerHTML = `<div class="offmain"><h2 id="off-title">Disconnected!</h2><p class="sub">${o.mode === 'account' ? `Your ${esc(app.name)} account is deleted.` : `${esc(app.name)} is gone from your device.`}</p></div>`;
@@ -2098,36 +2298,38 @@ dlgOff.addEventListener('cancel', e => {
 });
 
 /* ---------- Planting ---------- */
-function growTree(tree){           // a full tree grows into the next size up; apps keep their order
-  const old = tree.geom.slots.map(sl => sl.id);
-  const members = state.apps.filter(a => a.tree === tree.id && a.slot && a.slot !== 'gone').sort((a, b) => old.indexOf(a.slot) - old.indexOf(b.slot));
-  tree.design = pickDesign(members.length + 1, state.trees.indexOf(tree) + 1);
-  tree.geom = makeGeom(tree.design);
-  members.forEach((a, i) => { a.slot = tree.geom.slots[i].id; });
+function plantedApps(tree){
+  const bySlot = new Map(state.apps.filter(app => app.tree === tree.id).map(app => [app.slot, app]));
+  return tree.geom.slots.map(slot => bySlot.get(slot.id)).filter(Boolean);
+}
+function regroupAfterRemoval(tree){
+  const remaining = plantedApps(tree);
+  if (remaining.length > 0 && remaining.length < MIN_TREE_APPS){
+    const candidates = state.trees.filter(other => other !== tree && plantedApps(other).length);
+    const merged = groupTreeCategories([
+      {name:tree.name, apps:remaining, tree},
+      ...candidates.map(other => ({name:other.name, apps:plantedApps(other), tree:other}))
+    ]);
+    const target = merged.find(group => group.tree !== tree && group.apps.includes(remaining[0]));
+    if (target){
+      remaining.forEach(app => { app.tree = target.tree.id; });
+      // Reset the destination layout even if its form has enough spare positions.
+      target.tree.design = null;
+      fitTreeApps(target.tree, target.apps, state.trees.indexOf(target.tree) + 1);
+    }
+  }
+  fitTreeApps(tree, plantedApps(tree), state.trees.indexOf(tree) + 1);
   layoutTrees(state.trees);
 }
 function plant(id){
-  const app = state.apps.find(a=>a.id===id); if(!app) return;
-  const tree = treeOf(app.tree); let free = tree.geom.slots.find(s=>!occupant(app.tree,s.id)), grew = false;
-  if (!free){ growTree(tree); free = tree.geom.slots.find(s=>!occupant(app.tree,s.id)); grew = true; }
-  app.slot = free.id; state.fresh.add(app.id); playToolSound('plant'); render();
+  const app = state.apps.find(a => a.id === id);
+  if (!app || app.slot !== null) return;
+  const tree = treeOf(app.tree);
+  const grew = fitTreeApps(tree, [...plantedApps(tree), app], state.trees.indexOf(tree) + 1);
+  layoutTrees(state.trees);
+  state.fresh.add(app.id); playToolSound('plant'); render();
   if (grew) toast(`The ${tree.name} tree grew to make room.`);
 }
-function plantFlowerAt(i, cx, cy){      // dropped where you let go
-  const lines = state.stock[i]; if (!lines) return;
-  const w = clientToWorld(cx, cy);
-  playToolSound('plant');
-  state.stock.splice(i, 1); state.flowers.push({lines, x:w.x, y:w.y, fresh:true}); render();
-}
-function plantFlower(i){                // clicked: goes to the next free spot beside a tree
-  const lines = state.stock[i]; if (!lines) return;
-  const free = USER_SPOTS.map(([x,y]) => ({x:x + 22, y:y + 60})).find(sp => !state.flowers.some(f => Math.abs(f.x - sp.x) < 60 && Math.abs(f.y - sp.y) < 90));
-  if (!free){ toast('The garden has no room for another flower.'); return; }
-  playToolSound('plant');
-  state.stock.splice(i, 1); state.flowers.push({lines, x:free.x, y:free.y, fresh:true}); render();
-}
-
-
 /* ---------- Watering can (custom icon, drawn to match Lucide: 24px grid, 2px-family round strokes) ---------- */
 const CAN_ICON = '<rect x="4" y="9" width="11" height="11" rx="2"/><path d="M6 9V7.5a2.5 2.5 0 0 1 5 0V9"/><path d="M15 16l5-6"/><path d="M18.5 8.7l3 2.6"/>';
 const SCISSORS_ICON = '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/>';
@@ -2258,7 +2460,9 @@ function activate(el){
 stage.addEventListener('click', e => {
   if (performance.now() - lastPinch < 400 || performance.now() - lastDnd < 300) return;           // the end of a pinch isn't a tap
   if (state.hand || state.visit) return;
-  if (state.view === 'compost'){ const b = e.target.closest('[data-bed]');  return; }
+  const seed = e.target.closest('[data-dig-seed]');
+  if (seed){ digUpSeed(+seed.dataset.digSeed); return; }
+  if (state.view === 'compost') return;
   const bed = e.target.closest('[data-bed]');
   if (bed && state.mode === 'prune') return;
   if (state.mode==='water'){ pour(e.clientX, e.clientY); return; }
@@ -2266,6 +2470,15 @@ stage.addEventListener('click', e => {
 });
 stage.addEventListener('keydown', e => {
   if (e.key!=='Enter' && e.key!==' ') return;
+  const seed = e.target.closest('[data-dig-seed]');
+  if (seed){
+    e.preventDefault();
+    const box = seed.getBoundingClientRect();
+    dig(box.left + box.width/2, box.top + box.height/2);
+    digUpSeed(+seed.dataset.digSeed);
+    $('#tray [data-pflower]')?.focus();
+    return;
+  }
   const plot = e.target.closest('[data-plot]');
   if (plot && state.view === 'stroll'){ e.preventDefault(); enterVisit(+plot.dataset.plot); return; }
   const el = e.target.closest('[data-app]'); if (!el || state.visit) return;
@@ -2281,16 +2494,16 @@ stage.addEventListener('keydown', e => {
 let suppressClick = false, dnd = null, lastDnd = 0;
 $('#tray').addEventListener('click', e => {
   if (suppressClick) return;
-  const b = e.target.closest('[data-seed],[data-flower],[data-pflower]'); if (!b) return;
-  if (state.view === 'garden' && b.dataset.pflower != null){ plantNext(+b.dataset.pflower); return; }
+  const b = e.target.closest('[data-seed],[data-pflower]'); if (!b) return;
+  if (state.view === 'garden' && b.dataset.pflower != null){ plantNext(); return; }
   if (state.view === 'garden' && isRootApp(b.dataset.seed)){ placeAnywhere(b.dataset.seed); return; }
-  if (state.view === 'compost'){ if (b.dataset.pflower) plantNext(+b.dataset.pflower); else if (b.dataset.seed && state.cmode === 'fertilize') placeAnywhere(b.dataset.seed); return; }
-  if (b.dataset.seed) plant(b.dataset.seed); else plantFlower(+b.dataset.flower);
+  if (state.view === 'compost'){ if (b.hasAttribute('data-pflower')) plantNext(); else if (b.dataset.seed && state.cmode === 'fertilize') placeAnywhere(b.dataset.seed); return; }
+  if (b.dataset.seed) plant(b.dataset.seed);
 });
 /* dragging out of the toolbar: a copy of the icon follows the pointer */
 document.addEventListener('pointerdown', e => {
   if (!e.target.closest('#tray, #cmenu-body')) return;
-  const b = e.target.closest('[data-seed],[data-flower],[data-pflower]'); if (!b || b.hasAttribute('data-still') || e.button > 0) return;
+  const b = e.target.closest('[data-seed],[data-pflower]'); if (!b || b.hasAttribute('data-still') || e.button > 0) return;
   dnd = {b, x:e.clientX, y:e.clientY, on:false, ghost:null};
 });
 window.addEventListener('pointermove', e => {
@@ -2333,18 +2546,17 @@ function endDnd(e, cancel){
   }
   if (state.view === 'garden' && state.mode === 'plant' && d0.b.dataset.pflower != null){
     if (!el || !stage.contains(el)) return;
-    const fi = +d0.b.dataset.pflower;
-    if (bed) plantBed(+bed.dataset.bed, fi);
+    if (bed) plantBed(+bed.dataset.bed);
     else {
       const gi = state.beds.findIndex(b => !b.flower);
       if (gi < 0){ toast('Every flower bed is occupied.'); return; }
       moveBedTo(gi, clientToWorld(e.clientX, e.clientY));
-      plantBed(gi, fi);
+      plantBed(gi);
     }
     return;
   }
   if (state.view === 'garden' && !state.visit && el && stage.contains(el)){
-    if (d0.b.dataset.flower != null) plantFlowerAt(+d0.b.dataset.flower, e.clientX, e.clientY); else plant(d0.b.dataset.seed);
+    if (d0.b.dataset.seed) plant(d0.b.dataset.seed);
   }
 }
 window.addEventListener('pointerup', e => endDnd(e, false));
@@ -2457,34 +2669,31 @@ const endDrag = e => {
 };
 stage.addEventListener('pointerup', endDrag); stage.addEventListener('pointercancel', endDrag);
 const liveTile = e => e.target.closest && e.target.closest('.tile.live');
-const earnedFlowerAt = e => e.target.closest && e.target.closest('.flower.earned');
 stage.addEventListener('pointermove', e => {
-  const tree = e.target.closest('.tree-group');
-  if (!tree || drag || e.target.closest('.tile.live')) return;
-  showNameTip(tree.getAttribute('aria-label'), {left:e.clientX, top:e.clientY, bottom:e.clientY, width:0});
+  if (drag || e.target.closest('.tile.live')) return;
+  const item = e.target.closest('[data-world-name], .tree-group');
+  if (!item || (item.dataset.worldName && e.pointerType !== 'mouse')) return;
+  showNameTip(item.dataset.worldName || item.getAttribute('aria-label'), {
+    left:e.clientX, top:e.clientY, bottom:e.clientY, width:0
+  });
 });
 stage.addEventListener('pointerout', e => {
-  const tree = e.target.closest('.tree-group');
-  if (tree && !tree.contains(e.relatedTarget)) hideTip();
+  const item = e.target.closest('[data-world-name], .tree-group');
+  if (item && !item.contains(e.relatedTarget)) hideTip();
 });
 stage.addEventListener('focusin', e => {
-  if (e.target.matches('.tree-group')) showNameTip(e.target.getAttribute('aria-label'), e.target.getBoundingClientRect());
+  if (e.target.matches('[data-plot], .tree-group')){
+    showNameTip(e.target.getAttribute('aria-label'), e.target.getBoundingClientRect());
+  }
 });
 stage.addEventListener('pointerover', e => {
   if (e.pointerType !== 'mouse' || state.view !== 'garden') return;
-  if (state.visit){ const f = earnedFlowerAt(e); if (f){ showFlowerTip(f); return; } }
   const t = liveTile(e); if (t) showTip(t);
 });
 stage.addEventListener('pointerout', e => {
-  const f = earnedFlowerAt(e); if (f){ if (!(e.relatedTarget && f.contains(e.relatedTarget))) hideTip(); return; }
   const t = liveTile(e); if (t && !(e.relatedTarget && t.contains(e.relatedTarget))) hideTip();
 });
-let flowerTipTimer = 0;
-stage.addEventListener('click', e => {                     // a tap (no hover on a phone) shows it for a moment
-  if (!state.visit) return; const f = earnedFlowerAt(e); if (!f) return;
-  showFlowerTip(f); clearTimeout(flowerTipTimer); flowerTipTimer = setTimeout(hideTip, 2600);
-});
-stage.addEventListener('focusin', e => { const f = earnedFlowerAt(e); if (f){ showFlowerTip(f); return; } const t = liveTile(e); if (t) showTip(t); });
+stage.addEventListener('focusin', e => { const t = liveTile(e); if (t) showTip(t); });
 stage.addEventListener('focusout', hideTip);
 
 /* theme */
@@ -2570,7 +2779,6 @@ $('#gshape').addEventListener('click', event => {
     const half = t.geom.hw * t.scale;
     return [[t.cx - half, t.baseY + t.geom.minY * t.scale], [t.cx + half, t.baseY + 40]];
   });
-  state.flowers.forEach(f => corners.push([f.x - 36, f.y - 80], [f.x + 36, f.y + 16]));
   const bounds = corners.length ? bbox(corners) : {x0:0, y0:0, x1:1440, y1:1024};
   const x = bounds.x0 + u * (bounds.x1 - bounds.x0);
   const y = bounds.y0 + v * (bounds.y1 - bounds.y0);
@@ -2579,6 +2787,9 @@ $('#gshape').addEventListener('click', event => {
   applyPan();
 });
 /* The Compost panel: what is waiting to be offboarded, and what already has been (real apps, real sizes) */
+function inventoryTrees(){
+  return state.trees.filter(tree => tree.customCategory || SETUP);
+}
 function fillCMenu(){
   const gone = state.apps.filter(a => a.slot === 'gone');
   const delApps = gone.filter(a => a.appDeleted || (!a.accountDeleted && a.offMode === 'app'));
@@ -2589,17 +2800,80 @@ function fillCMenu(){
   };
   const sec = (title, list, btn, none) => `<h4>${title}</h4>` + (list.length ? `<div class="cgrid">${list.map(a => cell(a, btn)).join('')}</div>` : `<p class="cnone">${none}</p>`);
   const all = [...new Set([...state.queue, ...delApps, ...delAcc])], gb = all.reduce((n, a) => n + (a.gb || 0), 0);
+  const added = state.apps.filter(app => app.inventoryAdded);
+  const addedSection = added.length ? '<h4>Added items</h4>' + added.map(app => {
+    const label = app.url ? `<a href="${esc(app.url)}" target="_blank" rel="noopener noreferrer">${esc(app.name)}</a>` : `<span>${esc(app.name)}</span>`;
+    return `<div class="inventory-item">${label}${app.slot === null ? `<button class="btn" data-inventory-plant="${esc(app.id)}">Plant</button>` : ''}</div>`;
+  }).join('') : '';
   $('#cmenu-body').innerHTML =
-    sec('Offboard Queue', state.queue, true, 'Nothing waiting. Apps you add on your phone show up here.') +
+    addedSection +
+    (state.queue.length ? `<div class="cgrid">${state.queue.map(cell).join('')}</div>` : '') +
     sec('Deleted Apps', delApps, true, 'No apps deleted yet.') +
     sec('Deleted Accounts', delAcc, true, 'No accounts deleted yet.') +
     `<h4>Total Data</h4><p class="ctotal">${gb.toFixed(1)} GB data</p>`;
 }
-function openCMenu(){ closeMenu(false); fillCMenu(); cmenu.hidden = false; cbtn.setAttribute('aria-expanded', 'true'); }
-function closeCMenu(refocus){ if (cmenu.hidden) return; cmenu.hidden = true; cbtn.setAttribute('aria-expanded', 'false'); if (refocus) cbtn.focus(); }
+let inventoryId = 0;
+function inventoryEntry(value){
+  const scheme = /^[a-z][a-z0-9+.-]*:/i;
+  const domain = /^(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}(?::\d+)?(?:[/?#]\S*)?$/i;
+  const bareDomain = domain.test(value);
+  if (!scheme.test(value) && !bareDomain){
+    const name = normalizeAppName(value);
+    return name && name.length <= 80 && appNameKey(name) ? {name} : null;
+  }
+  try {
+    const url = new URL(bareDomain ? `https://${value}` : value);
+    if (!['http:', 'https:'].includes(url.protocol) || !url.hostname.includes('.') || url.username || url.password) return null;
+    return {name:url.hostname.replace(/^www\./i, ''), url:url.href};
+  } catch (error){ return null; }
+}
+$('#inventory-add').addEventListener('submit', e => {
+  e.preventDefault();
+  const form = new FormData(e.currentTarget);
+  const value = String(form.get('entry') || '').trim();
+  const entry = value ? inventoryEntry(value) : null;
+  const category = String(form.get('category') || '').trim().slice(0,32);
+  let tree = inventoryTrees().find(t => t.name.trim().toLowerCase() === category.toLowerCase());
+  const status = $('#inventory-status');
+  status.hidden = false;
+  if (!category || (value && !entry)){
+    status.textContent = !category ? 'Enter a category name.' : 'Enter a valid app name or site link.';
+    return;
+  }
+  if (!entry && tree){ status.textContent = `${tree.name} already exists.`; return; }
+  const duplicate = entry && state.apps.some(app => app.slot !== 'gone' && (entry.url ? app.url === entry.url : !app.url && appNameKey(app.name) === appNameKey(entry.name)));
+  if (duplicate){ status.textContent = `${entry.name} is already in your world.`; return; }
+  const created = !tree;
+  if (created){
+    tree = {id:`category-${++inventoryId}`, name:category, customCategory:true};
+    state.trees.push(tree);
+    fitTreeApps(tree, [], state.trees.length);
+    layoutTrees(state.trees);
+  }
+  if (entry){
+    const host = entry.url ? new URL(entry.url).hostname.replace(/^www\./i, '') : '';
+    const icons = iconAlts(host ? host.split('.').slice(0,-1).join('.') : entry.name);
+    state.apps.push({...entry, id:`added-${++inventoryId}`, inventoryAdded:true, tree:tree.id,
+      kind:tree.name, slot:null, gb:0, since:'Today', img:icons[0], alts:icons.slice(1)});
+  }
+  $('#inventory-entry').value = '';
+  $('#inventory-category').value = '';
+  status.textContent = entry ? `Added ${entry.name} to ${tree.name}.` : `Added ${tree.name}.`;
+  if (created) status.textContent += ' Plant three apps there to grow the tree.';
+  render();
+});
+function updatePanelTabs(){
+  const inventorySelected = !cmenu.hidden || state.view === 'compost';
+  gbtn.setAttribute('aria-selected', state.view === 'garden' && !state.visit && !inventorySelected);
+  cbtn.setAttribute('aria-selected', inventorySelected);
+}
+function openCMenu(){ closeMenu(false); fillCMenu(); cmenu.hidden = false; cbtn.setAttribute('aria-expanded', 'true'); updatePanelTabs(); }
+function closeCMenu(refocus){ if (cmenu.hidden) return; cmenu.hidden = true; cbtn.setAttribute('aria-expanded', 'false'); updatePanelTabs(); if (refocus) cbtn.focus(); }
 $('#cpanel-close').onclick = () => closeCMenu(true);
 $('#cmenu-body').addEventListener('click', e => {           // a queued app opens the same disconnect window as pruning it
   if (performance.now() - lastDnd < 300) return;
+  const plantButton = e.target.closest('[data-inventory-plant]');
+  if (plantButton){ plant(plantButton.dataset.inventoryPlant); return; }
   const b = e.target.closest('[data-q]'); if (!b) return;
   const a = state.apps.find(x => x.id === b.dataset.q); if (a) openPrune(a);
 });
@@ -2623,6 +2897,49 @@ function closeMenu(refocus){ if (gmenu.hidden) return; gmenu.hidden = true; gbtn
 applyName();
 $('#gpanel-close').onclick = () => closeMenu(true);       // it stays open until you collapse it
 document.addEventListener('keydown', e => { if (e.key !== 'Escape' || document.querySelector('dialog[open]')) return; if (!gmenu.hidden) closeMenu(true); else if (!cmenu.hidden) closeCMenu(true); });
+const fieldGuide = $('#field-guide'), guideButton = $('#g-guide');
+// Project habitat coordinates into the same preview frame for every specimen.
+const GUIDE_FRAME = 224;
+function guideDrawing(markup){
+  return `<svg viewBox="0 0 ${GUIDE_FRAME} ${GUIDE_FRAME}" aria-hidden="true">${markup}</svg>`;
+}
+function guideSprite(sprite, scale){
+  const x = (GUIDE_FRAME - sprite.w * scale) / 2;
+  const y = (GUIDE_FRAME - sprite.h * scale) / 2;
+  return guideDrawing(`<g class="spr" fill-rule="evenodd" transform="translate(${x} ${y}) scale(${scale})">${sprite.markup || sprPaths(sprite.poses[0])}</g>`);
+}
+function renderFieldGuide(){
+  const entry = (label, drawing) => `<figure tabindex="0" aria-label="${esc(label)}">${drawing}<figcaption aria-hidden="true">${esc(label)}</figcaption></figure>`;
+  const animalNames = {bear:'Squirrel', bunny:'Rabbit', raccoon:'Rat', fox:'Raccoon'};
+  const animals = period => [...new Set(CRITTER_BAGS[period])].map(kind => {
+    const name = animalNames[kind] || kind[0].toUpperCase() + kind.slice(1);
+    const animal = CRITTERS[kind];
+    const scale = animal.s * (kind === 'deer' ? .78 : 1);
+    return entry(name, guideSprite(critSpr(animal, 0), scale));
+  }).join('');
+  const flowerNames = ['Square bloom','Round bloom','Cross bloom','Wave bloom','Cup bloom','Star bloom','Ring bloom'];
+  const flowers = FLOWERS.map((lines, i) => entry(flowerNames[i],
+    guideDrawing(`<text class="ascii flower-ascii" dominant-baseline="central" xml:space="preserve">${lines.map((line, row) =>
+      `<tspan x="${GUIDE_FRAME / 2}" y="${GUIDE_FRAME / 2 + (row - (lines.length - 1) / 2) * 24}">${esc(line)}</tspan>`
+    ).join('')}</text>`))).join('');
+  const mushroomNames = ['Buttoncap','Towercap','Bellcap','Pebblecap'];
+  const mushrooms = SHROOM_SPR.map((sprite, i) => entry(mushroomNames[i], guideSprite(sprite, sprite.k || SPR_K))).join('');
+  $('#guide-body').innerHTML = `
+    <h3>Day wildlife</h3><div class="guide-grid">${animals('day')}</div>
+    <h3>Night wildlife</h3><div class="guide-grid">${animals('night')}</div>
+    <h3>Flowers</h3>
+    <div class="guide-grid">${flowers}</div>
+    <h3>Mushrooms</h3>
+    <div class="guide-grid">${mushrooms}</div>`;
+}
+guideButton.onclick = () => {
+  renderFieldGuide();
+  fieldGuide.showModal();
+  $('#guide-close').focus();
+};
+$('#guide-close').onclick = () => fieldGuide.close();
+fieldGuide.addEventListener('close', () => guideButton.focus());
+
 const dlgRename = $('#dlg-rename'), renameInput = $('#rename-input');
 $('#g-rename').onclick = () => { closeMenu(false); renameInput.value = meta.name; dlgRename.showModal(); renameInput.focus(); renameInput.select(); };
 function saveRename(){
