@@ -206,7 +206,7 @@
 <main id="main"></main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-<script src="app-names.js"></script>
+<script src="app-names.js?v=wildlife-scale"></script>
 <script>
 /* =====================================================================
    Helpers
@@ -666,65 +666,117 @@ function hideOverlappingClouds(){
 }
 setInterval(hideOverlappingClouds, 80);
 const ENTRY_ANIMALS = {
-  day: { sky: ['ƸӜƷ', 'ᵛӜᵛ'], ground: ['(\\_/)\n(• x •)\n(____)', ' (•)>\n /__)', ' (•)>\n /__]'] },
-  night: { sky: ['\\^..^/', '⌣^..^⌣'], ground: [' /\\_/\\\n(•ᴥ•)\n(____)', ' _o_o_\n(_____ )', ' _o_o_\n(_____)'] }
+  day: { sky: ['butterfly'], ground: ['bunny', 'bird', 'bear'] },
+  night: { sky: ['bat'], ground: ['raccoon', 'frog', 'owl'] }
 };
+let entryTimer, entryStep, entrySky = true;
 function clearEntryAnimal(){
   $('#scene > .entry-animal')?.remove();
 }
 function showEntryAnimal(){
   const scene = $('#scene');
   const stage = scene.querySelector('.stage');
-  if (!stage || scene.hidden || document.hidden || reduced()) return;
+  if (!stage || scene.hidden || document.hidden) return;
   const frame = stage.getBoundingClientRect();
   const horizon = frame.top + frame.height * HORIZON / 1024;
-  const sky = Math.random() < .5;
-  const top = sky ? 16 : Math.max(16, horizon);
-  const bottom = sky ? Math.min(horizon, innerHeight - 16) : innerHeight - 16;
-  const obstacles = [...document.querySelectorAll('.modal, .home h1, .home-pronunciation, .home-definition, .home .stack, .sky-sun')]
+  const obstacles = [...document.querySelectorAll('.modal, .home h1, .home-pronunciation, .home-definition, .home .stack, .sky-sun, .sky-moon')]
     .map(el => el.getBoundingClientRect());
-  const glyphs = ENTRY_ANIMALS[isNight() ? 'night' : 'day'][sky ? 'sky' : 'ground'];
-  const frames = sky ? glyphs : glyphs.slice(Math.random() < .5 ? 0 : 1);
-  const travel = Math.min(sky ? 210 : 95, innerWidth - 108);
-  if (bottom - top < 70 || travel < 30) return;
-  for (let attempt = 0; attempt < 24; attempt++){
-    const x = 12 + Math.random() * (innerWidth - travel - 96);
-    const y = top + Math.random() * (bottom - top - 64);
-    if (obstacles.some(box => x < box.right && x + travel + 84 > box.left && y < box.bottom && y + 64 > box.top)) continue;
-    const animal = document.createElement('pre');
-    animal.className = 'entry-animal';
-    animal.style.cssText = `left:${x}px;top:${y + 10}px;font-size:${sky ? 18 : 15}px`;
-    animal.textContent = frames[0];
-    scene.append(animal);
-    const reverse = Math.random() < .5;
-    const start = reverse ? travel : 0, end = reverse ? 0 : travel;
-    const animation = animal.animate([
-      { transform: `translate(${start}px,0)`, opacity: 0 },
-      { opacity: 1, offset: .18 },
-      { transform: `translate(${travel / 2}px,${sky ? -9 : -4}px)`, offset: .5 },
-      { opacity: 1, offset: .82 },
-      { transform: `translate(${end}px,0)`, opacity: 0 }
-    ], { duration: sky ? 4800 : 5600 });
-    const flap = setInterval(() => {
-      if (!animal.isConnected || reduced()){
-        animation.cancel();
-        animal.remove();
-        clearInterval(flap);
-        return;
+  const animals = ENTRY_ANIMALS[isNight() ? 'night' : 'day'];
+  const motion = !reduced();
+  const candidates = [entrySky, !entrySky].flatMap(sky => {
+    const choices = sky ? animals.sky : animals.ground;
+    const first = Math.floor(Math.random() * choices.length);
+    return [...choices.slice(first), ...choices.slice(0, first)].map(kind => ({sky, kind}));
+  });
+  for (const {sky, kind} of candidates){
+    const gait = CRITTERS[kind];
+    const sprite = critSpr(gait, Math.floor(Math.random() * (gait.variants || 1)));
+    const width = sprite.w * gait.s, height = sprite.h * gait.s;
+    const top = sky ? 10 : Math.max(10, horizon);
+    const bottom = sky ? Math.min(horizon, innerHeight - 10) : innerHeight - 10;
+    const lift = motion ? (gait.leap ? 34 : 20) : 0;
+    const lanes = [top, (top + bottom - height - lift) / 2, bottom - height - lift,
+      ...obstacles.flatMap(box => [box.top - height - lift - 6, box.bottom + 6])];
+    const spots = [];
+    for (const y of lanes){
+      if (y < top || y + height + lift > bottom) continue;
+      const blocked = obstacles.filter(box => y < box.bottom + 6 && y + height + lift > box.top - 6)
+        .sort((a, b) => a.left - b.left);
+      let left = 10;
+      for (const box of [...blocked, {left: innerWidth - 4, right: innerWidth}]){
+        const right = Math.min(innerWidth - 10, box.left - 6);
+        if (right - left >= width) spots.push({left, right, y});
+        left = Math.max(left, box.right + 6);
       }
-      animal.textContent = frames[(frames.indexOf(animal.textContent) + 1) % frames.length];
-    }, sky ? 220 : 420);
-    animation.onfinish = () => { clearInterval(flap); animal.remove(); };
-    break;
+    }
+    if (!spots.length) continue;
+    const {left, right, y} = spots[Math.floor(Math.random() * spots.length)];
+    const travel = motion ? Math.min(sky ? 150 : 85, right - left - width) : 0;
+    const x = left + Math.random() * (right - left - width - travel);
+    const animal = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    animal.classList.add('entry-animal');
+    animal.setAttribute('viewBox', `0 0 ${sprite.w} ${sprite.h}`);
+    animal.setAttribute('width', width);
+    animal.setAttribute('height', height);
+    animal.style.cssText = `position:absolute;left:${x}px;top:${y + (sky ? lift / 2 : lift)}px;fill:var(--ink)`;
+    const direction = Math.random() < .5 ? -1 : 1;
+    const facing = gait.base;
+    const draw = pose => { animal.innerHTML = `<g fill-rule="evenodd">${sprite.markup || sprPaths(sprite.poses[pose])}</g>`; };
+    const idle = sprite.poses.length === 3 ? 1 : 0;
+    draw(idle);
+    scene.append(animal);
+    entrySky = !sky;
+    if (motion){
+      const born = performance.now();
+      const limit = direction > 0 ? travel : 0;
+      let start = direction > 0 ? 0 : travel, end = start;
+      let next = born + (sky ? 80 : 500), stride = null;
+      function move(now){
+        if (!animal.isConnected) return;
+        const age = (now - born) / 1000;
+        if (age >= 6.5){ animal.remove(); return; }
+        animal.style.opacity = Math.min(1, age / .7, (6.5 - age) / 1.2);
+        let offset = start, rise = 0;
+        if (!reduced()){
+          if (!stride && now >= next && start !== limit){
+            const distance = sky || gait.big ? 55 + Math.random() * 55
+              : gait.leap ? 35 + Math.random() * 35 : 18 + Math.random() * 26;
+            end = start + direction * Math.min(distance, Math.abs(limit - start));
+            stride = {...wildlifeMotion(gait), began: now};
+            if (idle) draw(direction < 0 ? 0 : 2);
+          }
+          if (stride){
+            const progress = Math.min(1, (now - stride.began) / (1000 * stride.duration));
+            offset = start + (end - start) * wildlifeProgress(progress, gait.big);
+            rise = wildlifeLift(progress, gait, stride.height);
+            if (progress === 1){
+              start = end;
+              next = now + wildlifePause(gait) * 1000;
+              stride = null;
+              if (idle) draw(idle);
+            }
+          }
+          const flip = sky ? wildlifeWingScale(age) : facing && facing !== direction ? -1 : 1;
+          animal.style.transform = `translate(${offset}px,${-rise}px) scaleX(${flip})`;
+        }
+        requestAnimationFrame(move);
+      }
+      animal.style.opacity = 0;
+      requestAnimationFrame(move);
+    } else {
+      setTimeout(() => animal.remove(), 6500);
+    }
+    return true;
   }
+  return false;
 }
 function scheduleEntryAnimal(delay){
-  setTimeout(() => {
-    showEntryAnimal();
-    scheduleEntryAnimal(16000 + Math.random() * 19000);
+  clearTimeout(entryTimer);
+  entryTimer = setTimeout(() => {
+    const appeared = showEntryAnimal();
+    scheduleEntryAnimal(appeared ? 7200 + Math.random() * 1600 : 1200);
   }, delay);
 }
-scheduleEntryAnimal(3500 + Math.random() * 5000);
 
 function windStep(force, t = performance.now()/1000){
   const scene = $('#scene'); if (scene.hidden || document.hidden || reduced()) return;
@@ -1034,7 +1086,11 @@ document.addEventListener('input', e => { if (e.target.matches && e.target.match
 function render(){
   const s = state.step, home = s==='home';
   const grid = $('#catgrid'), keep = grid ? grid.scrollTop : 0;
-  clearEntryAnimal();
+  if (entryStep !== s){
+    entryStep = s;
+    clearEntryAnimal();
+    scheduleEntryAnimal(1100);
+  }
   $('#scene').hidden = false;
   $('#main').innerHTML = home ? homeHtml() : s==='plot' ? plotHtml() : s==='draw' ? drawHtml() : s==='devices' ? devicesHtml()
     : s==='sorting' ? statusHtml('sorting','Sorting') : s==='planting' ? statusHtml('planting', phone() ? 'Initializing' : 'Planting') : catsHtml();
@@ -1141,6 +1197,7 @@ function applyTime(){
   const t = state.time==='day' ? 'light' : state.time==='night' ? 'dark' : (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   document.documentElement.setAttribute('data-theme', t);
   fitScene();                              // swap the sky: sun and clouds by day, moon and stars by night
+  scheduleEntryAnimal(800);
 }
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (state.time === 'system') applyTime(); });
 document.addEventListener('input', e => {
